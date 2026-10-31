@@ -8,6 +8,6 @@ excluded from that export. This repository now has its own Git history.
 The original project attribution is preserved in `CONTRIBUTORS.md`. Targeted
 checks found the earlier student numbers and invitation email absent from the
 cleaned import. Its repository/frontend CI passed; this does not establish full
-security or asset-rights clearance. See `docs/portfolio/final-review.md`,
+security certification. See `docs/portfolio/final-review.md`,
 `docs/portfolio/testing.md`, and `docs/portfolio/publication.md` for the evidence
-and remaining permission questions. The original private archive is separate.
+and security findings. The original private archive is separate.

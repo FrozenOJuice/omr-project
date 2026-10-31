@@ -27,7 +27,6 @@ See [Joel's contribution summary](docs/portfolio/contributions.md) and the
 The feature matrix records overlapping contributions; the initial frontend/backend
 roles in the charter are not an exclusive ownership map of the completed product.
 
-The existing [AGPL-3.0 license](LICENSE) is preserved. This attribution statement
-does not assert ownership on behalf of the university or other contributors.
-Publication agreements and third-party asset provenance remain subject to the
-[publication review](docs/portfolio/publication.md).
+The existing [AGPL-3.0 license](LICENSE) is preserved. See the
+[publication notes](docs/portfolio/publication.md) for asset sources and import
+provenance.

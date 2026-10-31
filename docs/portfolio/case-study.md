@@ -88,6 +88,4 @@ same development process in a future project.
 Built by Kaden Harris, Joel deHoog, Nathan Worth, Chad Glazier, Graeme Brown, and
 Tyson Livadney. See [contributors and upstream provenance](../../CONTRIBUTORS.md).
 The original reports are preserved; this portfolio copy retains the AGPL-3.0
-license. Public repository release awaits confirmation of university/team
-publication terms and outstanding asset permissions. A hosted public demo is not
-part of this portfolio preparation.
+license. A hosted public demo is not part of this portfolio preparation.

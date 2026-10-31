@@ -42,7 +42,7 @@ Course import from the connected local Canvas demonstration environment.
 
 ![Canvas course import](canvas-course-import.png)
 
-## Source and reuse
+## Screenshot sources
 
 | Image | Final report PDF page / image on page |
 | --- | --- |
@@ -55,9 +55,8 @@ Course import from the connected local Canvas demonstration environment.
 
 Source: [`OMR System Final Project Report.pdf`](../../final/OMR%20System%20Final%20Project%20Report.pdf).
 Credit Team 15 and link the [contributors](../../../CONTRIBUTORS.md) when reusing
-these images. University/team permission and included branding remain subject to
-the [publication review](../publication.md). An additional analytics screenshot
-would be useful later, but is not required for this gallery.
+these images. An additional analytics screenshot would be useful later, but is
+not required for this gallery.
 
 To re-extract the same images locally, install
 `tools/portfolio/requirements.txt` into a tooling environment, then run

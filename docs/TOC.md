@@ -8,8 +8,8 @@
 - [Screenshot gallery](portfolio/screenshots/README.md)
 - [Testing evidence and prerequisites](portfolio/testing.md)
 - [Local setup notes](portfolio/local-setup.md)
-- [Publication status and asset provenance](portfolio/publication.md)
-- [Final security and asset-rights review](portfolio/final-review.md)
+- [Publication notes and asset sources](portfolio/publication.md)
+- [Final security review](portfolio/final-review.md)
 - [Team contributors and original repository](../CONTRIBUTORS.md)
 
 ## Preserved capstone evidence

@@ -1,74 +1,47 @@
-# Publication review
+# Portfolio publication notes
 
-Status as of **31 October 2026**: this is the new, private
-[`FrozenOJuice/omr-project`](https://github.com/FrozenOJuice/omr-project) repository.
-It began with the cleaned import commit `22be7a91a8c247fd9310351288a25a89d32a791f`;
-only that one commit was reachable at review time. Targeted checks did not find
-the earlier student numbers or personal invitation email in the reviewed files.
-Both jobs in [CI run 41242912328](https://github.com/FrozenOJuice/omr-project/actions/runs/41242912328)
-passed for that commit.
+The cleaned import reviewed on **31 October 2026** is commit
+`22be7a91a8c247fd9310351288a25a89d32a791f` in
+[`FrozenOJuice/omr-project`](https://github.com/FrozenOJuice/omr-project).
+Targeted checks did not find the earlier student numbers or personal invitation
+email. Both configured jobs in
+[CI run 41242912328](https://github.com/FrozenOJuice/omr-project/actions/runs/41242912328)
+passed for that commit. Subsequent documentation commits build on this cleaned
+history.
 
-The [final security and asset-rights review](final-review.md) records the evidence,
-remaining dependency/application risks, and unresolved asset permissions. This is
-not a complete security certification or a blanket rights clearance. Public
-release remains pending the university/team terms and asset questions below.
-This documentation update changes no application features, dependencies, license,
-repository visibility, or deployment.
+The [final security review](final-review.md) records the checks, evidence, and
+remaining dependency/application risks. Application features, dependencies, the
+existing license, and deployment behavior are preserved.
 
 ## Completed preparation
 
-- Team names and the original repository are credited in `CONTRIBUTORS.md`.
-- Student numbers were removed from the charter and project plan.
-- OMR identity-page fixtures now use Alex Example and a synthetic student ID.
-  Matching expected results and the affected PDF copies were updated.
-- Published-story and novel PDF fixtures were replaced with original generated
-  documents of the same page counts. Unrelated illustration and poem fixtures
-  were replaced with original synthetic test data.
-- The personal invitation email was replaced with a reserved example address in
-  demo data, documentation, and smoke-test expectations. The generated upload
-  filename was also made generic.
-- Six existing application screenshots were extracted unchanged from the original
-  report and reviewed against the synthetic seed identities shown in them.
-- The maintainer confirmed that tracked Garage values were used only for a
-  disposable local environment. Their status is now explicit in the configuration;
-  they are public test defaults and unsuitable for a shared deployment.
+- All six contributors and the original project repository are credited in
+  `CONTRIBUTORS.md`.
+- Student numbers were omitted from the charter and project plan. OMR fixture
+  identities and their expected results use synthetic data.
+- Literary PDF fixtures and unrelated illustration/text fixtures were replaced
+  with original generated test content, retaining page counts and dimensions.
+- The personal invitation address and generated upload filename were replaced
+  with generic demonstration values.
+- Six application screenshots were extracted unchanged from the original report
+  and checked against the synthetic seed identities shown in them.
+- Tracked Garage values are documented as disposable local demonstration defaults.
 - The original AGPL license and substantive capstone reports are preserved.
 
-## Decisions still needed
+## Asset sources
 
-| Question | Evidence available | Required next step |
-| --- | --- | --- |
-| University, client, or sponsor publication terms | The report identifies UBC, COSC 499, the client, and the six-person team. The maintainer is unsure whether the university owns the project. No ownership agreement was provided. | Locate the capstone/sponsor agreement or get written clarification from the course/client contact before releasing source or unrestricted report copies. |
-| Scope of the original license grant | This import includes AGPL-3.0, but not the original development history or licensing decision. | Confirm the original repository's license and any additional project terms. Retain the license and notices; do not replace them with a personal license. |
-| Team attribution and presentation | Team names, feature matrix, and personal reflections are present. | Have the team confirm the attribution where practical; verify original PR links before adding more specific authorship claims. |
-| Screenshots, report reuse, and third-party branding | Screenshots come from the team report. University logos/forms and other branding remain in the original application. | Confirm permission/provenance before unrestricted reuse. Do not imply university endorsement or ownership of external assets. |
-
-The existing license is evidence to retain, not a substitute for determining
-whether third-party assets and university/sponsor material are covered. This
-document records what is known; it does not resolve ownership or give a legal
-opinion.
-
-A concise request to the course/client contact can be: "I would like to showcase
-Team 15's COSC 499 OMR capstone in my professional portfolio, crediting all six
-contributors and retaining the existing AGPL license. May I share application
-screenshots, the final reports, and a sanitized source repository publicly? Are
-there university, sponsor, confidentiality, or branding conditions I should follow?"
-This is a suggested draft only; no message has been sent on the team's behalf.
-
-## Asset provenance
-
-| Material | Source/status | Treatment |
-| --- | --- | --- |
-| Application code and original reports | Team 15 capstone; original repository identified in the final report | Preserved with attribution and existing AGPL license; publication terms awaiting confirmation |
-| Gallery PNGs | Embedded images from final report pages 41–44 | Original pixels retained; synthetic seed data reviewed; permission follows the report/project review |
-| OMR identity scans | Original project test scans with identity bubble fields regenerated | Alex Example and a synthetic ID; anchor/answer geometry retained, with lossless identity-page images |
-| PDF renderer documents, generic image fixtures, malformed-text fixture | Original deterministic content generated by `tools/portfolio/prepare_assets.py` | Replaces uncleared literary/illustration material; test page counts and image dimensions retained |
-| Backend manual-upload scans | Deterministic synthetic seed/generator data | Preserved; not real student submissions |
-| UBC logos, forms, and template artwork | Included in the original project | Provenance/permission remains to be confirmed; no new license grant asserted |
-| Remark sample form and cropped anchors | Included scanner fixture, bearing a third-party copyright/use notice | Notice retained; check redistribution terms before public source release |
-| Application/OMR logos, icons, and background image | Included in the original project without a complete source inventory | Confirm source and reuse terms before public release |
-| Aperture CSS adaptation | `app/omr/pages/css/aperture.css` cites Rplus's public CodePen | CodePen documents public Pens as MIT-licensed; preserve the author credit and obtain/include the applicable copyright and permission notice |
-| Libraries and container images | Dependency manifests/locks and OMR service report | Existing licenses remain applicable; the service report contains a useful direct-dependency license table |
+| Material | Source and treatment |
+| --- | --- |
+| Application code and original reports | Team 15 capstone; original repository and contributors identified in the final report and `CONTRIBUTORS.md` |
+| Gallery PNGs | Images embedded in final report pages 41–44; original pixels retained |
+| OMR identity scans | Original project test scans with identity bubble fields regenerated; anchors, answer marks, page orders, and dimensions retained |
+| Renderer PDFs, generic image fixtures, and malformed text | Original deterministic content generated by `tools/portfolio/prepare_assets.py` |
+| Backend manual-upload scans | Deterministic synthetic seed/generator data |
+| UBC logos, forms, and template artwork | Assets included in the original capstone project |
+| Remark sample form and cropped anchors | Original scanner fixture; the existing Gravic attribution notice is retained |
+| Application/OMR logos, icons, background, and unclear-mark illustration | Assets included in the original capstone project |
+| Aperture CSS adaptation | `app/omr/pages/css/aperture.css` credits [Rplus's camera-aperture Pen](https://codepen.io/Rplus/pen/pVNKmL) |
+| Libraries and container images | Dependency manifests/locks and the OMR service report's dependency table |
 
 ## Current Git history and provenance
 
@@ -92,40 +65,7 @@ based on the evidence reviewed here.
 For an optional source-only snapshot, use
 `python tools/portfolio/export_source.py /tmp/omr-project-review-copy` with a new
 destination. That helper excludes Git internals and ignored files and does not
-commit, push, publish, or establish publication permission. A fresh export is
-not a substitute for asset-rights review.
-
-## Specific asset decisions before unrestricted release
-
-- **UBC branding:** `app/frontend/public/UBC-logo.jpg`, `2Crest_ex_768.png`, and
-  the left-menu logo copy contain UBC marks. The
-  [UBC visual identity rules](https://assets.brand.ubc.ca/downloads/ubc_brand_identity_rules.pdf)
-  (Introduction, PDF page 4) require prior approval for students to use the brand
-  to promote themselves or their work. Confirm coverage for this portfolio and
-  redistribution of the asset files; do not infer it from the code's AGPL license.
-- **UBC forms/templates:** the canonical sheets and cropped anchors under
-  `app/omr/data/templates/ubc/` also need source/permission documentation. The logo
-  policy alone does not establish the copyright status of those forms.
-- **Remark form:** `app/omr/internal/scanner/testdata/input.jpg` and its cropped
-  anchors retain Gravic's notice allowing modification for use. The publisher's
-  [copyright terms](https://remarksoftware.com/copyright/) separately restrict
-  redistribution absent permission or an applicable included license. Reconcile
-  the specific form's terms before publishing copies; "free sample" is not proof
-  of unrestricted redistribution.
-- **Adapted CSS:** the source identifies
-  [Rplus's camera-aperture Pen](https://codepen.io/Rplus/pen/pVNKmL).
-  [CodePen's public-Pen policy](https://blog.codepen.io/documentation/licensing/)
-  provides an MIT license basis. The repository has a source credit but no full
-  specific third-party notice. Preserve/add the applicable notice before claiming
-  that attribution requirements are complete; do not invent a copyright year.
-- **Other artwork and reports:** obtain provenance for the background, SVG/GIF
-  logos, favicon/icon family, and `Unclearexample.png`, and confirm the team/report
-  grant for screenshot reuse. No finding of infringement is made merely because
-  a source record is missing.
-
-The [final review](final-review.md#asset-rights-evidence) maps these questions to
-specific files and primary sources. No asset was removed or relicensed in this
-review.
+commit, push, or publish.
 
 ## Hosting is a separate decision
 

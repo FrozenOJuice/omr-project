@@ -54,7 +54,7 @@ Backend and OMR are not claimed as CI jobs. Backend CI needs a correctly
 provisioned disposable PostgreSQL/Garage environment; OMR needs the native-library
 image and an appropriate hardware-metadata environment. The successful run above
 covers the configured repository/frontend jobs, not backend tests, OMR tests,
-security scanning, dependency-audit clearance, or asset permissions.
+security scanning or dependency auditing.
 
 ## Backend test isolation
 
@@ -106,7 +106,7 @@ their values. That private historical ref is intentionally absent from an export
 
 ## Final review and advisory checks
 
-The [final security and asset-rights review](final-review.md) rechecked the cleaned
+The [final security review](final-review.md) rechecked the cleaned
 repository's history, known privacy targets, tracked configurations, PDF/raster
 metadata, and asset provenance. Its targeted findings are not a security
 certification.

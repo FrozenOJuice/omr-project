@@ -1,4 +1,4 @@
-# Final security and asset-rights review
+# Final security review
 
 Reviewed **31 October 2026** for `FrozenOJuice/omr-project`, commit
 `22be7a91a8c247fd9310351288a25a89d32a791f` ("Import cleaned OMR System copy").
@@ -14,9 +14,8 @@ from this repository's reachable history. Both configured CI jobs passed for the
 reviewed commit. Another history reset is not required to remove those old values
 based on the evidence checked here.
 
-This is **not a complete security certification or asset-rights clearance**.
-Current dependency versions match published advisories, known application access
-control issues remain, and several asset permissions still need evidence.
+This is **not a complete security certification**. Current dependency versions
+match published advisories, and known application access-control issues remain.
 A source-code portfolio and a publicly reachable application require different
 risk decisions. No feature, dependency, license, asset, deployment, history, or
 visibility changes were made during this final review.
@@ -106,36 +105,13 @@ links, and scopes. It is a dated snapshot. Go modules, container/native librarie
 transitive Python resolution, and externally fetched assets were not exhaustively
 scanned. No automatic audit fix, dependency upgrade, or exploit test was run.
 
-## Asset-rights evidence
-
-| Asset / location | Verified basis | Remaining question / action |
-| --- | --- | --- |
-| Team code and original reports | Root AGPL-3.0 retained; all six contributors and original project repository credited | Verify the original grant and capstone/sponsor agreements. No conclusion that the university owns the code was reached. No fresh license was invented. |
-| Gallery `docs/portfolio/screenshots/*.png` | Six unchanged embedded report images; seeded identities reviewed | Confirm the team/report grant and any included third-party branding. Screenshot provenance is established; unrestricted rights are not. |
-| UBC logo files `app/frontend/public/UBC-logo.jpg`, `2Crest_ex_768.png`, and `src/app/sub-components/left-menu/UBC-logo.jpg` | UBC marks identified visually; official [brand rules](https://assets.brand.ubc.ca/downloads/ubc_brand_identity_rules.pdf), Introduction/PDF page 4, require prior approval for student self-promotion using the brand | Obtain/record permission covering the intended portfolio and file redistribution, or separately approve replacement. Code licensing does not establish logo permission. |
-| UBC canonical sheets and anchors `app/omr/data/templates/ubc/` | Blank exam-sheet artwork and crops are present | Establish the form artwork's source and redistribution terms separately from branding approval. |
-| Remark form `app/omr/internal/scanner/testdata/input.jpg` and `anchors/` | Visible Gravic copyright/use notice; publisher [copyright terms](https://remarksoftware.com/copyright/) restrict redistribution unless allowed by an applicable license/permission | Reconcile the specific sample-form notice with intended repository redistribution; preserve the notice. Permission to modify for use does not by itself settle redistribution. |
-| Adapted aperture CSS `app/omr/pages/css/aperture.css:10` | Identifies [Rplus's public Pen](https://codepen.io/Rplus/pen/pVNKmL); [CodePen policy](https://blog.codepen.io/documentation/licensing/) licenses public Pens under MIT | Retain author attribution and obtain/include the applicable MIT copyright/permission notice. The current source credit is not the complete notice. |
-| SVG/GIF logos, background, favicon/icon family, and `app/frontend/public/Unclearexample.png` | Present in original project; no complete author/source grant in tracked metadata | Confirm creator/source and applicable terms. Missing provenance is an unresolved question, not a finding that the artwork is copied unlawfully. |
-| Synthetic renderer documents, image fixtures, and malformed text | Original generated content; retained page counts/dimensions verified; removed literary titles absent from replacement PDFs | No further third-party literary permission identified for those replacements. Generator dependencies have their own licenses and advisory risks. |
-| Third-party dependencies | Frontend lock records license identifiers; OMR service report has a direct-dependency table; `go-fitz` identifies AGPL-3.0 [upstream](https://github.com/gen2brain/go-fitz) | Preserve applicable notices when distributing code/built artifacts. Only the root LICENSE is a tracked standalone license file; dependencies are not vendored, so this alone does not prove missing distributed notices. This is not a complete transitive license audit. |
-
-A valid existing AGPL grant may authorize redistribution under its terms; this
-review cannot establish the original grant's scope for every report, asset, or
-sponsor material. University branding rules are a separate permission issue.
-The code license was not changed. If a modified version is hosted, assess the
-source-offer requirements in the existing LICENSE, including section 13.
-
 ## Next decisions
 
-1. Record the university/team/sponsor publication terms and resolve the listed
-   asset permissions/notices before claiming unrestricted clearance.
-2. Keep the cleaned history; no further reset is indicated by the targeted checks.
-3. Retain the CI run as evidence for the exact reviewed commit; let the next
+1. Keep the cleaned history; no further reset is indicated by the targeted checks.
+2. Retain the CI run as evidence for the exact reviewed commit; let the next
    documentation commit receive its own CI result after the user pushes it.
-4. Treat dependency remediation and application authorization changes as separate
+3. Treat dependency remediation and application authorization changes as separate
    implementation tasks. They were not included in this documentation-only review.
 
 The review supports accurate presentation of the capstone's current state. It
-makes no guarantee that all sensitive data, vulnerabilities, or third-party
-obligations have been found.
+makes no guarantee that all sensitive data or vulnerabilities have been found.

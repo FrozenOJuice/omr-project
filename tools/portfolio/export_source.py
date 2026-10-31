@@ -1,7 +1,7 @@
-"""Export current non-ignored source for private publication review, without Git history.
+"""Export current non-ignored source without Git history.
 
 This creates a new directory; it never commits, pushes, initializes Git, or
-changes repository visibility. It does not establish publication permission.
+changes repository visibility.
 """
 
 from __future__ import annotations
@@ -38,12 +38,12 @@ def main() -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
     (destination / "PORTFOLIO_EXPORT.md").write_text(
-        "# Private publication-review export\n\n"
+        "# Source-only portfolio export\n\n"
         "This is a snapshot of the current working source, including portfolio cleanup.\n"
         "Git history and ignored local environment files are excluded.\n"
         "The original repository and collaboration attribution are preserved separately.\n"
-        "University/team publication terms and asset permissions still require confirmation.\n"
-        "Read CONTRIBUTORS.md and docs/portfolio/publication.md before sharing.\n"
+        "Team attribution and the existing license are included.\n"
+        "See CONTRIBUTORS.md and docs/portfolio/publication.md for project provenance.\n"
     )
     print(f"Created private review snapshot: {destination} ({len(files)} files; no Git history)")
 

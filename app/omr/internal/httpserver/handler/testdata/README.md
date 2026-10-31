@@ -13,5 +13,6 @@ fixture regression.
 
 The tests exercise recognition, not real student grades. See
 [`tools/portfolio/prepare_assets.py`](../../../../../../tools/portfolio/prepare_assets.py)
-for deterministic identity-field regeneration and the portfolio publication page
-for remaining permissions/history considerations.
+for deterministic identity-field regeneration and the
+[publication notes](../../../../../../docs/portfolio/publication.md) for import
+provenance.
