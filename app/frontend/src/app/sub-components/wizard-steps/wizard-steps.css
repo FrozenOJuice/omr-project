@@ -1,0 +1,61 @@
+.wizard-steps {
+    gap: 0.4em;
+    flex-shrink: 0;
+    margin: 0 1em;
+}
+
+.wizard-step {
+    gap: 0.5em;
+}
+
+.wizard-step-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6em;
+    height: 1.6em;
+    border-radius: 50%;
+    border: var(--border-size) solid var(--color-border);
+    font-size: 0.8em;
+    font-weight: 700;
+    color: var(--color-text);
+    opacity: 0.55;
+    flex-shrink: 0;
+}
+
+.wizard-step-circle.active {
+    border-color: var(--tag-green);
+    color: var(--tag-green);
+    opacity: 1;
+}
+
+.wizard-step-circle.done {
+    background: var(--tag-green);
+    border-color: var(--tag-green);
+    color: #FFFFFF;
+    opacity: 1;
+}
+
+.wizard-step-label {
+    font-size: 0.82em;
+    font-weight: 600;
+    opacity: 0.55;
+    white-space: nowrap;
+}
+
+.wizard-step-label.active {
+    opacity: 1;
+}
+
+.wizard-step-connector {
+    width: 1.75em;
+    height: var(--border-size);
+    background: var(--color-border);
+    opacity: 0.4;
+    margin: 0 0.4em;
+}
+
+.wizard-step-connector.done {
+    background: var(--tag-green);
+    opacity: 1;
+}

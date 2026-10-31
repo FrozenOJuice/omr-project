@@ -1,0 +1,298 @@
+.auth-layout {
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+}
+
+.gradient {
+    background:
+        radial-gradient(
+            ellipse 110% 140% at 0% 50%,
+            var(--primary) 0%,
+            color-mix(in oklab, var(--primary), var(--highlight3) 20%) 30%,
+            color-mix(in oklab, var(--primary), var(--highlight3) 100%) 80%
+        );
+    background-size: 200% 200%;
+    animation: gradient-shift 15s ease infinite;
+    flex-grow: 5;
+    flex-basis: 0;
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Keeps the tagline readable as the animated gradient behind it cycles
+   through darker shades -- a soft halo in the page's own background
+   colour rather than a text-colour change, so it stays legible without
+   the text itself flickering between colours. */
+.gradient-tagline h1,
+.gradient-tagline p,
+.gradient-tagline div {
+    text-shadow:
+        0 0 20px color-mix(in oklab, var(--primary), transparent 5%),
+        0 0 10px color-mix(in oklab, var(--primary), transparent 8%),
+        0 0 4px color-mix(in oklab, var(--primary), transparent 12%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gradient {
+        animation: none;
+    }
+
+    .load-curtain {
+        display: none;
+    }
+
+    .auth-reveal {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+
+.error-message {
+    margin-top: 5px;
+    color: red;
+    font-weight: bold;
+}
+
+.form-card {
+    background-color: var(--primary);
+    border-radius: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", system-ui, sans-serif;
+
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 600px;
+    overflow-y: auto;
+}
+
+/* Decorative overlay that plays the "cover the page, then settle into
+   place" intro. It's a separate absolutely-positioned layer -- not the
+   real .gradient/.form-card boxes -- so nothing underneath ever reflows;
+   its own spacer/card split mirrors the real flex-grow ratio (and
+   min-width) so .load-curtain-card lands exactly on top of the real
+   .form-card once it finishes shrinking. */
+.load-curtain {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: row;
+    z-index: 20;
+    pointer-events: none;
+}
+
+/* Transparent and never animated -- the real .gradient panel sits statically
+   underneath it the whole time, so as .load-curtain-card shrinks (growing
+   this spacer's share of the row) the gradient is progressively uncovered,
+   like a curtain sliding open, rather than the whole page fading at once. */
+.load-curtain-spacer {
+    flex-grow: 5;
+    flex-basis: 0;
+}
+
+.load-curtain-card {
+    flex-grow: 300;
+    flex-basis: 0;
+    min-width: 600px;
+    background-color: var(--primary);
+    animation: curtain-card-intro 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Settles into the real card's flex-grow first, then -- once it's sitting
+   exactly on top of the real (already-static) form-card -- fades away to
+   reveal it underneath. */
+@keyframes curtain-card-intro {
+    0% {
+        flex-grow: 300;
+        opacity: 1;
+    }
+    65% {
+        flex-grow: 1;
+        opacity: 1;
+    }
+    100% {
+        flex-grow: 1;
+        opacity: 0;
+    }
+}
+
+.auth-reveal {
+    opacity: 0;
+    animation: auth-reveal-in 0.5s ease-out 1.2s both;
+}
+
+@keyframes auth-reveal-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.center {
+    display: flex;
+    margin: auto;
+    /* "safe" falls back to start-alignment once the title+form column is
+       taller than this box, instead of plain `center`, which would center
+       it anyway and push the top (the title) out above the scrollable
+       area -- centered flex overflow toward the start edge isn't
+       reachable by scrolling, only overflow toward the end edge is. */
+    justify-content: safe center;
+    height: 100%;
+    width: 65%;
+}
+
+h1 {
+    margin-top: 0;
+    font-size: clamp(2rem, 7vh, 3.75rem);
+}
+
+#formTitle {
+    margin-bottom: 0.15em;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+
+    /* Sits above .load-curtain (z-index 20) so the real title is what
+       shows on the curtain while it plays -- no duplicate ghost text to
+       keep in sync with the real layout. */
+    position: relative;
+    z-index: 21;
+}
+
+.auth-intro {
+    margin: 0 0 1.5em;
+    font-size: 1rem;
+    color: color-mix(in oklab, var(--color-text), transparent 25%);
+}
+
+input,
+select {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.8em;
+    font-size: large;
+    line-height: 1.2;
+}
+
+.row-flex-container > .col-flex-container {
+    min-width: 0;
+}
+
+select {
+    background-color: var(--primary-darkened);
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    color: var(--color-text);
+    width: 100%;
+    cursor: pointer;
+}
+
+button {
+    margin-top: 10px;
+    padding: 0.8em;
+    background-color: var(--highlight3);
+    border: var(--border-size) solid var(--color-border);
+    border-radius: 5px;
+    color: var(--on-highlight3);
+    font-size: large;
+    width: 100%;
+}
+
+button:hover {
+    background-color: color-mix(in oklab, var(--highlight3), var(--hover-darken));
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.link-button {
+    width: fit-content;
+    margin: 0 5px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--highlight2);
+    font-size: inherit;
+}
+
+.link-button:hover {
+    background-color: var(--primary);
+    color: color-mix(in oklab, var(--highlight2), var(--hover-darken));
+    text-decoration: underline;
+}
+
+.password-input {
+    position: relative;
+}
+
+.password-input input {
+    padding-right: 3em;
+}
+
+.password-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    right: 0.4em;
+    transform: translateY(-50%);
+    width: 2em;
+    height: 2em;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--highlight2);
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+    background: none;
+    color: color-mix(in oklab, var(--highlight2), var(--hover-darken));
+}
+
+.password-toggle .material-icons-outlined {
+    font-size: 1.35em;
+}
+
+.account-prompt {
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.25em;
+    margin-top: 0.5em;
+}
+
+.account-prompt .link-button {
+    margin: 0;
+    line-height: inherit;
+}
+
+@media (min-width: 1200px) {
+    .form-card {
+        min-width: 800px;
+    }
+
+    .load-curtain-card {
+        min-width: 800px;
+    }
+}

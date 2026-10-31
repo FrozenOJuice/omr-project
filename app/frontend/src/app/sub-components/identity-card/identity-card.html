@@ -1,0 +1,32 @@
+@if (gradeIdentity()?.page_index != null) {
+<div class="identity-panel col-flex-container" [class.current]="isOnIdentityPage()" role="button" tabindex="0"
+    title="View the ID page" (click)="goToPage.emit()" (keydown.enter)="goToPage.emit()">
+    <div class="identity-header row-flex-container align-items-center">
+        <span class="identity-title grow">Identify Student</span>
+        <span class="status-badge tag-outline">Read-only</span>
+        @if (!isOnIdentityPage()) {
+        <span class="material-icons-outlined identity-goto-icon">chevron_right</span>
+        }
+    </div>
+    <div class="identity-detected col-flex-container">
+        <div class="identity-row row-flex-container align-items-center" [class.hovered]="hoveredQuestionId() === 'identity-name'"
+            (mouseenter)="hover.emit('identity-name')" (mouseleave)="hover.emit(null)">
+            <span class="identity-label grow">Detected name</span>
+            <span>{{ gradeIdentity()!.first_name || '—' }} {{ gradeIdentity()!.last_name || '—' }}</span>
+            @if (nameConfidence(); as c) {
+            <span class="identity-confidence">{{ c }}%</span>
+            }
+        </div>
+        <div class="identity-row row-flex-container align-items-center" [class.hovered]="hoveredQuestionId() === 'identity-id'"
+            (mouseenter)="hover.emit('identity-id')" (mouseleave)="hover.emit(null)">
+            <span class="identity-label grow">Detected ID</span>
+            <span>{{ gradeIdentity()!.student_id || '—' }}</span>
+            @if (idConfidence(); as c) {
+            <span class="identity-confidence">{{ c }}%</span>
+            }
+        </div>
+    </div>
+
+    <ng-content></ng-content>
+</div>
+}

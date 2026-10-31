@@ -1,0 +1,27 @@
+# Disposable local demonstration credentials, confirmed by the project maintainer.
+# These are public test defaults; use separate private credentials for any shared deployment.
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "lmdb"
+
+replication_factor = 1
+
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "garage-store:3901"
+rpc_secret = "6856485fad203277f44cffc12781637fedc4429e22a119845676b22b26b4852e"
+
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "[::]:3900"
+root_domain = ".s3.garage.localhost"
+
+[s3_web]
+bind_addr = "[::]:3902"
+root_domain = ".web.garage.localhost"
+index = "index.html"
+
+[admin]
+api_bind_addr = "[::]:3903"
+
+admin_token = "49a331c066ab1cb6b8e372e8db394ef297d703eb95848c8911d2e0312d3d1112"
+metrics_token = "d86a88d02868cfad5fab9d22d569ed1af6acc43347d274869ca3aa2accdb5b44"

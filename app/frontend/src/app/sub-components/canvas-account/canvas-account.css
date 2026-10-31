@@ -1,0 +1,152 @@
+:host {
+  display: contents;
+}
+
+.section-card {
+  gap: 0.85em;
+  width: 100%;
+}
+
+.section-title {
+  font-size: 1em;
+  font-weight: 700;
+}
+
+.divider {
+  border: none;
+  border-top: var(--border-size) solid var(--color-border);
+  opacity: 0.2;
+  margin: 0;
+}
+
+.canvas-token-form {
+  gap: 0.45em;
+}
+
+.canvas-token-heading,
+.canvas-token-row {
+  gap: 0.5em;
+}
+
+.canvas-token-row .field-input {
+  min-width: 0;
+  flex: 1;
+  box-sizing: border-box;
+  padding: 0.55em 0.7em;
+  font-size: 0.9em;
+}
+
+.canvas-token-help {
+  position: relative;
+  display: inline-flex;
+}
+
+.canvas-info-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45em;
+  height: 1.45em;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text);
+  cursor: help;
+  opacity: 0.7;
+  text-decoration: none;
+}
+
+.canvas-info-button:hover,
+.canvas-info-button:focus-visible {
+  opacity: 1;
+}
+
+.canvas-info-button .material-icons-outlined {
+  font-size: 1.2em;
+}
+
+.canvas-token-tooltip {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.45em);
+  left: 50%;
+  display: none;
+  width: min(20em, calc(100vw - 4em));
+  padding: 0.75em;
+  border: var(--border-size) solid var(--color-border);
+  border-radius: var(--input-border-radius);
+  background: var(--primary-highlight);
+  box-shadow: 0 4px 14px rgba(0, 33, 69, 0.25);
+  font-size: 0.78em;
+  font-weight: 400;
+  line-height: 1.45;
+  transform: translateX(-50%);
+}
+
+.canvas-token-tooltip ol {
+  margin: 0.4em 0;
+  padding-left: 1.4em;
+}
+
+.canvas-token-tooltip li + li {
+  margin-top: 0.25em;
+}
+
+.canvas-token-help:hover .canvas-token-tooltip,
+.canvas-token-help:focus-within .canvas-token-tooltip {
+  display: block;
+}
+
+.canvas-token-form--replacement {
+  padding-top: 0.85em;
+  border-top: var(--border-size) solid color-mix(in oklab, var(--color-border), transparent 80%);
+}
+
+.canvas-status {
+  gap: 0.4em;
+  font-size: 0.78em;
+  font-weight: 600;
+}
+
+.canvas-status-dot {
+  width: 0.65em;
+  height: 0.65em;
+  border-radius: 50%;
+  background: var(--tag-green);
+  border: 1px solid var(--color-border);
+}
+
+.canvas-message,
+.field-error {
+  font-size: 0.82em;
+}
+
+.canvas-message--success {
+  color: color-mix(in oklab, var(--tag-green), var(--tag-text-shade) 35%);
+}
+
+.field-error {
+  color: var(--danger, #e05a5a);
+}
+
+.canvas-account {
+  gap: 0.75em;
+  flex-wrap: wrap;
+}
+
+.canvas-account-actions {
+  gap: 0.5em;
+  flex-wrap: wrap;
+}
+
+.security-label {
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.security-sublabel {
+  font-size: 0.78em;
+  opacity: 0.6;
+  margin-top: 0.1em;
+}

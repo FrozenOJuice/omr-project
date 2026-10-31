@@ -1,0 +1,11 @@
+.version-label {
+    text-decoration: underline dotted;
+    text-decoration-color: color-mix(in oklab, currentColor, transparent 60%);
+    text-underline-offset: 2px;
+    border-radius: var(--input-border-radius);
+    transition: background-color 120ms ease;
+}
+
+.version-label.hovered {
+    background: color-mix(in oklab, var(--tag-blue), transparent 88%);
+}

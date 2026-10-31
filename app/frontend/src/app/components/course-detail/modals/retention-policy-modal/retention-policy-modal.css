@@ -1,0 +1,117 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.retention-card {
+  width: min(92vw, 36rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 1.25rem;
+  gap: 1.1rem;
+}
+
+.retention-heading {
+  align-items: flex-start;
+}
+
+.retention-icon {
+  flex-shrink: 0;
+  color: var(--highlight2);
+  font-size: 2rem;
+}
+
+.retention-icon--warning {
+  color: var(--tag-red);
+}
+
+.retention-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.retention-body,
+.retention-help,
+.policy-sources {
+  font-size: 0.84rem;
+  opacity: 0.75;
+}
+
+.ubc-default-note,
+.policy-summary,
+.analytics-toggle {
+  padding: 0.8rem;
+  border: var(--border-size) solid var(--color-border);
+  border-radius: var(--input-border-radius);
+  background: var(--primary-darkened);
+}
+
+.retention-field {
+  gap: 0.35rem;
+}
+
+.retention-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.retention-number .field-input {
+  width: 7rem;
+  border: var(--border-size) solid var(--color-border);
+  border-radius: var(--input-border-radius);
+  background: var(--primary-darkened);
+  color: var(--color-text);
+  padding: 0.65rem;
+}
+
+.analytics-toggle {
+  cursor: pointer;
+}
+
+.retention-error {
+  color: color-mix(in oklab, var(--tag-red), var(--tag-text-shade) 15%);
+  font-size: 0.85rem;
+}
+
+.policy-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.policy-sources a {
+  color: inherit;
+}
+
+.policy-summary {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.policy-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.policy-summary span {
+  opacity: 0.72;
+}
+
+.retention-actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 38rem) {
+  .retention-actions--confirm > * {
+    width: 100%;
+  }
+}

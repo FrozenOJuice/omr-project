@@ -1,0 +1,44 @@
+@if (summary(); as s) {
+<div class="score-boxplot col-flex-container">
+    <div class="boxplot-header row-flex-container align-items-baseline justify-content-between gap">
+        <span class="boxplot-title">Class Distribution</span>
+        <span class="boxplot-subtitle">{{ studentCount() }} student{{ studentCount() !== 1 ? 's' : '' }}</span>
+    </div>
+
+    <svg class="boxplot-svg" [attr.viewBox]="viewBox" role="img" [attr.aria-label]="ariaLabel()">
+        <line class="boxplot-whisker" [attr.x1]="minX()" [attr.x2]="maxX()" [attr.y1]="plotY" [attr.y2]="plotY" />
+        <line class="boxplot-cap" [attr.x1]="minX()" [attr.x2]="minX()" [attr.y1]="plotY - capHalfHeight" [attr.y2]="plotY + capHalfHeight" />
+        <line class="boxplot-cap" [attr.x1]="maxX()" [attr.x2]="maxX()" [attr.y1]="plotY - capHalfHeight" [attr.y2]="plotY + capHalfHeight" />
+
+        <rect class="boxplot-box" [attr.x]="boxLeft()" [attr.y]="plotY - boxHalfHeight" [attr.width]="boxWidth()"
+            [attr.height]="boxHalfHeight * 2" rx="3" />
+        <line class="boxplot-median" [attr.x1]="medianX()" [attr.x2]="medianX()" [attr.y1]="plotY - boxHalfHeight"
+            [attr.y2]="plotY + boxHalfHeight" />
+
+        @for (item of summaryItems(); track item.key) {
+        <circle class="boxplot-summary-point" [class.boxplot-summary-point--active]="activeSummaryKey() === item.key"
+            [attr.cx]="xFor(item.value)" [attr.cy]="plotY" r="3" tabindex="0"
+            [attr.aria-label]="item.label + ' ' + item.value + '%'"
+            (mouseenter)="setActiveSummary(item.key)" (mouseleave)="setActiveSummary(null)"
+            (focus)="setActiveSummary(item.key)" (blur)="setActiveSummary(null)" />
+        }
+
+        @for (tick of axisTicks; track tick) {
+        <text class="boxplot-tick-label" [attr.x]="xFor(tick)" [attr.y]="axisLabelY" [attr.text-anchor]="tickAnchor(tick)">{{ tick }}</text>
+        }
+
+        @if (highlightX(); as hx) {
+        <circle class="boxplot-highlight" [attr.cx]="hx" [attr.cy]="plotY" r="4" />
+        }
+    </svg>
+
+    <div class="boxplot-summary" aria-label="Five-number summary">
+        @for (item of summaryItems(); track item.key) {
+        <span class="boxplot-summary-item" [class.boxplot-summary-item--active]="activeSummaryKey() === item.key">
+            <span class="boxplot-summary-label">{{ item.label }}</span>
+            <span class="boxplot-summary-value">{{ item.value }}%</span>
+        </span>
+        }
+    </div>
+</div>
+}

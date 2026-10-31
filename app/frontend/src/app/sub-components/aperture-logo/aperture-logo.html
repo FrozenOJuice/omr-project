@@ -1,0 +1,31 @@
+<div
+    class="logo"
+    #logoRoot
+    [style.--logo-size]="size()"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()"
+>
+    <h1>
+        <div class="camera-aperture">
+            <div class="blade-box">
+                <div class="blade"></div>
+                <div class="blade"></div>
+                <div class="blade"></div>
+                <div class="blade"></div>
+                <div class="blade"></div>
+                <div class="blade"></div>
+                <div class="blade"></div>
+                <div class="blade"></div>
+            </div>
+        </div>
+        @if (!iconOnly()) {
+            <span class="text">mr</span>
+        }
+    </h1>
+    @if (!iconOnly()) {
+        <p>
+            <span class="by">by</span>
+            <span class="aperture">Aperture</span>
+        </p>
+    }
+</div>

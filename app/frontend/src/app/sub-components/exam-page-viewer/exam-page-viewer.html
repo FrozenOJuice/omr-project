@@ -1,0 +1,99 @@
+<div class="exam-page-viewer col-flex-container">
+
+    <div class="page-nav row-flex-container align-items-center">
+        <button class="action-btn action-btn--outline" [disabled]="isFirstPage" (click)="prevPage.emit()">
+            <span class="material-icons-outlined">chevron_left</span>
+            Previous
+        </button>
+        <div class="legend row-flex-container align-items-center justify-content-center gap">
+            <span class="legend-item"><span class="legend-swatch status-correct"></span>Correct</span>
+            <span class="legend-item"><span class="legend-swatch status-incorrect"></span>Incorrect</span>
+            <span class="legend-item"><span class="legend-swatch status-ambiguous"></span>Ambiguous</span>
+            <span class="legend-item"><span class="legend-swatch status-empty"></span>Empty</span>
+            @if ((identityBoxes().length || identityRegions().length) || versionBox()) {
+            <span class="legend-item"><span class="legend-swatch status-identity"></span>Detected</span>
+            }
+        </div>
+        <button class="action-btn action-btn--outline" [disabled]="isLastPage" (click)="nextPage.emit()">
+            Next
+            <span class="material-icons-outlined">chevron_right</span>
+        </button>
+    </div>
+    <div class="row-flex-container align-items-center justify-content-center gap">
+        <span class="page-counter">Page {{ page() + 1 }} / {{ pageCount() }}</span>
+        @if (zoomable()) {
+        <div class="zoom-controls row-flex-container align-items-center gap">
+            <button class="icon-btn" title="Zoom out" [disabled]="zoomLevel() <= 0.5" (click)="zoomOut()">
+                <span class="material-icons-outlined">remove</span>
+            </button>
+            <span class="zoom-level">{{ zoomPercent() }}%</span>
+            <button class="icon-btn" title="Zoom in" [disabled]="zoomLevel() >= 2" (click)="zoomIn()">
+                <span class="material-icons-outlined">add</span>
+            </button>
+            <!-- Always rendered (just disabled at 100%) rather than
+                 appearing/disappearing via @if: toggling it in and out of the
+                 layout shifted the row, so a fast click meaning to hit zoom
+                 in twice could land on Reset the instant it appeared here. -->
+            <button class="action-btn action-btn--sm action-btn--outline" [disabled]="zoomLevel() === 1" (click)="resetZoom()">Reset</button>
+        </div>
+        }
+    </div>
+
+    <div class="page-image-wrapper" [class.zoomable]="zoomable()" #imageWrapper (pointerdown)="onPanStart($event)">
+        @if (loading()) {
+        <div class="page-image-placeholder">
+            <span class="empty-text">Loading page...</span>
+        </div>
+        } @else if (error()) {
+        <div class="page-image-placeholder">
+            <span class="empty-text">{{ error() }}</span>
+        </div>
+        } @else if (imageUrl(); as src) {
+        <div class="page-image-frame" [style.width.em]="zoomable() ? 58 * zoomLevel() : null" (mousemove)="onPointerMove($event)">
+            <img #pageImage [src]="src" class="page-image" alt="Exam page {{ page() + 1 }}" draggable="false"
+                (dragstart)="$event.preventDefault()" (load)="onImageLoad()" />
+            @for (region of regions(); track region.questionId) {
+            <div class="question-region" [style]="rectStyle(region)" (mouseenter)="onRegionEnter(region, $event)"
+                (mouseleave)="onRegionLeave()" (click)="select.emit(region.questionId)">
+            </div>
+            }
+            @for (region of identityRegions(); track region.questionId) {
+            <div class="question-region" [style]="rectStyle(region)" [title]="region.title"
+                (mouseenter)="hover.emit(region.questionId)" (mouseleave)="hover.emit(null)"></div>
+            }
+            @if (versionRegion(); as region) {
+            <div class="question-region" [style]="rectStyle(region)" [title]="region.title"
+                (mouseenter)="hover.emit(region.questionId)" (mouseleave)="hover.emit(null)"></div>
+            }
+            @for (box of boxes(); track box.key) {
+            <div class="annotation-box" [class]="box.statusClass" [class.hovered]="hoveredQuestionId() === box.questionId"
+                [style]="rectStyle(box)"></div>
+            }
+            @for (box of identityBoxes(); track box.key) {
+            <div class="annotation-box" [class]="box.statusClass" [class.hovered]="hoveredQuestionId() === box.questionId"
+                [style]="rectStyle(box)"></div>
+            }
+            @if (versionBox(); as box) {
+            <div class="annotation-box" [class]="box.statusClass" [class.hovered]="hoveredQuestionId() === box.questionId"
+                [style]="rectStyle(box)"></div>
+            }
+            @for (region of highlightRegions(); track region.questionId) {
+            <div class="question-highlight" [style]="highlightRectStyle(region)" [title]="region.title"></div>
+            }
+        </div>
+        } @else {
+        <div class="page-image-placeholder">
+            <span class="empty-text">No page to display.</span>
+        </div>
+        }
+    </div>
+
+    @if (previewRegion(); as region) {
+    @if (previewSize(); as size) {
+    <div class="snippet-preview" [style]="previewPositionStyle()">
+        <app-question-snippet [imageUrl]="imageUrl()" [bounds]="region" [boxWidth]="size.width" [boxHeight]="size.height" />
+    </div>
+    }
+    }
+
+</div>

@@ -1,0 +1,182 @@
+/* Bounded and scrollable on its own, so whatever sits above it in the
+   sidebar (score summary, identity card) stays pinned in view instead of
+   scrolling away with the list. Both callers place this in the same kind
+   of fixed-height sidebar, so the host owns the fit instead of each caller
+   repeating it. */
+:host {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+@media (max-width: 64em) {
+    :host {
+        flex: none;
+        overflow-y: visible;
+    }
+}
+
+.question-list {
+    gap: 0.6em;
+}
+
+.empty-text {
+    font-size: 0.88em;
+    opacity: 0.55;
+    padding: 1em 0;
+}
+
+.question-card {
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    background: var(--primary-darkened);
+    overflow: hidden;
+    transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.question-card.ambiguous {
+    border-color: var(--tag-amber);
+    background: color-mix(in oklab, var(--tag-amber), transparent 88%);
+}
+
+.question-card-header {
+    width: 100%;
+    padding: 0.6em 0.8em;
+    gap: 0.5em;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+}
+
+.question-status-dot {
+    width: 0.7em;
+    height: 0.7em;
+    border-radius: 50%;
+    background-color: currentColor;
+    flex-shrink: 0;
+}
+
+.question-number {
+    font-weight: 700;
+    font-size: 0.92em;
+}
+
+.question-score {
+    font-size: 1em;
+    font-weight: 700;
+    opacity: 1;
+}
+
+.expand-icon {
+    opacity: 0.6;
+}
+
+.question-card-body {
+    padding: 0 0.9em 0.9em;
+    gap: 0.5em;
+}
+
+/* Caps how tall the snippet gets before it scrolls vertically, rather than
+   shrinking a long question down to fit -- same as before. max-width does
+   the equivalent job horizontally for a wide question (many options): the
+   snippet itself can render wider than the card, and this wrapper clips it
+   instead of the whole card (and sidebar) growing to match. That horizontal
+   overflow normally has no scrollbar of its own -- it's driven by the
+   answer-options row's scroll instead (see syncSnippetScroll), so there's
+   one scroll action, not two. Without an answer-options row to sync from
+   (.unlinked, the hideAnswerKey() view) the snippet gets its own native
+   horizontal scrollbar back. */
+.card-snippet-scroll {
+    max-height: 260px;
+    max-width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-self: flex-start;
+}
+
+.card-snippet-scroll.unlinked {
+    overflow-x: auto;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+    font-size: 0.85em;
+}
+
+.detail-label {
+    opacity: 0.65;
+}
+
+.detail-value {
+    font-weight: 600;
+    text-align: right;
+}
+
+.answer-editor {
+    gap: 0.5em;
+    margin-top: 0.4em;
+    padding-top: 0.6em;
+    border-top: var(--border-size) solid var(--color-border);
+}
+
+.answer-options {
+    gap: 0.4em;
+}
+
+/* 5 or fewer options (e.g. A-E, or True/False) just fill the row evenly via
+   .answer-btn's flex: 1 below -- no scrolling needed. Only once there are
+   more than 5 does the row switch to fixed-size buttons that scroll
+   horizontally (its own scrollbar appears below the buttons) instead of
+   squeezing every button down to fit (unreadable) or overflowing the card. */
+.answer-options.scrollable {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.3em;
+}
+
+.answer-btn {
+    flex: 1;
+    padding: 0.5em 0;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary);
+    color: var(--color-text);
+    font-size: 0.88em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.answer-options.scrollable .answer-btn {
+    flex: 0 0 calc((100% - 4 * 0.4em) / 5);
+    min-width: 2.75em;
+}
+
+.answer-btn:hover {
+    border-color: var(--highlight3);
+    background: color-mix(in oklab, var(--highlight3), transparent 70%);
+}
+
+.answer-btn.selected {
+    border-color: var(--tag-teal);
+    background: color-mix(in oklab, var(--tag-teal), transparent 70%);
+    color: color-mix(in oklab, var(--tag-teal), var(--tag-text-shade) 30%);
+}
+
+.status-correct {
+    color: var(--tag-green);
+}
+
+.status-incorrect {
+    color: var(--tag-red);
+}
+
+.status-ambiguous {
+    color: var(--tag-amber);
+}

@@ -1,0 +1,94 @@
+<div class="modal-overlay" (click)="close()">
+    <div class="card comparison-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <div class="stats-title">Compare Course Performance</div>
+                <div class="stats-subtitle">Compare terms and years, then adjust automatically matched exams.</div>
+            </div>
+            <button class="icon-btn icon-btn--ghost" title="Close" (click)="close()"><span class="material-icons-outlined">close</span></button>
+        </div>
+
+        @if (isLoadingComparison) {
+            <div class="comparison-loading"><app-loading-spinner [overlay]="false" /></div>
+        } @else if (comparisonError) {
+            <div class="error-text">{{ comparisonError }}</div>
+        } @else if (historicalComparisons.length === 0) {
+            <div class="stats-empty">No archived courses are available for comparison.</div>
+        } @else {
+            <div class="historical-chart-card">
+                <div class="section-title">Historical course averages</div>
+                <div class="historical-chart-wrapper"><canvas #historicalAverageChart></canvas></div>
+            </div>
+
+            <div class="historical-course-list">
+                @for (entry of historicalComparisons; track entry.comparison.id) {
+                    <section class="historical-course-section">
+                        <div class="historical-course-header">
+                            <div>
+                                <div class="section-title">{{ entry.comparison.comparison_course.name }}</div>
+                                <div class="muted">{{ formatAcademicPeriod(entry.comparison.comparison_course.academic_term, entry.comparison.comparison_course.academic_year_start) }}</div>
+                            </div>
+                            <div class="historical-header-actions">
+                                <div class="historical-summary">
+                                    <span><strong>{{ formatStat(entry.stats.mean_percentage, '%') }}</strong> mean</span>
+                                    <span><strong>{{ formatStat(entry.stats.median_percentage, '%') }}</strong> median</span>
+                                    <span><strong>{{ entry.stats.graded_count }}</strong> graded</span>
+                                </div>
+                                <button class="icon-btn icon-btn--outline remove-btn" title="Remove comparison" [disabled]="removingComparisonId === entry.comparison.id" (click)="removeComparison(entry.comparison)">
+                                    <span class="material-icons-outlined">delete_outline</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="historical-exam-cards">
+                            @for (mapping of entry.comparison.mappings; track mapping.id) {
+                                <article class="historical-exam-card">
+                                    <div class="exam-comparison-names">
+                                        <strong>{{ mapping.base_exam_name }}</strong>
+                                        <span class="material-icons-outlined">compare_arrows</span>
+                                        <select class="mapping-select" [(ngModel)]="mapping.comparison_exam_id">
+                                            <option [ngValue]="null">Not mapped</option>
+                                            @for (exam of entry.stats.exams; track exam.exam_id) {
+                                                <option [value]="exam.exam_id">{{ exam.exam_name }}</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="exam-card-stats">
+                                        <div><span>Current mean</span><strong>{{ formatStat(baseStatsFor(mapping)?.mean_percentage, '%') }}</strong></div>
+                                        <div><span>Historical mean</span><strong>{{ formatStat(historicalStatsFor(mapping, entry.stats)?.mean_percentage, '%') }}</strong></div>
+                                        <div><span>Historical std. dev.</span><strong>{{ formatStat(historicalStatsFor(mapping, entry.stats)?.standard_deviation_percentage, '%') }}</strong></div>
+                                        <div><span>Historical graded</span><strong>{{ historicalStatsFor(mapping, entry.stats)?.graded_count ?? 0 }}</strong></div>
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                        <div class="comparison-actions">
+                            <button class="action-btn action-btn--sm" [disabled]="savingComparisonId === entry.comparison.id" (click)="saveMappings(entry.comparison)">
+                                {{ savingComparisonId === entry.comparison.id ? 'Saving...' : 'Save mappings' }}
+                            </button>
+                        </div>
+                    </section>
+                }
+            </div>
+        }
+
+        @if (!isLoadingComparison) {
+            <div class="add-comparison-course">
+                <div><div class="section-title">Add another course</div><div class="muted">Choose another course you own to include in this comparison.</div></div>
+                @if (availableAdditionalCourses().length === 0) {
+                    <div class="stats-empty">All available courses are already included.</div>
+                } @else {
+                    <div class="add-comparison-controls">
+                        <select class="field-input" [(ngModel)]="selectedComparisonCourseId">
+                            <option value="">Select a course</option>
+                            @for (option of availableAdditionalCourses(); track option.id) {
+                                <option [value]="option.id">{{ option.name }} — {{ formatAcademicPeriod(option.academic_term, option.academic_year_start) }}{{ option.archived_at ? ' (Archived)' : '' }}</option>
+                            }
+                        </select>
+                        <button class="action-btn" [disabled]="!selectedComparisonCourseId" (click)="addSelectedComparisonCourse()">Add course</button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,56 @@
+# ── Python ───────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# ── Angular / Node ───────────────────────────────────────────
+node_modules/
+dist/
+.angular/
+*.js.map
+
+# ── Environment & secrets ────────────────────────────────────
+.env
+.env.dev
+.env.prod
+*.env.local
+.env.*
+!.env.*.example
+!.env.example
+*.log
+
+# ── Docker ───────────────────────────────────────────────────
+postgres_data/
+garage_data/
+garage_meta/
+tools/canvas/.env
+tools/canvas/.seed-state
+tools/canvas/canvas-lms/
+
+# ── OS ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ──────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+
+app/backend/htmlcov/
+app/backend/.coverage
+app/backend/.coverage.*
+app/omr/coverage/
+app/frontend/coverage/
+
+# Rebuilt locally with `make presentation-data`.
+app/backend/data/presentation_flows/*
+
+# Portfolio exports and local tooling outputs
+output/
+tmp/

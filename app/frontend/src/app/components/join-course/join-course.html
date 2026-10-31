@@ -1,0 +1,18 @@
+<div class="join-container">
+  <div class="card join-card col-flex-container align-items-center">
+
+    @if (state === 'joining') {
+      <div class="spinner"></div>
+      <span class="join-title">Joining course&hellip;</span>
+      <span class="join-body">You'll be redirected in just a moment.</span>
+    }
+
+    @if (state === 'error') {
+      <span class="material-icons-outlined error-icon">link_off</span>
+      <span class="join-title">Unable to join</span>
+      <span class="join-body">{{ errorMessage }}</span>
+      <button class="action-btn" (click)="goToCourses()">Go to Courses</button>
+    }
+
+  </div>
+</div>

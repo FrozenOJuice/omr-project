@@ -1,0 +1,123 @@
+<div class="student-exam-page">
+
+    <div class="page-header row-flex-container align-items-center gap">
+        <button class="icon-btn icon-btn--ghost" title="Back" (click)="goBack()">
+            <span class="material-icons-outlined">arrow_back</span>
+        </button>
+        <div class="col-flex-container">
+            <h1 class="page-title">Your Exam Results</h1>
+            @if (version()?.detected_version) {
+            <span class="page-subtitle">
+                <app-version-label [version]="version()" [hovered]="hoveredQuestionId() === 'identity-version'"
+                    (hover)="hoveredQuestionId.set($event)" />
+            </span>
+            }
+        </div>
+    </div>
+
+    @if (loadingGrade()) {
+    <span class="empty-text">Loading your results...</span>
+    } @else if (error() && !grade()) {
+    <span class="empty-text">{{ error() }}</span>
+    } @else {
+    <app-exam-result-layout>
+        @if (distributionSummary(); as summary) {
+        <app-score-boxplot slot="left" [precomputedSummary]="summary" [precomputedCount]="scoreDistribution()!.count"
+            [highlightScore]="percentage()" highlightLabel="You" />
+        }
+
+        <div slot="left" class="review-request-panel col-flex-container">
+            <div class="row-flex-container align-items-center justify-content-between gap">
+                <span class="stats-section-title">Review Request</span>
+                @if (showReviewRequestForm()) {
+                <button class="action-btn action-btn--sm action-btn--outline" (click)="cancelReviewRequest()">Cancel</button>
+                } @else {
+                <button class="action-btn action-btn--sm" (click)="openRequestReviewForm()">
+                    <span class="material-icons-outlined">rate_review</span>
+                    Request Review
+                </button>
+                }
+            </div>
+
+            @if (reviewRequestSuccess()) {
+            <div class="review-request-success">{{ reviewRequestSuccess() }}</div>
+            }
+
+            @if (showReviewRequestForm()) {
+            <div class="field col-flex-container">
+                <span class="field-label">Questions</span>
+                <div class="review-request-questions col-flex-container">
+                    @for (question of reviewQuestionNumbers(); track question) {
+                    <label class="review-request-question row-flex-container align-items-center gap"
+                        [class.review-request-question--disabled]="isQuestionPendingReview(question)">
+                        <input type="checkbox" [checked]="isReviewRequestQuestionSelected(question)"
+                            [disabled]="isSubmittingReviewRequest() || isQuestionPendingReview(question)"
+                            (change)="toggleReviewRequestQuestion(question)" />
+                        Question {{ question }}
+                        @if (isQuestionPendingReview(question)) {
+                        <span class="status-badge tag-blue">Pending</span>
+                        }
+                    </label>
+                    }
+                </div>
+            </div>
+
+            @if (reviewRequestQuestions().length > 0) {
+            <div class="field col-flex-container">
+                <span class="field-label">Proposed scores</span>
+                <div class="review-request-scores col-flex-container">
+                    @for (question of reviewRequestQuestions(); track question) {
+                    <div class="review-request-score-row row-flex-container align-items-center justify-content-between gap">
+                        <span class="review-request-score-label">Question {{ question }} (out of {{ reviewRequestMaxScoreFor(question) }})</span>
+                        <input type="number" class="field-input review-request-question-score" min="0"
+                            [max]="reviewRequestMaxScoreFor(question)" step="0.5"
+                            [title]="'Proposed score out of ' + reviewRequestMaxScoreFor(question)"
+                            [attr.aria-label]="'Proposed score for Question ' + question + ', out of ' + reviewRequestMaxScoreFor(question)"
+                            [value]="reviewRequestProposedScores()[question]"
+                            [disabled]="isSubmittingReviewRequest()"
+                            (input)="updateReviewRequestProposedScore(question, $any($event.target).value)" />
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <label class="field col-flex-container">
+                <span class="field-label">Explanation</span>
+                <textarea class="field-input review-request-explanation" rows="3" maxlength="2000"
+                    placeholder="Explain why these questions should be reviewed." [(ngModel)]="reviewRequestExplanation"
+                    [disabled]="isSubmittingReviewRequest()"></textarea>
+            </label>
+
+            @if (reviewRequestError()) {
+            <div class="review-request-error">{{ reviewRequestError() }}</div>
+            }
+
+            <div class="row-flex-container justify-content-end gap">
+                <button class="action-btn action-btn--sm" [disabled]="isSubmittingReviewRequest()"
+                    (click)="submitReviewRequest()">
+                    {{ isSubmittingReviewRequest() ? 'Submitting...' : 'Submit Request' }}
+                </button>
+            </div>
+            } @else {
+            <span class="confirm-body">Use this form to request a manual review of one or more questions.</span>
+            }
+        </div>
+
+        <app-exam-page-viewer slot="main" [page]="page()" [pageCount]="pageCount()" [loading]="loading()" [error]="error()"
+            [imageUrl]="imageUrl()" [regions]="regions()" [boxes]="boxes()" [identity]="identity()"
+            [version]="version()" [hoveredQuestionId]="hoveredQuestionId()" (hover)="hoveredQuestionId.set($event)"
+            (select)="selectedQuestionId.set($event)" (prevPage)="prevPage()" (nextPage)="nextPage()" />
+
+        <app-score-summary slot="sidebar" [percentage]="percentage()" [totalScore]="grade()?.total_score ?? null"
+            [maxScore]="grade()?.max_score ?? null" />
+
+        <app-identity-card slot="sidebar" [gradeIdentity]="gradeIdentity()" [isOnIdentityPage]="isOnIdentityPage()"
+            [hoveredQuestionId]="hoveredQuestionId()" (goToPage)="goToIdentityPage()" (hover)="hoveredQuestionId.set($event)" />
+
+        <app-question-list slot="sidebar" [annotations]="annotations()" [imageUrl]="imageUrl()" [hideAnswerKey]="true"
+            [selectedQuestionId]="selectedQuestionId()" (hover)="hoveredQuestionId.set($event)" />
+    </app-exam-result-layout>
+    }
+
+</div>

@@ -1,0 +1,11 @@
+@import '../student-exam-view/student-exam-view.css';
+
+.canvas-access-error {
+    align-items: center;
+    background: color-mix(in oklab, var(--tag-red), transparent 88%);
+    border: var(--border-size) solid color-mix(in oklab, var(--tag-red), transparent 55%);
+    border-radius: var(--card-border-radius);
+    display: flex;
+    gap: 0.6em;
+    padding: 1em;
+}

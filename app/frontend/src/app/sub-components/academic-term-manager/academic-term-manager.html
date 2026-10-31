@@ -1,0 +1,164 @@
+<section
+    class="term-manager card col-flex-container"
+    [class.term-manager--custom]="mode === 'custom'"
+    id="academic-terms"
+>
+    <div class="term-manager-header row-flex-container align-items-center justify-content-between">
+        <div class="col-flex-container term-heading-copy">
+            <span class="section-title">{{ title }}</span>
+            <span class="term-description">{{ description }}</span>
+        </div>
+
+        @if (allowInstitutionSelection) {
+            <label class="institution-filter col-flex-container">
+                <span>Institution</span>
+                <select
+                    class="term-input"
+                    [ngModel]="selectedInstitution"
+                    (ngModelChange)="onInstitutionChange($event)"
+                >
+                    @for (option of institutionOptions; track option.code) {
+                        <option [value]="option.code">{{ option.name }}</option>
+                    }
+                </select>
+            </label>
+        }
+    </div>
+
+    <div class="new-term-form row-flex-container align-items-end">
+        <label class="term-field term-name-field col-flex-container">
+            <span>Term name</span>
+            <input
+                class="term-input"
+                type="text"
+                [(ngModel)]="newName"
+                placeholder="e.g. Fall Intensive"
+                [disabled]="isCreating"
+                (keyup.enter)="createTerm()"
+            />
+        </label>
+        <label class="term-field col-flex-container year-format-field">
+            <span>Year display</span>
+            <select class="term-input" [(ngModel)]="newYearFormat" [disabled]="isCreating">
+                @for (option of yearFormatOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                }
+            </select>
+        </label>
+        <button class="action-btn term-add" [disabled]="!canCreate" (click)="createTerm()">
+            <span class="material-icons-outlined">add</span>
+            {{ isCreating ? 'Adding...' : 'Add term' }}
+        </button>
+    </div>
+
+    @if (error) {
+        <div class="term-error row-flex-container align-items-center">
+            <span class="material-icons-outlined">error_outline</span>
+            <span>{{ error }}</span>
+        </div>
+    }
+
+    @if (isLoading) {
+        <div class="term-empty">Loading academic terms...</div>
+    } @else if (terms.length === 0) {
+        <div class="term-empty">No {{ mode }} terms yet.</div>
+    } @else {
+        <div class="term-list">
+            @for (term of terms; track term.id) {
+                <div class="term-row col-flex-container" [class.term-row--archived]="!term.is_active">
+                    @if (editingTermId === term.id) {
+                        <div class="term-edit-form col-flex-container">
+                            <label class="term-field col-flex-container">
+                                <span>Term name</span>
+                                <input class="term-input" [(ngModel)]="editName" />
+                            </label>
+                            <label class="term-field col-flex-container">
+                                <span>Year display</span>
+                                <select class="term-input edit-format" [(ngModel)]="editYearFormat">
+                                    @for (option of yearFormatOptions; track option.value) {
+                                        <option [value]="option.value">{{ option.label }}</option>
+                                    }
+                                </select>
+                            </label>
+                            <div class="term-actions row-flex-container">
+                                <button class="action-btn action-btn--sm" [disabled]="operationTermId === term.id" (click)="saveEdit(term)">Save</button>
+                                <button class="action-btn action-btn--sm action-btn--outline" [disabled]="operationTermId === term.id" (click)="cancelEdit()">Cancel</button>
+                            </div>
+                        </div>
+                    } @else {
+                        <div class="term-summary col-flex-container grow">
+                            <div class="row-flex-container align-items-center term-name-row">
+                                <span class="term-name">{{ term.name }}</span>
+                                @if (!term.is_active) {
+                                    <span class="status-badge">Archived</span>
+                                }
+                            </div>
+                            <span class="term-meta">{{ yearFormatLabel(term.year_format) }}@if (term.code) { · {{ term.code }} }</span>
+                        </div>
+                        <div class="term-actions row-flex-container">
+                            <button class="action-btn action-btn--sm action-btn--outline" [disabled]="operationTermId === term.id" (click)="startEdit(term)">Edit</button>
+                            <button class="action-btn action-btn--sm action-btn--outline" [disabled]="operationTermId === term.id" (click)="toggleActive(term)">
+                                {{ term.is_active ? 'Archive' : 'Activate' }}
+                            </button>
+                            @if (mode === 'custom') {
+                                <button class="action-btn action-btn--sm action-btn--danger" [disabled]="operationTermId === term.id" (click)="requestDeleteTerm(term)">Delete</button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</section>
+
+@if (deleteConfirmationTerm) {
+    <div class="term-confirm-overlay" (click)="cancelDeleteTerm()">
+        <div
+            class="term-confirm-dialog card col-flex-container"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-term-title"
+            aria-describedby="delete-term-description"
+            (click)="$event.stopPropagation()"
+        >
+            <div class="term-confirm-heading row-flex-container align-items-center">
+                <span class="material-icons-outlined term-confirm-icon">
+                    {{ deleteConfirmationTerm.in_use ? 'block' : 'delete_outline' }}
+                </span>
+                <div class="col-flex-container">
+                    <span class="term-confirm-title" id="delete-term-title">
+                        {{ deleteConfirmationTerm.in_use ? 'Term cannot be deleted' : 'Delete custom term?' }}
+                    </span>
+                    <span class="term-confirm-name">{{ deleteConfirmationTerm.name }}</span>
+                </div>
+            </div>
+            <p class="term-confirm-description" id="delete-term-description">
+                @if (deleteConfirmationTerm.in_use) {
+                    This term is being used by one or more courses and must remain available for their records.
+                } @else {
+                    This permanently removes the term.
+                }
+            </p>
+            <div class="term-confirm-actions row-flex-container">
+                @if (deleteConfirmationTerm.in_use) {
+                    <button class="action-btn" (click)="cancelDeleteTerm()">Close</button>
+                } @else {
+                    <button
+                        class="action-btn action-btn--outline"
+                        [disabled]="operationTermId === deleteConfirmationTerm.id"
+                        (click)="cancelDeleteTerm()"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        class="action-btn action-btn--danger"
+                        [disabled]="operationTermId === deleteConfirmationTerm.id"
+                        (click)="confirmDeleteTerm()"
+                    >
+                        {{ operationTermId === deleteConfirmationTerm.id ? 'Deleting...' : 'Delete term' }}
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+}

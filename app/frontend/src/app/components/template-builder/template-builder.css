@@ -1,0 +1,781 @@
+.template-page {
+    padding: 0.75em;
+    gap: 0.25em;
+    width: min(98vw, 116em);
+    height: 96vh;
+    overflow: hidden;
+}
+
+.layout {
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.list-panel {
+    width: 17em;
+    flex-shrink: 0;
+    gap: 0.7em;
+    padding: 0.9em;
+    background: color-mix(in oklab, var(--primary-darkened), transparent 30%);
+    overflow-y: auto;
+}
+
+.builder-panel {
+    flex-grow: 1;
+    min-width: 0;
+    gap: 0.4em;
+    height: 100%;
+    overflow: hidden;
+    padding: 0.75em;
+}
+
+.preview-panel {
+    width: 38em;
+    flex-shrink: 0;
+    gap: 0.6em;
+    height: 100%;
+    padding: 0.75em;
+    overflow: hidden;
+}
+
+.preview-toggle.active {
+    background: color-mix(in oklab, var(--secondary), transparent 82%);
+}
+
+/* Buttons don't inherit font-size from the page by default, so this
+   icon-btn (no font-size of its own) renders off the browser's smaller
+   form-control default instead of matching its neighbour, the
+   action-btn--sm preview-toggle button (~37px tall). Pin it to match --
+   see course-header.css for the fuller explanation of the underlying bug. */
+.page-header .icon-btn { font-size: 0.93em; }
+
+.preview-panel iframe,
+.preview-placeholder {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    border-radius: var(--input-border-radius);
+}
+
+.preview-panel iframe {
+    border: var(--border-size) solid var(--color-border);
+    background: white;
+}
+
+.preview-placeholder {
+    border: var(--border-size) dashed var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1em;
+}
+
+.page-title {
+    font-size: 1.5em;
+}
+
+/* Below this, the panels no longer comfortably fit side by side, so stack
+   them instead of squeezing all three into a sliver of width each. */
+@media (max-width: 1300px) {
+    .layout {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .list-panel,
+    .preview-panel {
+        width: 100%;
+        overflow: visible;
+    }
+
+    .preview-panel {
+        height: 28em;
+    }
+
+    .builder-panel {
+        height: auto;
+        overflow: visible;
+    }
+}
+
+.section-title {
+    font-weight: 700;
+    font-size: 1.05em;
+}
+
+.muted {
+    opacity: 0.7;
+    font-size: 0.85em;
+}
+
+/* Template list */
+
+.archive-tabs {
+    gap: 0.3em;
+    padding: 0.2em;
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--primary), transparent 20%);
+}
+
+.archive-tab {
+    padding: 0.4em 0.55em;
+    border: none;
+    border-radius: calc(var(--input-border-radius) - 0.15em);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.archive-tab.active {
+    background: var(--primary-darkened);
+    font-weight: 700;
+}
+
+.template-row {
+    border: var(--border-size) solid transparent;
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--highlight2), var(--primary-darkened) 88%);
+    transition: border-color 120ms ease, transform 120ms ease;
+}
+
+.template-row:hover {
+    border-color: color-mix(in oklab, var(--color-border), transparent 45%);
+    transform: translateX(2px);
+}
+
+.template-row.archived {
+    opacity: 0.78;
+}
+
+.template-row.archived:hover {
+    transform: none;
+}
+
+.template-row.active {
+    border-color: var(--color-border);
+    background: var(--primary-darkened);
+}
+
+.template-select {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15em;
+    padding: 0.7em;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    cursor: pointer;
+    text-align: left;
+    min-width: 0;
+    /* let the flex item shrink below its text's natural width */
+    width: 100%;
+}
+
+.template-select:disabled {
+    cursor: default;
+}
+
+.template-name {
+    font-weight: 600;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.list-ready-badge {
+    margin-top: 0.2em;
+}
+
+/* Fields */
+
+.template-status-badge {
+    flex-shrink: 0;
+    margin-bottom: 0.55em; /* roughly matches the name field's own baseline */
+}
+
+.controls {
+    flex-wrap: wrap;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+}
+
+.field-label {
+    font-size: 0.8em;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+.field-input {
+    padding: 0.5em 0.7em;
+    font-size: 0.9em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    box-sizing: border-box;
+}
+
+.field-input.slim {
+    width: 6em;
+}
+
+.field-input--error {
+    border-color: var(--tag-red);
+}
+
+.field-input--locked {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.field-error {
+    color: var(--tag-red);
+    font-size: 0.78em;
+}
+
+.field-help {
+    font-size: 0.78em;
+    line-height: 1.35;
+    opacity: 0.75;
+}
+
+.setup-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8em;
+}
+
+@media (max-width: 700px) {
+    .setup-options {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+.setup-card {
+    padding: 0.85em;
+    border: var(--border-size) solid color-mix(in oklab, var(--color-border), transparent 35%);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--highlight2), var(--primary-darkened) 88%);
+    min-height: 11em;
+}
+
+.setup-card--preset {
+    background: color-mix(in oklab, var(--tag-green), transparent 88%);
+}
+
+.setup-card> :last-child {
+    margin-top: auto;
+}
+
+.preset-icon {
+    opacity: 0.7;
+}
+
+.q1-toggle input[type='checkbox'] {
+    width: 1.3em;
+    height: 1.3em;
+    flex: 0 0 1.3em;
+    border: 2px solid var(--secondary);
+    border-radius: 0.25em;
+    background: var(--primary-darkened);
+}
+
+.q1-toggle input[type='checkbox']:checked {
+    background: var(--highlight2);
+}
+
+.q1-toggle input[type='checkbox']:checked::after {
+    content: '✓';
+    inset: 0;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    color: var(--primary-highlight);
+    font-size: 0.8em;
+    font-weight: 900;
+    line-height: 1;
+    transform: none;
+}
+
+.sheet-toolbar {
+    padding: 0.35em 0.55em;
+    border: var(--border-size) solid color-mix(in oklab, var(--color-border), transparent 35%);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--highlight2), var(--primary-darkened) 90%);
+    flex-wrap: wrap;
+}
+
+.question-count-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.8em;
+    font-weight: 700;
+}
+
+.question-count-control .field-input {
+    width: 5em;
+    padding: 0.35em 0.45em;
+}
+
+.move-section-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.8em;
+    font-weight: 700;
+}
+
+.move-section-control select {
+    max-width: 10em;
+    padding-block: 0.35em;
+}
+
+.selection-action-btn {
+    flex: 0 0 12em;
+}
+
+.selection-cancel-btn {
+    border-color: var(--tag-red);
+    background: color-mix(in oklab, var(--tag-red), transparent 88%);
+    color: var(--tag-red);
+}
+
+.selection-cancel-btn:hover {
+    background: color-mix(in oklab, var(--tag-red), transparent 78%);
+}
+
+/* Compact spreadsheet editor. The question column and option header stay
+   visible while large layouts scroll in either direction. */
+.sheet-wrap {
+    flex: 1;
+    min-height: 12em;
+    max-width: 100%;
+    overflow: auto;
+    border-block: var(--border-size) solid var(--color-border);
+    user-select: none;
+    overflow-anchor: none;
+}
+
+.sheet-grid {
+    display: grid;
+    /* Was sized to fit the "Question" header label; now that the corner is
+       blank, the row labels ("Q200") and the add-row button ("200 max") are
+       the widest things left in this column. */
+    grid-template-columns: 4em repeat(var(--option-columns), 2em);
+    width: max-content;
+    min-width: 100%;
+}
+
+.sheet-section + .sheet-section {
+    border-top: var(--border-size) solid var(--color-border);
+}
+
+.sheet-section {
+    width: max-content;
+    min-width: 100%;
+}
+
+.sheet-section-header {
+    grid-column: 1 / -1;
+    min-height: 2.55em;
+    border-bottom: 1px solid var(--color-border);
+    background: color-mix(in oklab, var(--secondary-darkened), black 8%);
+}
+
+.section-header-content {
+    position: sticky;
+    left: 0;
+    width: min(48em, calc(100vw - 5em));
+    min-height: 2.55em;
+    padding: 0.3em 0.5em;
+    box-sizing: border-box;
+    color: var(--primary-highlight);
+    flex-wrap: wrap;
+}
+
+.section-order {
+    display: grid;
+    place-items: center;
+    width: 1.7em;
+    height: 1.7em;
+    border-radius: 50%;
+    background: color-mix(in oklab, var(--primary-highlight), transparent 82%);
+    font-size: 0.75em;
+    font-weight: 800;
+}
+
+.section-name-input {
+    min-width: 8em;
+    padding: 0.3em 0.45em;
+    border: 1px solid transparent;
+    border-radius: var(--input-border-radius);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 750;
+}
+
+.section-name-input:hover,
+.section-name-input:focus {
+    border-color: color-mix(in oklab, var(--primary-highlight), transparent 35%);
+    background: color-mix(in oklab, var(--primary-highlight), white 30%);
+    color: var(--secondary-darkened);
+    outline: none;
+}
+
+.section-type-select {
+    max-width: 10.5em;
+    padding: 0.3em 0.45em;
+    border: 1px solid color-mix(in oklab, var(--primary-highlight), transparent 35%);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--primary-highlight), white 30%);
+    color: var(--secondary-darkened);
+    font: inherit;
+    font-size: 0.78em;
+    font-weight: 700;
+}
+
+.section-question-count-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    font-size: 0.75em;
+    white-space: nowrap;
+}
+
+.section-question-count-control input {
+    width: 4.2em;
+    padding: 0.3em 0.4em;
+    border: 1px solid color-mix(in oklab, var(--primary-highlight), transparent 35%);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--primary-highlight), white 30%);
+    color: var(--secondary-darkened);
+    font: inherit;
+    font-weight: 700;
+}
+
+.section-question-count-control button {
+    padding: 0.32em 0.5em;
+    border: 1px solid color-mix(in oklab, var(--primary-highlight), transparent 35%);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--primary-highlight), white 30%);
+    color: var(--secondary-darkened);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.section-question-count-control button:hover {
+    background: var(--primary-highlight);
+}
+
+.sheet-section-header .icon-btn {
+    color: inherit;
+}
+
+.sheet-section-header .icon-btn:disabled {
+    opacity: 0.3;
+}
+
+.section-delete-btn:not(:disabled) {
+    color: color-mix(in oklab, var(--tag-red), white 25%);
+}
+
+.sheet-corner,
+.sheet-header,
+.sheet-row-label,
+.sheet-cell {
+    box-sizing: border-box;
+    min-height: 1.85em;
+    border: 0;
+    /* Same hue as the grid headers (--secondary) rather than --color-border.
+       The two happen to be equal in light mode but diverge in dark mode,
+       which made the grid lines read as a different, off blue. */
+    border-right: 1px solid color-mix(in oklab, var(--secondary), transparent 65%);
+    border-bottom: 1px solid color-mix(in oklab, var(--secondary), transparent 65%);
+}
+
+.sheet-cell.sheet-cell--fixed {
+    cursor: default;
+}
+
+.sheet-corner,
+.sheet-header {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    background: var(--secondary);
+    color: var(--primary-highlight);
+    font-size: 0.78em;
+    font-weight: 700;
+}
+
+.sheet-corner {
+    left: 0;
+    z-index: 5;
+}
+
+.sheet-row-label {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.45em;
+    background: var(--primary-highlight);
+    font-size: 0.82em;
+    font-weight: 700;
+}
+
+.sheet-question-row {
+    display: grid;
+    padding: 0;
+    place-items: center;
+    cursor: ns-resize;
+    line-height: 1;
+    touch-action: none;
+}
+
+.sheet-row-label.selected {
+    background: var(--tag-red);
+    color: white;
+    box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--tag-red), black 25%);
+}
+
+.sheet-cell {
+    position: relative;
+    background: color-mix(in oklab, var(--primary), white 8%);
+    cursor: crosshair;
+}
+
+.sheet-cell.active {
+    background: color-mix(in oklab, var(--highlight3), var(--primary) 35%);
+}
+
+.sheet-cell.selected-row {
+    background: color-mix(in oklab, var(--tag-red), var(--primary) 55%);
+    box-shadow: inset 0 0 0 2px var(--tag-red);
+}
+
+/* A lighter/brighter version of the same green .active uses, in light mode.
+   Dark mode goes the other way (darker than .active) since a lighter tint
+   would wash out against a dark page instead of standing out. */
+.sheet-cell.preview {
+    background: color-mix(in oklab, var(--highlight3), white 55%);
+    box-shadow: inset 0 0 0 1px var(--highlight3);
+}
+
+body.dark-mode .sheet-cell.preview {
+    background: color-mix(in oklab, var(--highlight3), black 45%);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--highlight3), white 25%);
+}
+
+.sheet-cell.endpoint {
+    /* Marks where a question's option count ends. Blue so it doesn't blend
+       into the green "active" fill or the red row-selection highlight. */
+    border-right: 4px solid color-mix(in oklab, var(--tag-blue), white 20%);
+}
+
+.sheet-cell.endpoint span {
+    position: relative;
+    z-index: 1;
+    font-size: 0.82em;
+    font-weight: 800;
+    /* --color-text flips between a dark navy (light mode) and a light
+       off-white (dark mode), so it stays readable against .active's green
+       fill either way, since that fill itself gets much darker in dark mode. */
+    color: var(--color-text);
+}
+
+.sheet-add-row,
+.sheet-add-cell {
+    border-bottom: 1px dashed color-mix(in oklab, var(--color-border), transparent 30%);
+    background: color-mix(in oklab, var(--primary-darkened), transparent 45%);
+}
+
+.sheet-add-cell {
+    grid-column: 2 / -1;
+}
+
+.sheet-add-row {
+    justify-content: center;
+    cursor: pointer;
+    z-index: 4;
+    color: var(--secondary);
+    font: inherit;
+    font-weight: 800;
+}
+
+.sheet-add-row:hover,
+.sheet-add-row:focus-visible {
+    background: color-mix(in oklab, var(--tag-green), var(--primary) 70%);
+    outline: 2px solid var(--secondary);
+    outline-offset: -2px;
+}
+
+.sheet-add-row:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.q-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(var(--preview-rows), max-content);
+    grid-auto-flow: column;
+    column-gap: 1.5em;
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.q-row {
+    padding: 0.3em 0;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-border), transparent 70%);
+}
+
+.q-row--reserved {
+    opacity: 0.55;
+}
+
+@media (max-width: 700px) {
+    .q-list {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+        grid-auto-flow: row;
+    }
+}
+
+.q-num {
+    font-weight: 700;
+    width: 2.2em;
+    flex-shrink: 0;
+}
+
+.q-choices {
+    opacity: 0.7;
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Banner + footer */
+
+.banner {
+    width: 100%;
+    padding: 0.7em 1em;
+    border-radius: var(--input-border-radius);
+    box-sizing: border-box;
+}
+
+.banner--error {
+    background: color-mix(in oklab, var(--tag-red), transparent 80%);
+    color: color-mix(in oklab, var(--tag-red), var(--tag-text-shade) 20%);
+    border: var(--border-size) solid var(--tag-red);
+}
+
+.banner--warning {
+    background: color-mix(in oklab, var(--tag-amber), transparent 78%);
+    color: color-mix(in oklab, var(--tag-amber), var(--tag-text-shade) 30%);
+    border: var(--border-size) solid var(--tag-amber);
+}
+
+.footer {
+    width: 100%;
+}
+
+/* Delete confirmation */
+
+.delete-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in oklab, black, transparent 55%);
+    z-index: 50;
+    padding: 1em;
+    box-sizing: border-box;
+}
+
+.delete-confirm-card {
+    width: min(92vw, 34em);
+    max-height: min(80vh, 36em);
+    overflow: auto;
+    padding: 1.2em;
+    gap: 1em;
+}
+
+.confirm-icon {
+    color: var(--tag-red);
+    font-size: 2.1em;
+}
+
+.confirm-title {
+    font-weight: 800;
+    font-size: 1.2em;
+}
+
+.confirm-body {
+    opacity: 0.75;
+}
+
+.usage-loading {
+    padding: 0.8em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+}
+
+.usage-list {
+    gap: 0.45em;
+}
+
+.usage-title {
+    font-weight: 700;
+    font-size: 0.95em;
+}
+
+.usage-row {
+    padding: 0.55em 0.7em;
+    border: var(--border-size) solid color-mix(in oklab, var(--color-border), transparent 40%);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+}
+
+.usage-name {
+    min-width: 0;
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.usage-meta {
+    flex-shrink: 0;
+    font-size: 0.82em;
+    opacity: 0.72;
+}
+
+.confirm-actions {
+    width: 100%;
+}

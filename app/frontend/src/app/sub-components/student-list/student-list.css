@@ -1,0 +1,241 @@
+/* Gap between header/toolbar/sort-bar/list/footer -- applies whether this is
+   rendered as a popup modal or embedded inline on the course page (embedded
+   mode never gets the .modal-card class, so it must live here instead). */
+.student-list-root {
+    gap: 1.0em;
+}
+
+.modal-card {
+    width: 32em;
+}
+
+.modal-header {
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1em;
+}
+
+.modal-title {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.modal-subtitle {
+    font-size: 0.82em;
+    opacity: 0.6;
+    margin-top: 0.15em;
+}
+
+/* Toolbar */
+
+.toolbar {
+    gap: 0.6em;
+    flex-wrap: wrap;
+}
+
+.canvas-roster-tools {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 0.55em 0.65em;
+    border: 1px solid color-mix(in oklab, var(--tag-blue), transparent 65%);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--tag-blue), transparent 92%);
+}
+
+.canvas-roster-label {
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.canvas-roster-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    min-width: 14em;
+}
+
+.invite-confirm-text {
+    font-size: 0.78em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.6em;
+    font-size: 1.1em;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.search-input {
+    padding: 0 0.75em 0 2.2em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    font-size: 0.88em;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.search-input::placeholder {
+    color: var(--color-text);
+    opacity: 0.45;
+}
+
+/* Sort bar */
+
+.sort-bar {
+    border-bottom: 1px solid var(--primary-darkened);
+    gap: 0;
+    margin-bottom: -0.25em;
+}
+
+.sort-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.2em;
+    padding: 0.3em 0.75em;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text);
+    font-size: 0.78em;
+    font-weight: 600;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 150ms ease, border-color 150ms ease;
+    margin-bottom: -1px;
+}
+
+.sort-btn:hover {
+    opacity: 0.8;
+}
+
+.sort-btn.active {
+    opacity: 1;
+    border-bottom-color: var(--color-text);
+}
+
+.sort-dir {
+    font-size: 0.75em;
+    opacity: 0.6;
+}
+
+/* Student list */
+
+.student-list-body {
+    display: flex;
+    flex-direction: column;
+    max-height: 18em;
+    overflow-y: auto;
+}
+
+.empty-text {
+    font-size: 0.88em;
+    opacity: 0.55;
+    text-align: center;
+    padding: 1.5em 0;
+}
+
+.student-row {
+    padding: 0.6em 0;
+    border-bottom: 1px solid var(--primary-darkened);
+}
+
+.student-row--confirm {
+    align-items: flex-start;
+}
+
+.student-row--inactive .student-avatar,
+.student-row--inactive .student-name,
+.student-row--inactive .student-id {
+    opacity: 0.55;
+}
+
+.student-row.last {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.student-avatar {
+    width: 2.4em;
+    height: 2.4em;
+    background-color: var(--highlight2);
+    color: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95em;
+    flex-shrink: 0;
+}
+
+.student-name {
+    font-size: 0.92em;
+    font-weight: 600;
+}
+
+.student-id {
+    font-size: 0.78em;
+    opacity: 0.6;
+    margin-top: 0.1em;
+}
+
+.student-row .status-badge {
+    flex-shrink: 0;
+}
+
+.student-actions {
+    flex-shrink: 0;
+    gap: 0.35em;
+}
+
+.invite-btn .material-icons-outlined {
+    font-size: 1.05em;
+}
+
+.student-confirm {
+    align-items: flex-end;
+    gap: 0.35em;
+}
+
+.student-confirm-text {
+    font-size: 0.76em;
+    opacity: 0.7;
+    text-align: right;
+}
+
+.remove-error {
+    border: 1px solid rgba(235, 87, 87, 0.45);
+    background: rgba(235, 87, 87, 0.12);
+    color: #ffb8b8;
+    border-radius: var(--input-border-radius);
+    padding: 0.55em 0.7em;
+    font-size: 0.82em;
+}
+
+/* Footer */
+
+.modal-footer {
+    justify-content: flex-end;
+    border-top: 1px solid var(--primary-darkened);
+    padding-top: 0.75em;
+    margin-top: 0.25em;
+}
+
+.student-count {
+    font-size: 0.82em;
+    opacity: 0.6;
+    font-weight: 500;
+}

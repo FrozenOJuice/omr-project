@@ -1,0 +1,55 @@
+/* Identify-student card: always visible, like the score summary above it,
+   and clickable to jump to whichever page has the name/ID bubbles. */
+
+.identity-panel {
+    gap: 0.6em;
+    padding: 0.85em;
+    flex-shrink: 0;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    background: var(--primary-darkened);
+    cursor: pointer;
+}
+
+.identity-panel.current {
+    cursor: default;
+}
+
+.identity-panel:focus-visible {
+    outline: 2px solid var(--tag-blue);
+    outline-offset: 2px;
+}
+
+.identity-title {
+    font-weight: 700;
+}
+
+.identity-goto-icon {
+    opacity: 0.6;
+}
+
+.identity-detected {
+    gap: 0.3em;
+}
+
+.identity-row {
+    padding: 0.2em 0.3em;
+    margin: 0 -0.3em;
+    border-radius: var(--input-border-radius);
+    transition: background-color 120ms ease;
+}
+
+.identity-row:hover,
+.identity-row.hovered {
+    background: color-mix(in oklab, var(--tag-blue), transparent 88%);
+}
+
+.identity-label {
+    opacity: 0.65;
+}
+
+.identity-confidence {
+    font-size: 0.8em;
+    opacity: 0.6;
+    margin-left: 0.5em;
+}

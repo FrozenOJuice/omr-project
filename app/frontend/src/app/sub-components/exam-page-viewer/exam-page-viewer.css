@@ -1,0 +1,263 @@
+/* .exam-main (the parent flex column) centers rather than stretches its
+   children, so a narrower image centers itself on small screens instead of
+   staying pinned to one side. That means this host needs its own explicit
+   width. Without it, the host sizes to its content's natural width (the
+   56em image frame) instead of the column's actual space, and overflows
+   everything next to it. */
+:host {
+    display: block;
+    width: 100%;
+}
+
+.exam-page-viewer {
+    gap: 1em;
+    align-items: center;
+    width: 100%;
+}
+
+/* Nav + legend */
+
+/* Matches .page-image-frame's width so the buttons sit flush above the
+   image's actual edges instead of spanning the wider column. */
+.page-nav {
+    justify-content: space-between;
+    width: 58em;
+    max-width: 100%;
+}
+
+.legend {
+    flex: 1;
+    gap: 1em;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.82em;
+    opacity: 0.75;
+}
+
+.legend-swatch {
+    width: 0.85em;
+    height: 0.85em;
+    border-radius: 3px;
+    border: 2px solid currentColor;
+    background-color: currentColor;
+}
+
+/* Page image + overlay */
+
+.page-image-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* zoomable mode: a fixed-height, click-drag-pannable viewport instead of
+   the image dictating the whole component's height. Switched to block
+   layout (rather than staying flex with justify-content: flex-start)
+   because Chrome/Firefox don't include a flex container's own end padding
+   in its scrollable area (flexbugs #34) -- as a flex item, page-image-frame
+   would sit flush against the wrapper's bottom edge once scrolled all the
+   way down, with the padding-bottom below silently ignored. */
+.page-image-wrapper.zoomable {
+    display: block;
+    max-height: 44em;
+    overflow: auto;
+    cursor: grab;
+    /* Stops the browser's own touch-scroll/zoom gestures from fighting our
+       pointer-based panning on touchscreens. */
+    touch-action: none;
+}
+
+.page-image-wrapper.zoomable:active {
+    cursor: grabbing;
+}
+
+/* page-image-frame's max-width: 100% (below) exists to shrink it on narrow
+   screens; in zoomable mode that same rule would also cap zooming in at the
+   wrapper's own width, since 100% resolves against it. Zoomed mode already
+   has its own scrollable wrapper to handle overflow, so it doesn't need
+   that cap. */
+.page-image-wrapper.zoomable .page-image-frame {
+    max-width: none;
+}
+
+.zoom-controls {
+    gap: 0.35em;
+}
+
+.zoom-level {
+    font-size: 0.82em;
+    font-weight: 600;
+    min-width: 2.75em;
+    text-align: center;
+}
+
+/* A fixed size keeps questions at a consistent, readable scale regardless
+   of window size, shrinking below that on narrower screens via max-width.
+   Also the coordinate origin for the annotation-box/question-region
+   children below, since it matches the image's box exactly. */
+.page-image-frame {
+    position: relative;
+    width: 58em;
+    max-width: 100%;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    background: var(--primary-darkened);
+    overflow: hidden;
+}
+
+.page-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+.empty-text {
+    font-size: 0.88em;
+    opacity: 0.55;
+    padding: 1.5em 0;
+}
+
+/* Same box (width/border/background) as .page-image-frame, so a
+   loading/error/empty page doesn't collapse the viewer down to just the
+   message text and shift everything around it -- it holds the same
+   letter-page-shaped footprint a loaded scan would. */
+.page-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58em;
+    max-width: 100%;
+    aspect-ratio: 8.5 / 11;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    background: var(--primary-darkened);
+    box-sizing: border-box;
+}
+
+.page-image-placeholder .empty-text {
+    padding: 0 1.5em;
+    text-align: center;
+}
+
+.annotation-box {
+    position: absolute;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    box-sizing: border-box;
+    /* Purely visual. .question-region below is the actual hover/click
+       target, generously sized to the whole question rather than each
+       small circle. */
+    pointer-events: none;
+    background-color: color-mix(in oklab, currentColor, transparent 65%);
+    transition: background-color 120ms ease, box-shadow 120ms ease, border-width 120ms ease;
+}
+
+.annotation-box.hovered {
+    border-width: 2.75px;
+    background-color: color-mix(in oklab, currentColor, transparent 35%);
+    box-shadow: 0 0 10px 2px color-mix(in oklab, currentColor, transparent 40%);
+}
+
+/* An unselected option's bubble: invisible until its question is hovered.
+   There's nothing right or wrong about a bubble nobody marked, so it
+   shouldn't compete with the always-visible colored ones at rest. */
+.annotation-box.status-empty:not(.hovered) {
+    border-color: transparent;
+    background-color: transparent;
+}
+
+/* A faint white rather than the graded statuses' currentColor, so a hovered
+   empty bubble reads as neutral, distinct from the correct/incorrect/
+   ambiguous colors, while still being clearly lighter-touch (no glow,
+   thinner border) than a real answer's hover state. */
+.annotation-box.status-empty.hovered {
+    border-width: 1.5px;
+    border-color: color-mix(in oklab, white, transparent 30%);
+    background-color: color-mix(in oklab, white, transparent 55%);
+    box-shadow: none;
+}
+
+/* Purely a hover/click hit-target for the whole question. All visual
+   feedback comes from the .annotation-box circles it groups via
+   hoveredQuestionId, not from this element itself. */
+.question-region {
+    position: absolute;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.status-correct {
+    color: var(--tag-green);
+}
+
+.status-incorrect {
+    color: var(--tag-red);
+}
+
+.status-ambiguous {
+    color: var(--tag-amber);
+}
+
+.status-empty {
+    color: #8a8a8a;
+}
+
+/* Name/student-ID bubbles: no correct/incorrect here, just what OMR read,
+   so a neutral color distinct from the graded statuses above. */
+.status-identity {
+    color: var(--tag-blue);
+}
+
+/* Marks a whole question as flagged (e.g. the subject of a regrade
+   request) independent of the correct/incorrect coloring on its bubbles.
+   No fill: a filled box would make it impossible to tell whether the
+   student actually marked a bubble the system didn't flag, since a mark
+   under a translucent tint reads differently than one in the clear.
+   Sits over the question-region hit-target but doesn't intercept clicks. */
+.question-highlight {
+    position: absolute;
+    box-sizing: border-box;
+    border: 3px solid var(--tag-amber);
+    border-radius: 8px;
+    background-color: transparent;
+    pointer-events: none;
+}
+
+.page-counter {
+    font-size: 0.85em;
+    font-weight: 600;
+    opacity: 0.7;
+    align-self: center;
+}
+
+/* The "zoomed in" snippet that follows the cursor while hovering a question
+   on the page image. Fixed positioning (not relative to the page) since
+   previewPositionStyle's coordinates are viewport-relative, and
+   pointer-events: none so it can never itself intercept the mouseleave that
+   would otherwise dismiss it. */
+.snippet-preview {
+    position: fixed;
+    z-index: 20;
+    pointer-events: none;
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    animation: snippet-preview-in 100ms ease;
+}
+
+@keyframes snippet-preview-in {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

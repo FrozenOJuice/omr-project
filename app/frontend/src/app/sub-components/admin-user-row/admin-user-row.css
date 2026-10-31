@@ -1,0 +1,146 @@
+.user-row {
+    border-bottom: var(--border-size) solid var(--color-border);
+    padding: 0.75em 1em;
+    align-items: center;
+    gap: 1em;
+    flex-wrap: wrap;
+}
+
+:host(:last-child) .user-row {
+    border-bottom: none;
+}
+
+.user-title-row {
+    gap: 0.6em;
+    flex-wrap: wrap;
+    margin-bottom: 0.35em;
+}
+
+.user-field {
+    width: min(100%, 28em);
+    padding: 0.35em 0.55em;
+    border: var(--border-size) solid transparent;
+    border-radius: var(--input-border-radius);
+    background: transparent;
+    color: var(--color-text);
+    box-sizing: border-box;
+}
+
+.user-field:focus {
+    border-color: var(--color-border);
+    background: var(--primary-darkened);
+}
+
+.user-name-input {
+    font-weight: 600;
+    font-size: 1em;
+}
+
+.user-field:not(.user-name-input) {
+    font-size: 0.8em;
+    opacity: 0.7;
+    margin-top: 0.1em;
+}
+
+.user-meta {
+    font-size: 0.75em;
+    opacity: 0.55;
+    margin-top: 0.15em;
+}
+
+.user-actions {
+    flex-shrink: 0;
+    gap: 0.5em;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.inline-control {
+    gap: 0.35em;
+}
+
+.inline-control .filter-dropdown {
+    min-width: 7.5em;
+}
+
+.icon-btn--sm {
+    width: 2.25em;
+    height: 2.25em;
+}
+
+.icon-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.busy-icon {
+    animation: busy-spin 0.8s linear infinite;
+}
+
+.admin-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1em;
+    background: rgb(0 0 0 / 45%);
+}
+
+.admin-confirm-card {
+    width: min(34em, 100%);
+    gap: 1em;
+}
+
+.admin-confirm-icon {
+    flex-shrink: 0;
+    color: var(--tag-amber);
+    font-size: 2.25em;
+}
+
+.admin-confirm-title {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.admin-confirm-warning,
+.admin-confirm-details {
+    gap: 0.65em;
+    padding: 0.8em;
+    border-left: 3px solid var(--tag-amber);
+    background: color-mix(in srgb, var(--tag-amber) 12%, transparent);
+    font-size: 0.9em;
+}
+
+.admin-confirm-actions {
+    justify-content: flex-end;
+}
+
+@keyframes busy-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 48em) {
+    .user-row {
+        align-items: stretch;
+    }
+
+    .user-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 34em) {
+    .inline-control {
+        width: 100%;
+    }
+
+    .inline-control .filter-dropdown {
+        flex: 1;
+        min-width: 0;
+    }
+}

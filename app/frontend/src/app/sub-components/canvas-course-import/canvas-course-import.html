@@ -1,0 +1,194 @@
+<div class="modal-card card col-flex-container">
+  <div class="modal-header row-flex-container align-items-center justify-content-between gap">
+    <div class="col-flex-container">
+      <span class="modal-title">Import courses</span>
+      <span class="modal-subtitle">Select one or more courses from a connected service.</span>
+    </div>
+    <button
+      type="button"
+      class="icon-btn icon-btn--danger"
+      [disabled]="importing"
+      (click)="close.emit()"
+      title="Close"
+    >
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="source-bar row-flex-container align-items-center gap">
+    <span class="source-icon material-icons-outlined">school</span>
+    <div class="col-flex-container grow">
+      <span class="source-name">Canvas</span>
+      <span class="modal-subtitle">Connected learning platform</span>
+    </div>
+    <span class="status-badge tag-blue">Connected</span>
+  </div>
+
+  @if (error) {
+    <div class="error-message">{{ error }}</div>
+  }
+
+  @if (importResults.length && error) {
+    <div class="import-results col-flex-container">
+      @for (result of importResults; track result.canvas_course_id) {
+        <div class="import-result row-flex-container justify-content-between gap">
+          <span>{{
+            courses.find((course) => course.id === result.canvas_course_id)?.name ??
+              result.canvas_course_id
+          }}</span>
+          <span [class.result-failed]="result.status === 'failed'">
+            {{ result.status === 'failed' ? (result.message ?? 'Import failed') : 'Imported' }}
+          </span>
+        </div>
+      }
+    </div>
+  }
+
+  @if (loadingCourses) {
+    <div class="modal-state col-flex-container align-items-center">
+      <span class="material-icons-outlined spin">sync</span>
+      <span>Loading courses...</span>
+    </div>
+  } @else if (!courses.length) {
+    <div class="modal-state col-flex-container align-items-center">
+      <span class="material-icons-outlined state-icon">school</span>
+      <strong>No courses available</strong>
+      <span>No active instructor courses were found in Canvas.</span>
+    </div>
+  } @else {
+    <div class="import-layout">
+      <div class="course-list col-flex-container">
+        <div class="row-flex-container align-items-center justify-content-between">
+          <span class="panel-label">Available courses</span>
+          @if (selectedCourses.length) {
+            <span class="selection-count">{{ selectedCourses.length }} selected</span>
+          }
+        </div>
+        <div class="course-options col-flex-container">
+          @for (course of courses; track course.id) {
+            <div
+              class="course-option row-flex-container align-items-center gap"
+              [class.course-option--selected]="isSelected(course.id)"
+              [class.course-option--previewed]="course.id === previewCourseId"
+            >
+              <button
+                type="button"
+                class="selection-indicator"
+                [class.selection-indicator--selected]="isSelected(course.id)"
+                [disabled]="course.imported || importing"
+                role="checkbox"
+                [attr.aria-checked]="course.imported || isSelected(course.id)"
+                [attr.aria-label]="course.imported ? course.name + ' is already imported' : 'Select ' + course.name + ' for import'"
+                (click)="toggleSelection(course)"
+              >
+                @if (course.imported) {
+                  <span class="material-icons-outlined">check_circle</span>
+                } @else if (isSelected(course.id)) {
+                  <span class="material-icons-outlined">check</span>
+                }
+              </button>
+              <button
+                type="button"
+                class="course-preview-trigger row-flex-container align-items-center gap grow"
+                [disabled]="importing"
+                [attr.aria-label]="'Preview roster for ' + course.name"
+                (click)="previewCourseRoster(course)"
+              >
+                <span class="col-flex-container grow course-option-copy">
+                  <span class="course-option-name">{{ course.name }}</span>
+                  <span class="modal-subtitle">{{ course.course_code ?? 'No course code' }}</span>
+                </span>
+                @if (course.imported) {
+                  <span class="status-badge tag-green">Imported</span>
+                }
+                <span class="material-icons-outlined option-arrow">chevron_right</span>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="course-preview col-flex-container">
+        @if (previewCourse; as course) {
+          <div class="preview-heading col-flex-container">
+            <span class="panel-label">Course preview</span>
+            <strong>{{ course.name }}</strong>
+            <span class="modal-subtitle">{{ course.course_code ?? 'Canvas course' }}</span>
+          </div>
+
+          @if (loadingRoster) {
+            <div class="preview-state row-flex-container align-items-center gap">
+              <span class="material-icons-outlined spin">sync</span>
+              <span>Loading roster...</span>
+            </div>
+          } @else if (rosterError) {
+            <div class="error-message">{{ rosterError }}</div>
+          } @else {
+            <div
+              class="roster-heading row-flex-container align-items-center justify-content-between"
+            >
+              <span class="panel-label">Students</span>
+              <span class="student-count">{{ students.length }}</span>
+            </div>
+            <div class="student-list col-flex-container">
+              @for (student of students; track student.id) {
+                <div
+                  class="student-row row-flex-container align-items-center justify-content-between gap"
+                >
+                  <span>{{ student.name }}</span>
+                  <span class="modal-subtitle">{{
+                    student.sis_user_id ?? student.login_id ?? 'No identifier'
+                  }}</span>
+                </div>
+              } @empty {
+                <span class="preview-state">No active students were found.</span>
+              }
+            </div>
+            @if (rosterSkipCount) {
+              <div class="roster-note">
+                {{ rosterSkipCount }} roster
+                {{ rosterSkipCount === 1 ? 'record' : 'records' }} cannot be imported because
+                required information is missing or invalid. {{ rosterSkipSummary }}.
+              </div>
+            }
+          }
+        } @else {
+          <div class="modal-state col-flex-container align-items-center grow">
+            <span class="material-icons-outlined state-icon">touch_app</span>
+            <strong>Preview a course roster</strong>
+            <span>Click a course to show its students. Use its checkbox to select it for import.</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="modal-footer row-flex-container justify-content-end gap">
+    <button
+      type="button"
+      class="action-btn action-btn--outline"
+      [disabled]="importing"
+      (click)="close.emit()"
+    >
+      Cancel
+    </button>
+    @if (!selectedCourses.length && previewCourse?.imported) {
+      <button type="button" class="action-btn" (click)="openCourse()">Open course</button>
+    } @else {
+      <button
+        type="button"
+        class="action-btn"
+        [disabled]="!selectedCourses.length || importing"
+        (click)="importCourses()"
+      >
+        {{
+          importing
+            ? 'Importing...'
+            : selectedCourses.length === 1
+              ? 'Import course'
+              : 'Import ' + selectedCourses.length + ' courses'
+        }}
+      </button>
+    }
+  </div>
+</div>

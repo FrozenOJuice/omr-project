@@ -1,0 +1,323 @@
+.modal-card {
+    width: min(38em, calc(100vw - 2em));
+    gap: 1em;
+}
+
+.modal-header {
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1em;
+}
+
+.modal-title {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.modal-subtitle {
+    font-size: 0.82em;
+    opacity: 0.6;
+    margin-top: 0.15em;
+}
+
+/* Tabs */
+
+.tab-bar {
+    border-bottom: 1px solid var(--primary-darkened);
+    gap: 0;
+    margin-bottom: -0.25em;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.45em 1em;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text);
+    font-size: 0.85em;
+    font-weight: 600;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 150ms ease, border-color 150ms ease;
+    margin-bottom: -1px;
+}
+
+.tab-btn:hover {
+    opacity: 0.8;
+}
+
+.tab-btn.active {
+    opacity: 1;
+    border-bottom-color: var(--highlight2);
+}
+
+.tab-icon {
+    font-size: 1.1em;
+}
+
+/* Tab content */
+
+.tab-content {
+    gap: 0.9em;
+}
+
+.manual-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75em;
+}
+
+.manual-grid-full {
+    grid-column: 1 / -1;
+}
+
+.field {
+    gap: 0.35em;
+}
+
+.field-label {
+    font-size: 0.78em;
+    font-weight: 700;
+    opacity: 0.68;
+}
+
+.field-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55em 0.7em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    font: inherit;
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: var(--highlight2);
+}
+
+.hint-text {
+    font-size: 0.84em;
+    opacity: 0.7;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Invite link */
+
+.link-display {
+    background: var(--primary-darkened);
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    padding: 0.6em 0.8em;
+    gap: 0.6em;
+}
+
+.link-code {
+    font-family: monospace;
+    font-size: 1.05em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    word-break: break-all;
+}
+
+.link-display--expired {
+    border-color: var(--tag-red);
+}
+
+.invite-expiry {
+    gap: 0.65em;
+    padding: 0.7em 0.8em;
+    border: var(--border-size) solid color-mix(in oklab, var(--tag-green), transparent 45%);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--tag-green), transparent 88%);
+}
+
+.invite-expiry--expired {
+    border-color: color-mix(in oklab, var(--tag-red), transparent 35%);
+    background: color-mix(in oklab, var(--tag-red), transparent 90%);
+}
+
+.invite-expiry-icon {
+    color: var(--tag-green);
+    font-size: 1.35em;
+    flex-shrink: 0;
+}
+
+.invite-expiry--expired .invite-expiry-icon,
+.invite-expiry--expired .invite-expiry-status {
+    color: var(--tag-red);
+}
+
+.invite-expiry-copy {
+    gap: 0.15em;
+    min-width: 0;
+}
+
+.invite-expiry-status {
+    color: var(--tag-green);
+    font-size: 0.88em;
+    font-weight: 700;
+}
+
+.invite-expiry-detail {
+    font-size: 0.78em;
+    opacity: 0.72;
+}
+
+.warn-text {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4em;
+    font-size: 0.78em;
+    opacity: 0.65;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.warn-icon {
+    font-size: 1em;
+    flex-shrink: 0;
+    margin-top: 0.05em;
+}
+
+/* CSV upload */
+
+.file-drop {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--card-border-radius);
+    padding: 1.5em;
+    gap: 0.5em;
+    cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease;
+    position: relative;
+    text-align: center;
+}
+
+.file-drop:hover,
+.file-drop.has-file {
+    background: var(--primary-darkened);
+    border-color: var(--highlight2);
+}
+
+.file-icon {
+    font-size: 2em;
+    opacity: 0.5;
+}
+
+.file-drop.has-file .file-icon {
+    opacity: 0.8;
+    color: var(--highlight2);
+}
+
+.file-label {
+    font-size: 0.88em;
+    font-weight: 600;
+}
+
+.file-size {
+    font-size: 0.78em;
+    opacity: 0.55;
+}
+
+.file-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    font-size: unset;
+}
+
+/* Results */
+
+.result-card {
+    background: var(--primary-darkened);
+    border-radius: var(--card-border-radius);
+    padding: 0.9em 1em;
+    gap: 0.5em;
+}
+
+.result-row {
+    gap: 0.5em;
+}
+
+.result-row--inline {
+    padding: 0.55em 0.7em;
+    border: var(--border-size) solid color-mix(in oklab, var(--tag-green), transparent 45%);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--tag-green), transparent 88%);
+}
+
+.result-icon {
+    font-size: 1.15em;
+    flex-shrink: 0;
+}
+
+.result-icon--success {
+    color: var(--tag-green);
+}
+
+.result-icon--warn {
+    color: var(--tag-amber);
+}
+
+.result-label {
+    font-size: 0.88em;
+    font-weight: 600;
+}
+
+.result-pill {
+    margin-left: auto;
+    padding: 0.2em 0.55em;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--tag-green), transparent 80%);
+    color: var(--tag-green);
+    font-size: 0.72em;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.result-pill--pending {
+    background: color-mix(in oklab, var(--tag-amber), transparent 82%);
+    color: var(--tag-amber);
+}
+
+.errors-section {
+    gap: 0.3em;
+    margin-top: 0.25em;
+    padding-top: 0.5em;
+    border-top: 1px solid var(--color-border);
+    opacity: 0.8;
+}
+
+.errors-title {
+    font-size: 0.78em;
+    font-weight: 700;
+    opacity: 0.7;
+}
+
+.error-item {
+    font-size: 0.78em;
+    color: var(--tag-red);
+}
+
+/* Shared */
+
+.error-text {
+    font-size: 0.82em;
+    color: var(--tag-red);
+}
+
+@media (max-width: 560px) {
+    .manual-grid {
+        grid-template-columns: 1fr;
+    }
+}

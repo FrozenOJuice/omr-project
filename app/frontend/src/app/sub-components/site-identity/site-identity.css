@@ -1,0 +1,11 @@
+:host {
+  display: block;
+  width: fit-content;
+}
+
+.site-logo {
+  display: block;
+  width: auto;
+  max-width: min(20rem, 45vw);
+  object-fit: contain;
+}

@@ -1,0 +1,76 @@
+services:
+  backend:
+    build: ./backend
+    stop_grace_period: 30s
+    volumes:
+      - ./omr/data/templates/ubc:/app/data/ubc_template:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      db:
+        condition: service_healthy
+      garage-store:
+        condition: service_healthy
+      omr_service:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    stop_grace_period: 10s
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  omr_service:
+    build: ./omr
+    stop_grace_period: 15s
+    volumes:
+      - omr_data:/app/data
+    healthcheck:
+      test: ["CMD", "/build/omr", "health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    stop_grace_period: 30s
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      retries: 5
+
+  garage-store:
+    image: dxflrs/garage:v2.3.0
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      GARAGE_CONFIG_FILE: /etc/garage.toml
+volumes:
+  postgres_data:
+  omr_data:

@@ -1,0 +1,260 @@
+/* ─── Page ─────────────────────────────────────────────────────────── */
+
+.notifications-page {
+  min-height: 100vh;
+  background-color: var(--primary);
+  padding: 2em;
+  box-sizing: border-box;
+  color: var(--color-text);
+  font-family: sans-serif;
+}
+
+/* ─── Header ────────────────────────────────────────────────────────── */
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1em;
+}
+
+.notifications-header h1 {
+  font-size: 2.5em;
+  color: var(--color-text);
+  margin: 0;
+}
+
+
+/* Matches the input style from styles.css */
+.sort-select {
+  padding: 0.5em 1em;
+  background-color: var(--primary-darkened);
+  border: 2px solid var(--color-border);
+  border-radius: 5px;
+  color: var(--color-text);
+  font-size: large;
+  cursor: pointer;
+}
+
+.sort-select:focus {
+  border-color: color-mix(in oklab, var(--color-border), var(--hover-darken));
+  outline: none;
+}
+
+/* ─── Page Size Control ─────────────────────────────────────────────── */
+
+.page-size-control {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  margin-bottom: 1em;
+}
+
+.page-size-control label {
+  font-size: medium;
+  color: var(--color-text);
+}
+
+/* Overrides the global input font-size (x-large) — too big for this inline control */
+.page-size-input {
+  width: 70px;
+  padding: 0.4em 0.6em;
+  font-size: medium;
+}
+
+/* ─── Filter Chips ──────────────────────────────────────────────────── */
+
+.filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  margin-bottom: 1.25em;
+}
+
+.dismiss-all-btn {
+  margin-left: auto;
+}
+
+.filter-chips button {
+  padding: 0.5em 1em;
+  background-color: var(--primary-darkened);
+  border: 2px solid var(--color-border);
+  border-radius: 50px;
+  color: var(--color-text);
+  font-size: medium;
+  cursor: pointer;
+}
+
+.filter-chips button:hover {
+  background-color: color-mix(in oklab, var(--primary-darkened), black 15%);
+}
+
+/* Active chip uses highlight3 — same colour as the login Sign In button */
+.filter-chips button.active {
+  background-color: var(--highlight3);
+  border: 2px solid var(--color-border);
+  color: var(--on-highlight3);
+}
+
+.filter-chips button.active:hover {
+  background-color: color-mix(in oklab, var(--highlight3), black 15%);
+}
+
+/* ─── Notification List ─────────────────────────────────────────────── */
+
+/* Matches .card from styles.css */
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.notification-row {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  padding: 0.85em 1.25em;
+  background-color: var(--primary-highlight);
+  border-bottom: 1px solid var(--color-border);
+  /* Reserved even when read so the unread indicator below doesn't shift layout. */
+  border-right: 4px solid transparent;
+  cursor: pointer;
+}
+
+.notification-row:last-child {
+  border-bottom: none;
+}
+
+/* Unread is signalled by a red accent on the trailing edge of the card,
+   rather than a tinted background — easier to scan down a long list. */
+.notification-row--unread {
+  font-weight: 600;
+  border-right-color: var(--danger, #e05a5a);
+}
+
+/* ─── Icon ──────────────────────────────────────────────────────────── */
+
+.notification-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 12px;
+  font-size: 1.4em;
+  color: white;
+}
+
+.notification-icon--regrade  { background-color: var(--tag-amber); }
+.notification-icon--batchjob { background-color: var(--highlight2); }
+
+/* ─── Body (title, course, subtitle) ───────────────────────────────── */
+
+.notification-body {
+  flex: 1;
+}
+
+.notification-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  margin-bottom: 0.2em;
+}
+
+.notification-title {
+  font-weight: bold;
+  color: var(--color-text);
+  font-size: 1em;
+}
+
+.notification-course {
+  color: var(--color-text);
+  font-size: 1em;
+}
+
+/* Green subtitle — highlight3 matches the gradient and active chip colour */
+.notification-subtitle {
+  margin: 0;
+  font-size: 0.85em;
+  color: var(--highlight3);
+}
+
+/* ─── Actions (time, buttons) ───────────────────────────────────────── */
+
+.notification-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.4em;
+  min-width: 160px;
+  align-self: stretch;    /* stretches to full row height so time sits at top, buttons at bottom */
+}
+
+.notification-time {
+  font-size: 0.8em;
+  color: var(--color-text);
+}
+
+.notification-buttons {
+  display: flex;
+  gap: 0.5em;
+}
+
+
+/* ─── Empty State ───────────────────────────────────────────────────── */
+
+.no-notifications {
+  padding: 2em;
+  text-align: center;
+  color: var(--color-text);
+  background-color: var(--primary-highlight);
+}
+
+/* ─── Pagination ────────────────────────────────────────────────────── */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75em;
+  margin-top: 1.5em;
+}
+
+/* Page number — styled as a card matching the site's card convention */
+.pagination span {
+  padding: 0.4em 1.5em;
+  background-color: var(--primary-highlight);
+  border: 2px solid var(--color-border);
+  border-radius: 5px;
+  color: var(--color-text);
+  font-size: 0.95em;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Arrow buttons — match the site button style */
+.page-btn {
+  padding: 0.4em 0.8em;
+  background-color: var(--highlight3);
+  border: 2px solid var(--color-border);
+  border-radius: 5px;
+  color: var(--on-highlight3);
+  font-size: 1.2em;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.page-btn:hover {
+  background-color: color-mix(in oklab, var(--highlight3), black 15%);
+}
+
+.page-btn:disabled {
+  background-color: var(--primary-darkened);
+  color: var(--color-text);
+  opacity: 0.5;
+  cursor: not-allowed;
+}

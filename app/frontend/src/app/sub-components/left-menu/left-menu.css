@@ -1,0 +1,198 @@
+.left-menu {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  height: 100%;
+  box-sizing: border-box;
+  font-size: 1.25em;
+  background-color: var(--highlight3);
+  border: var(--border-size) solid var(--color-border);
+  border-left: none;
+  border-radius: 0 var(--menu-border-radius) var(--menu-border-radius) 0;
+  transition: width 0.2s ease;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.left-menu.collapsed {
+  width: 80px;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────── */
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.75em;
+  min-height: 60px;
+  box-sizing: content-box;
+  border-bottom: 1px solid color-mix(in oklab, var(--highlight3), var(--hover-darken));
+}
+
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 0 0 1px;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  background-color: var(--logo-bg);
+  border: var(--border-size) solid var(--color-border);
+  border-radius: 50%;
+}
+
+.site-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: contain;
+  object-position: center;
+}
+.menu-title {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.menu-title-main {
+  font-weight: bold;
+  font-size: 0.95em;
+  color: var(--nav-text);
+  white-space: nowrap;
+}
+
+.menu-title-sub {
+  font-size: 0.75em;
+  color: var(--nav-text);
+  white-space: nowrap;
+}
+
+.left-menu.collapsed .menu-header {
+  justify-content: center;
+  padding: 0.75em 0;
+}
+
+.left-menu.collapsed .menu-item {
+  width: 54px;
+  height: 54px;
+  margin: 4px auto;
+  padding: 0;
+  justify-content: center;
+}
+
+.collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  background: none;
+  border: none;
+  color: var(--nav-text);
+  font-size: 0.85em;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.collapse-btn:hover {
+  background-color: color-mix(in oklab, var(--highlight3), var(--hover-darken));
+}
+
+/* ─── Nav ────────────────────────────────────────────────────────── */
+
+.menu-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0.75em 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  padding: 0.7em 1em;
+  margin: 3px 8px;
+  border-radius: var(--menu-item-border-radius);
+  color: var(--nav-text);
+  text-decoration: none;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  border: none;
+  background: none;
+  text-align: left;
+}
+
+.menu-item:hover {
+  background-color: color-mix(in oklab, var(--highlight3), var(--hover-darken));
+}
+
+.menu-item.active {
+  background-color: var(--nav-text);
+  color: var(--highlight3);
+}
+
+.menu-item.active .menu-icon {
+  color: var(--highlight3);
+}
+
+.menu-icon {
+  position: relative;
+  font-size: 1.3em;
+  width: 1.5em;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.menu-badge {
+  position: absolute;
+  top: -0.4em;
+  right: -0.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 1.3em;
+  min-width: 1.3em;
+  padding: 0 0.3em;
+  border-radius: 999px;
+  background-color: #d64545;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.65em;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
+.menu-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────── */
+
+.menu-footer {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5em 0;
+  border-top: 1px solid color-mix(in oklab, var(--highlight3), var(--hover-darken));
+}
+
+.logout-btn {
+  font-family: inherit;
+  font-size: 0.95em;
+  align-self: stretch;
+}
+
+.logout-btn:hover {
+  background-color: color-mix(in oklab, var(--highlight3), var(--hover-darken));
+}

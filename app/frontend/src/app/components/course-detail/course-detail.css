@@ -1,0 +1,734 @@
+.course-detail-container {
+    width: 100%;
+    padding: 1em;
+    box-sizing: border-box;
+    gap: 0;
+}
+
+/* Section-jump nav (Overview / Exams / Students) */
+
+.section-nav {
+    position: sticky;
+    top: 0.65em;
+    z-index: 40;
+    width: 100%;
+    margin: 0 0 1em;
+    padding: 0.38em 0.45em;
+    gap: 0.25em;
+    box-sizing: border-box;
+    border: 1px solid color-mix(in oklab, var(--color-border), transparent 22%);
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--primary-highlight), transparent 8%);
+    box-shadow: 0 0.35em 1.25em rgb(0 0 0 / 12%);
+    backdrop-filter: blur(12px);
+}
+
+.archived-read-only-banner {
+    display: flex;
+    align-items: center;
+    gap: .6em;
+    margin-bottom: 1em;
+    padding: .8em 1em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+}
+
+.action-notice {
+    gap: 0.6em;
+    margin-bottom: 1em;
+    padding: 0.75em 1em;
+    border: var(--border-size) solid var(--tag-green);
+    border-left-width: 4px;
+    border-radius: var(--input-border-radius);
+    background: color-mix(in srgb, var(--tag-green) 12%, var(--primary));
+}
+
+.section-nav-links {
+    flex-wrap: nowrap;
+    gap: 0.1em;
+}
+
+.section-nav-back {
+    flex: 0 0 auto;
+    font-size: 0.9em;
+}
+
+.section-nav-divider {
+    width: 1px;
+    height: 1.55em;
+    flex: 0 0 1px;
+    margin: 0 0.15em;
+    background: color-mix(in oklab, var(--color-border), transparent 25%);
+}
+
+.section-nav-links + .section-nav-divider {
+    margin-left: auto;
+}
+
+.section-nav-stats {
+    flex-shrink: 0;
+    min-height: 2.35em;
+    padding: 0.45em 0.75em;
+    border-color: transparent;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--highlight2), transparent 88%);
+}
+
+.section-nav-stats:hover {
+    border-color: color-mix(in oklab, var(--highlight2), transparent 45%);
+    background: color-mix(in oklab, var(--highlight2), transparent 82%);
+}
+
+.section-nav-stats .material-icons-outlined {
+    font-size: 1.25em;
+}
+
+.section-nav-chip {
+    padding: 0.5em 0.85em;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text);
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.section-nav-chip:hover {
+    border-color: color-mix(in oklab, var(--color-border), transparent 35%);
+    background: color-mix(in oklab, var(--primary-darkened), transparent 15%);
+}
+
+/* Offsets so a scrolled-to section doesn't land underneath the sticky nav. */
+#overview,
+#exams,
+#students {
+    scroll-margin-top: 4em;
+}
+
+@media (max-width: 600px) {
+    .section-nav {
+        top: 0.35em;
+        width: 100%;
+    }
+
+    .section-nav-chip {
+        padding-inline: 0.6em;
+    }
+
+    .section-nav-stats-label {
+        display: none;
+    }
+}
+
+/* Dashboard section (charts + stat tiles + re-grade requests) */
+
+.graph-card {
+    flex: 1;
+    height: 20em;
+}
+
+.card-title {
+    font-size: 1.2em;
+    font-weight: 500;
+    margin-bottom: 0.4em;
+    flex-shrink: 0;
+}
+
+.card-data {
+    display: block;
+    margin-top: 5px;
+    font-size: 2.5em;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.chart-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+}
+
+.chart-wrapper canvas {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.chart-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in oklab, var(--primary-highlight), transparent 15%);
+}
+
+.doughnut-center {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.doughnut-percent {
+    font-size: 1.4em;
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+.doughnut-label {
+    font-size: 0.7em;
+    opacity: 0.65;
+}
+
+.card-divider {
+    margin: 0.4em 0;
+    border: none;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.card-footer {
+    font-size: 0.78em;
+    opacity: 0.65;
+    flex-shrink: 0;
+}
+
+.regrade-requests-card {
+    width: 100%;
+    height: fit-content;
+}
+
+.course-stats-card {
+    width: 100%;
+    gap: 1.25em;
+}
+
+.course-summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(9em, 1fr));
+}
+
+.course-stats-table-wrap {
+    overflow-x: auto;
+}
+
+.course-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88em;
+}
+
+.course-stats-table th,
+.course-stats-table td {
+    padding: 0.75em;
+    border-bottom: 1px solid var(--color-border);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.course-stats-table th:first-child,
+.course-stats-table td:first-child {
+    text-align: left;
+}
+
+.course-stats-table th {
+    font-size: 0.82em;
+    opacity: 0.65;
+}
+
+.course-comparison-launch {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1em;
+    border-top: 1px solid var(--color-border);
+}
+
+.regrade-requests-list {
+    max-height: 22em;
+    overflow-y: auto;
+}
+
+/* Exams section */
+
+.exams-card,
+.students-card {
+    width: 100%;
+}
+
+.exams-list {
+    max-height: 26em;
+    overflow-y: auto;
+}
+
+.add-exam-dropdown {
+    position: relative;
+}
+
+.exam-menu.add-exam-menu {
+    position: absolute;
+    top: calc(100% + 0.35em);
+    right: 0;
+    width: 18em;
+}
+
+.exam-empty-state {
+    padding: 0.75em 0 0.25em;
+    opacity: 0.5;
+}
+
+.exam-empty-text {
+    font-size: 0.85em;
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
+}
+
+.course-divider {
+    margin: 0.75em 0 0.5em;
+    border: none;
+    border-top: 1px solid var(--color-border);
+    opacity: 0.25;
+}
+
+.exam-row {
+    padding: 0.6em 0;
+    border-bottom: 1px solid var(--primary-darkened);
+}
+
+.exam-row.last {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.exam-title-row {
+    gap: 0.5em;
+    align-items: baseline;
+}
+
+.exam-name {
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+.exam-schedule {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    margin-top: 0.2em;
+    font-size: 0.78em;
+    opacity: 0.75;
+}
+
+.exam-schedule .material-icons-outlined {
+    font-size: 1.15em;
+}
+
+.exam-schedule--unscheduled {
+    opacity: 0.55;
+}
+
+.exam-meta {
+    font-size: 0.78em;
+    opacity: 0.6;
+    margin-top: 0.15em;
+}
+
+.exam-warning {
+    color: color-mix(in oklab, var(--tag-amber), var(--tag-text-shade) 20%);
+    display: block;
+    font-size: 0.78em;
+    font-weight: 600;
+    margin-top: 0.2em;
+}
+
+.exam-actions {
+    flex-shrink: 0;
+}
+
+.regrade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    color: color-mix(in oklab, var(--tag-amber), var(--tag-text-shade) 25%);
+    background-color: color-mix(in oklab, var(--tag-amber), transparent 70%);
+    border-color: var(--tag-amber);
+}
+
+.regrade-badge .material-icons-outlined {
+    font-size: 1em;
+}
+
+.tag-orange {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+}
+
+.tag-orange .material-icons-outlined {
+    font-size: 1em;
+}
+
+
+.exam-actions .icon-btn--ghost {
+    opacity: 0.85;
+}
+
+.exam-actions .icon-btn--ghost:hover {
+    opacity: 1;
+}
+
+/* Buttons don't inherit font-size from the page by default, so this
+   icon-btn (no font-size of its own) renders off the browser's smaller
+   form-control default instead of matching its neighbouring
+   action-btn--sm buttons (~37px tall) -- see course-header.css for the
+   fuller explanation. Pinned before the icon-size rule below so that rule's
+   1.7em scales off the corrected font-size. */
+.exam-actions .icon-btn {
+    font-size: 0.93em;
+}
+
+.exam-actions .icon-btn .material-icons-outlined {
+    font-size: 1.7em;
+}
+
+/* Confirm Delete Dialog */
+
+.confirm-card {
+    width: 24em;
+    gap: 1.25em;
+}
+
+.confirm-icon {
+    font-size: 2em;
+    color: var(--tag-red);
+    flex-shrink: 0;
+}
+
+.confirm-title {
+    font-size: 1em;
+    font-weight: 700;
+}
+
+.confirm-body {
+    font-size: 0.85em;
+    opacity: 0.7;
+    margin-top: 0.2em;
+}
+
+.confirm-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.assign-template-card {
+    width: min(92vw, 30em);
+    gap: 1em;
+}
+
+.schedule-card {
+    width: min(92vw, 30em);
+    gap: 1em;
+}
+
+.schedule-form {
+    gap: 0.75em;
+}
+
+.schedule-fields,
+.schedule-presets {
+    gap: 0.5em;
+    flex-wrap: wrap;
+}
+
+.schedule-preset {
+    padding: 0.3em 0.7em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: transparent;
+    color: var(--color-text);
+    font-size: 0.8em;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.schedule-preset.active {
+    background: var(--highlight3);
+    color: var(--on-highlight3);
+}
+
+.schedule-preset:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.schedule-note {
+    font-size: 0.78em;
+    opacity: 0.65;
+}
+
+.modal-header {
+    justify-content: space-between;
+}
+
+.modal-title {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.field {
+    gap: 0.3em;
+}
+
+.field-label {
+    font-size: 0.82em;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+.field-input {
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    font-size: 0.9em;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.8em;
+}
+
+.field-input.schedule-control {
+    height: 2.35rem;
+    min-height: 2.35rem;
+    padding-block: 0.45rem;
+}
+
+.schedule-control--number {
+    appearance: textfield;
+}
+
+.schedule-control--number::-webkit-inner-spin-button,
+.schedule-control--number::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+}
+
+.link-btn {
+    align-self: flex-start;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--color-text);
+    font-size: 0.8em;
+    text-decoration: underline;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.link-btn:hover {
+    opacity: 1;
+}
+
+.error-text {
+    font-size: 0.82em;
+    color: var(--tag-red);
+}
+
+.loading-row {
+    padding: 0.8em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+}
+
+.template-reset-warning {
+    flex-basis: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.75em;
+    border: var(--border-size) solid var(--tag-red);
+    border-radius: var(--input-border-radius);
+    color: var(--tag-red);
+    font-size: 0.82em;
+    font-weight: 600;
+}
+
+.template-reset-warning .material-icons-outlined {
+    font-size: 1.25em;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+/* Exam row overflow ("...") menu */
+
+.exam-menu-wrapper {
+    position: relative;
+}
+
+.menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+}
+
+.exam-menu {
+    /* Fixed positioning escapes the exams list's overflow clipping. The
+       component updates top/right on every ancestor scroll so this overlay
+       still travels with the exam row that opened it. */
+    position: fixed;
+    z-index: 151;
+    width: 16em;
+    padding: 0.4em;
+    gap: 0.15em;
+    background: var(--primary-highlight);
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.exam-menu-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6em;
+    padding: 0.5em 0.6em;
+    background: none;
+    border: none;
+    border-radius: var(--input-border-radius);
+    color: var(--color-text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.exam-menu-item:hover {
+    background: var(--primary-darkened);
+}
+
+.exam-menu-item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.exam-menu-item:disabled:hover {
+    background: none;
+}
+
+.exam-menu-item .material-icons-outlined {
+    font-size: 1.3em;
+    opacity: 0.75;
+    flex-shrink: 0;
+    margin-top: 0.1em;
+}
+
+.exam-menu-item-label {
+    font-size: 0.88em;
+    font-weight: 600;
+}
+
+.exam-menu-item-desc {
+    font-size: 0.76em;
+    opacity: 0.65;
+}
+
+.exam-menu-item--danger .exam-menu-item-label,
+.exam-menu-item--danger .material-icons-outlined {
+    color: var(--tag-red);
+    opacity: 1;
+}
+
+.exam-menu-item--danger:hover {
+    background: color-mix(in oklab, var(--tag-red), transparent 85%);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75em;
+}
+
+.stat-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+    padding: 0.85em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    background: var(--primary-darkened);
+}
+
+.stat-label {
+    font-size: 0.75em;
+    color: color-mix(in oklab, var(--color-text), transparent 35%);
+}
+
+.stat-value {
+    font-size: 1.25em;
+    font-weight: 700;
+}
+
+.stats-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+}
+
+.stats-section-title {
+    font-size: 0.95em;
+    font-weight: 700;
+}
+
+.stats-empty {
+    padding: 1em;
+    text-align: center;
+    opacity: 0.65;
+}
+
+.correction-error {
+    color: color-mix(in oklab, var(--tag-red), var(--tag-text-shade) 15%);
+    font-size: 0.85em;
+}
+
+@media (max-width: 700px) {
+    .course-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grade-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .grade-row--header {
+        display: none;
+    }
+
+    .question-output-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .question-output-row--header {
+        display: none;
+    }
+}
+.scan-upload-action {
+    display: inline-flex;
+}
+
+.scan-upload-action button:disabled {
+    pointer-events: none;
+}

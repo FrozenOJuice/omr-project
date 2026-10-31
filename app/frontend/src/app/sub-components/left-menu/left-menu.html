@@ -1,0 +1,71 @@
+<div class="left-menu" [class.collapsed]="isCollapsed">
+
+  <!-- Header: logo, title, collapse button -->
+  <div class="menu-header">
+    @if (!isCollapsed) {
+      <span class="logo-wrapper">
+        @if (siteBranding().is_custom_logo) {
+          <img
+            class="site-logo"
+            [src]="siteBranding().logo_url"
+            alt="OMR System logo"
+          />
+        } @else {
+          <app-aperture-logo size="80px" [iconOnly]="true" />
+        }
+      </span>
+    }
+    @if (!isCollapsed) {
+      <div class="menu-title">
+        <span class="menu-title-main">{{ branding().navigationTitle }}</span>
+        @if (branding().navigationSubtitle) {
+          <span class="menu-title-sub">{{ branding().navigationSubtitle }}</span>
+        }
+      </div>
+    }
+    <button
+      class="collapse-btn"
+      type="button"
+      (click)="toggle()"
+      [attr.aria-label]="isCollapsed ? 'Expand menu' : 'Collapse menu'"
+    >
+      <span class="material-icons-outlined">
+        {{ isCollapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left' }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Nav items -->
+  <nav class="menu-nav">
+    @for (item of menuItems(); track item.route) {
+      <a
+        class="menu-item"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        [attr.aria-label]="item.label"
+      >
+        <span class="menu-icon material-icons-outlined">
+          {{ item.icon }}
+          @if (item.route === '/notifications' && unreadCount() > 0) {
+            <span class="menu-badge">{{ unreadCount() }}</span>
+          }
+        </span>
+        @if (!isCollapsed) {
+          <span class="menu-label">{{ item.label }}</span>
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- Logout pinned to bottom -->
+  <div class="menu-footer">
+    <button class="menu-item logout-btn" type="button" (click)="logout()" aria-label="Logout">
+      <span class="menu-icon material-icons-outlined">logout</span>
+      @if (!isCollapsed) {
+        <span class="menu-label">Logout</span>
+      }
+    </button>
+  </div>
+
+</div>

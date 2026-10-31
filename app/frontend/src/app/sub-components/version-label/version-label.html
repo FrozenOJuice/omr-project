@@ -1,0 +1,6 @@
+@if (version()?.detected_version; as v) {
+<span class="version-label" [class.hovered]="hovered()" [title]="confidencePercent() + '% confidence (read-only)'"
+    (mouseenter)="hover.emit('identity-version')" (mouseleave)="hover.emit(null)">
+    Version {{ v }}
+</span>
+}

@@ -1,0 +1,220 @@
+.modal-card {
+    box-sizing: border-box;
+    width: min(36em, calc(100vw - 2em));
+    max-height: calc(100dvh - 2em);
+    gap: 0.85em;
+    overflow: hidden;
+}
+
+.modal-header {
+    flex: 0 0 auto;
+    justify-content: space-between;
+}
+
+.modal-title {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.modal-body {
+    min-height: 0;
+    gap: 0.65em;
+    overflow-y: auto;
+    padding: 0.1em;
+    margin: -0.1em;
+}
+
+.field {
+    gap: 0.3em;
+}
+
+.field-label {
+    font-size: 0.82em;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+.field-input {
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    font-size: 0.9em;
+    width: 100%;
+    box-sizing: border-box;
+    line-height: 1.2;
+    padding: 0.65em 0.8em;
+}
+
+.field-input::placeholder {
+    color: var(--color-text);
+    opacity: 0.45;
+}
+
+.field-input.invalid {
+    border-color: var(--tag-red);
+}
+
+.field-datetime {
+    cursor: pointer;
+    color-scheme: light;
+}
+
+.field-datetime::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    width: 1.1em;
+    height: 1.1em;
+    padding: 0.15em;
+}
+
+body.dark-mode .field-datetime,
+body.scheme-ocean .field-datetime {
+    color-scheme: dark;
+}
+
+.field-input.schedule-control {
+    height: 2.35rem;
+    min-height: 2.35rem;
+    padding-block: 0.45rem;
+}
+
+.schedule-control--number {
+    appearance: textfield;
+}
+
+.schedule-control--number::-webkit-inner-spin-button,
+.schedule-control--number::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+}
+
+.field-hint {
+    font-size: 0.78em;
+    color: var(--tag-red);
+    opacity: 0.85;
+}
+
+.field-note {
+    font-size: 0.78em;
+    opacity: 0.65;
+}
+
+.schedule-section {
+    gap: 0.55em;
+    padding-top: 0.05em;
+}
+
+.schedule-heading {
+    gap: 0.15em;
+}
+
+.schedule-title {
+    font-size: 0.9em;
+    font-weight: 700;
+}
+
+.schedule-title span {
+    font-weight: 400;
+    opacity: 0.65;
+}
+
+.schedule-fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75em;
+}
+
+.schedule-fields > :only-child {
+    grid-column: 1 / -1;
+}
+
+.schedule-details {
+    min-height: 2em;
+    gap: 0.65em;
+    justify-content: space-between;
+}
+
+.duration-presets {
+    gap: 0.4em;
+    flex-wrap: wrap;
+}
+
+.preset-chip {
+    padding: 0.3em 0.7em;
+    font-size: 0.8em;
+    font-weight: 600;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.preset-chip.active {
+    background: var(--highlight3);
+    color: var(--on-highlight3);
+}
+
+.preset-chip:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.schedule-status {
+    flex: 0 0 auto;
+    font-size: 0.78em;
+    opacity: 0.7;
+    text-align: right;
+}
+
+.link-btn {
+    align-self: flex-start;
+    padding: 0;
+    margin-top: 0.3em;
+    background: none;
+    border: none;
+    color: var(--color-text);
+    font-size: 0.8em;
+    text-decoration: underline;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.link-btn:hover {
+    opacity: 1;
+}
+
+.modal-footer {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+}
+
+.error-text {
+    font-size: 0.82em;
+    color: var(--tag-red);
+}
+
+@media (max-width: 36em) {
+    .modal-card {
+        width: calc(100vw - 1em);
+        max-height: calc(100dvh - 1em);
+        padding: 1em;
+    }
+
+    .schedule-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .schedule-fields > :only-child {
+        grid-column: auto;
+    }
+
+    .schedule-details {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .schedule-status {
+        text-align: left;
+    }
+}

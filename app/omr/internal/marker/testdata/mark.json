@@ -1,0 +1,109 @@
+{
+  "config": {
+    "fillThreshold": 0.25,
+    "bubbleInset": 0.75
+  },
+  "pages": [
+    {
+      "questions": [
+        {
+          "id": "Q1",
+          "bubbleWidth": 26,
+          "bubbleHeight": 26,
+          "options": [
+            { "label": "A", "x": 72,  "y": 473 },
+            { "label": "B", "x": 110, "y": 473 },
+            { "label": "C", "x": 148, "y": 473 },
+            { "label": "D", "x": 185, "y": 473 },
+            { "label": "E", "x": 223, "y": 473 }
+          ]
+        },
+        {
+          "id": "Q2",
+          "bubbleWidth": 26,
+          "bubbleHeight": 26,
+          "type": "multi",
+          "options": [
+            { "label": "A", "x": 72,  "y": 532 },
+            { "label": "B", "x": 110, "y": 532 },
+            { "label": "C", "x": 148, "y": 532 },
+            { "label": "D", "x": 185, "y": 532 },
+            { "label": "E", "x": 223, "y": 532 }
+          ]
+        },
+        {
+          "id": "Q3",
+          "bubbleWidth": 26,
+          "bubbleHeight": 26,
+          "options": [
+            { "label": "A", "x": 72,  "y": 590 },
+            { "label": "B", "x": 110, "y": 590 },
+            { "label": "C", "x": 148, "y": 590 },
+            { "label": "D", "x": 185, "y": 590 },
+            { "label": "E", "x": 223, "y": 590 }
+          ]
+        },
+        {
+          "id": "Q4",
+          "bubbleWidth": 26,
+          "bubbleHeight": 26,
+          "options": [
+            { "label": "A", "x": 72,  "y": 649 },
+            { "label": "B", "x": 110, "y": 649 },
+            { "label": "C", "x": 148, "y": 649 },
+            { "label": "D", "x": 185, "y": 649 },
+            { "label": "E", "x": 223, "y": 649 }
+          ]
+        },
+        {
+          "id": "Q5",
+          "bubbleWidth": 26,
+          "bubbleHeight": 26,
+          "options": [
+            { "label": "A", "x": 72,  "y": 708 },
+            { "label": "B", "x": 110, "y": 708 },
+            { "label": "C", "x": 148, "y": 708 },
+            { "label": "D", "x": 185, "y": 708 },
+            { "label": "E", "x": 223, "y": 708 }
+          ]
+        },
+        {
+          "id": "Q6",
+          "bubbleWidth": 26,
+          "bubbleHeight": 26,
+          "options": [
+            { "label": "A", "x": 72,  "y": 766 },
+            { "label": "B", "x": 110, "y": 766 },
+            { "label": "C", "x": 148, "y": 766 },
+            { "label": "D", "x": 185, "y": 766 },
+            { "label": "E", "x": 223, "y": 766 }
+          ]
+        },
+        {
+          "id": "Q7",
+          "bubbleWidth": 26,
+          "bubbleHeight": 26,
+          "options": [
+            { "label": "A", "x": 72,  "y": 825 },
+            { "label": "B", "x": 110, "y": 825 },
+            { "label": "C", "x": 148, "y": 825 },
+            { "label": "D", "x": 185, "y": 825 },
+            { "label": "E", "x": 223, "y": 825 }
+          ]
+        },
+        {
+          "id": "Q8",
+          "bubbleWidth": 26,
+          "bubbleHeight": 26,
+          "options": [
+            { "label": "A", "x": 72,  "y": 884 },
+            { "label": "B", "x": 110, "y": 884 },
+            { "label": "C", "x": 148, "y": 884 },
+            { "label": "D", "x": 185, "y": 884 },
+            { "label": "E", "x": 223, "y": 884 }
+          ]
+        }
+      ]
+    }
+  ]
+}

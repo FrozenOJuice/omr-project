@@ -1,0 +1,41 @@
+<div class="student-exam-page">
+    <div class="page-header row-flex-container align-items-center gap">
+        <div class="col-flex-container">
+            <h1 class="page-title">Your Exam Results</h1>
+            <span class="page-subtitle">Securely opened from Canvas</span>
+            @if (version()?.detected_version) {
+            <span class="page-subtitle">
+                <app-version-label [version]="version()" [hovered]="hoveredQuestionId() === 'identity-version'"
+                    (hover)="hoveredQuestionId.set($event)" />
+            </span>
+            }
+        </div>
+    </div>
+
+    @if (loadingGrade()) {
+    <span class="empty-text">Loading your results...</span>
+    } @else if (error() && !grade()) {
+    <div class="canvas-access-error" role="alert">
+        <span class="material-icons-outlined">link_off</span>
+        <span>{{ error() }}</span>
+    </div>
+    } @else {
+    <app-exam-result-layout>
+        <app-exam-page-viewer slot="main" [gradeId]="grade()?.id ?? null" [page]="page()"
+            [pageCount]="pageCount()" [loading]="loading()" [error]="error()" [imageUrl]="imageUrl()"
+            [regions]="regions()" [boxes]="boxes()" [identity]="identity()" [version]="version()"
+            [hoveredQuestionId]="hoveredQuestionId()" (hover)="hoveredQuestionId.set($event)"
+            (select)="selectedQuestionId.set($event)" (prevPage)="prevPage()" (nextPage)="nextPage()" />
+
+        <app-score-summary slot="sidebar" [percentage]="percentage()" [totalScore]="grade()?.total_score ?? null"
+            [maxScore]="grade()?.max_score ?? null" />
+
+        <app-identity-card slot="sidebar" [gradeIdentity]="gradeIdentity()" [isOnIdentityPage]="isOnIdentityPage()"
+            [hoveredQuestionId]="hoveredQuestionId()" (goToPage)="goToIdentityPage()"
+            (hover)="hoveredQuestionId.set($event)" />
+
+        <app-question-list slot="sidebar" [annotations]="annotations()" [imageUrl]="imageUrl()" [hideAnswerKey]="true"
+            [selectedQuestionId]="selectedQuestionId()" (hover)="hoveredQuestionId.set($event)" />
+    </app-exam-result-layout>
+    }
+</div>

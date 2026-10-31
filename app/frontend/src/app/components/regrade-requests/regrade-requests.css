@@ -1,0 +1,480 @@
+
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.regrade-container {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    padding: 1em;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.regrade-panes {
+    flex: 1;
+    min-height: 0;
+}
+
+.regrade-list-pane,
+.regrade-detail-pane {
+    height: auto;
+}
+
+/* Confirm Approve Dialog */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+/* Single popup housing both the resolve form and the scanned-sheet preview
+   side by side, rather than two separate cards, so it reads as one dialog. */
+.confirm-card-wide {
+    max-width: 95vw;
+    max-height: 90vh;
+}
+
+.confirm-card {
+    width: 32em;
+    max-width: 90vw;
+    flex-shrink: 0;
+    gap: 1.25em;
+    overflow-y: auto;
+}
+
+/* Companion pane so staff can see the scanned sheet while deciding the
+   re-grade, without leaving the popup. Wide (rather than the ~20em sidebar
+   this started as) so the scan is actually legible instead of a thumbnail,
+   and a left border stands in for the two-card gap now that both panes
+   share one popup. */
+.confirm-preview-panel {
+    width: 46em;
+    flex-shrink: 0;
+    padding: 1em 0 1em 1.25em;
+    border-left: var(--border-size) solid var(--color-border);
+    gap: 0.5em;
+    align-items: center;
+    overflow: auto;
+}
+
+.confirm-icon {
+    font-size: 2em;
+    color: var(--tag-red);
+    flex-shrink: 0;
+}
+
+.confirm-icon--success {
+    color: var(--tag-green);
+}
+
+.confirm-title {
+    font-size: 1em;
+    font-weight: 700;
+}
+
+.confirm-body {
+    font-size: 0.85em;
+    opacity: 0.7;
+    margin-top: 0.2em;
+}
+
+.confirm-actions {
+    justify-content: flex-end;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.6em;
+    font-size: 1.1em;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.search-input {
+    padding: 0.5em 1.0em 0.5em 2.2em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    font-size: 0.95em;
+    width: 14em;
+    align-self: stretch;
+    box-sizing: border-box;
+}
+
+/* Empty States */
+
+.empty-state {
+    gap: 0.5em;
+    padding: 4em 1em;
+    opacity: 0.5;
+    text-align: center;
+    width: 100%;
+    flex: 1;
+    justify-content: center;
+}
+
+.empty-icon {
+    font-size: 2.5em;
+}
+
+.empty-title {
+    font-size: 1em;
+    font-weight: 600;
+}
+
+/* List Pane */
+
+.regrade-list-pane {
+    width: 22em;
+    flex-shrink: 0;
+    padding: 1em;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 0.5em;
+}
+
+.regrade-list-title {
+    font-size: 0.9em;
+    font-weight: 700;
+    opacity: 0.7;
+    padding: 0 0.25em;
+}
+
+.regrade-list {
+    flex: 1;
+    min-height: 0;
+    gap: 0.5em;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.regrade-list-item {
+    padding: 0.75em 1em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background-color: var(--primary-darkened);
+    cursor: pointer;
+    gap: 0.35em;
+}
+
+.regrade-list-item:hover {
+    background-color: color-mix(in oklab, var(--primary-darkened), var(--hover-darken));
+}
+
+.regrade-list-item.selected {
+    background-color: var(--highlight3);
+    border-color: var(--color-border);
+    color: var(--on-highlight3);
+}
+
+/* .status-badge's tag-* colors are a translucent tint meant for the page
+   background - on the solid --highlight3 selected fill they lose contrast
+   and nearly disappear. Force an opaque, high-contrast badge here instead. */
+.regrade-list-item.selected .status-badge {
+    background-color: var(--primary-highlight);
+    color: var(--color-text);
+    border-color: var(--color-text);
+}
+
+.regrade-list-name {
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+.regrade-list-date {
+    font-size: 0.78em;
+    opacity: 0.7;
+}
+
+.regrade-list-course {
+    font-size: 0.82em;
+    opacity: 0.7;
+}
+
+/* Detail Pane */
+
+.regrade-detail-pane {
+    padding: 1.5em;
+    gap: 1.25em;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-width: 0;
+}
+
+.regrade-detail-title {
+    font-size: 1.25em;
+    font-weight: 700;
+}
+
+.regrade-detail-subtitle {
+    font-size: 0.85em;
+    opacity: 0.65;
+    margin-top: 0.2em;
+}
+
+/* Grade / Note Boxes */
+
+.regrade-info-row {
+    align-items: stretch;
+}
+
+.regrade-info-box {
+    padding: 0.85em 1em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background-color: var(--primary-darkened);
+    box-sizing: border-box;
+    gap: 0.35em;
+    min-width: 0;
+}
+
+/* Current Grade / Proposed Re-grade hold short, similar-length values, so
+   give them a fixed width instead of flex-grow - otherwise they resize
+   awkwardly based on how long the Student Note text happens to be. */
+.regrade-info-box--fixed {
+    width: 11em;
+    flex-shrink: 0;
+}
+
+.regrade-info-label {
+    font-size: 0.78em;
+    font-weight: 700;
+    opacity: 0.65;
+    text-transform: uppercase;
+}
+
+.regrade-info-value {
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.regrade-note {
+    font-size: 0.85em;
+    font-weight: 400;
+    overflow-wrap: break-word;
+    min-width: 0;
+}
+
+.regrade-info-input {
+    font-size: 1.1em;
+    font-weight: 600;
+    padding: 0.15em 0.3em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background-color: var(--primary-highlight);
+    color: var(--color-text);
+    width: 5em;
+}
+
+.regrade-response-box {
+    gap: 0.4em;
+    min-width: 0;
+}
+
+.regrade-question-decisions {
+    gap: 0.5em;
+    max-height: 16em;
+    overflow-y: auto;
+}
+
+.regrade-question-decision {
+    padding: 0.6em 0.75em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background-color: var(--primary-darkened);
+    gap: 0.4em;
+}
+
+.regrade-question-correct-answer {
+    font-size: 0.8em;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+.regrade-question-score-wrapper {
+    margin-left: auto;
+    gap: 0.35em;
+}
+
+.regrade-question-score-input {
+    width: 8em;
+    font-size: 0.85em;
+    font-weight: 400;
+    padding: 0.4em 0.5em;
+}
+
+.regrade-question-score-max {
+    font-size: 0.8em;
+    opacity: 0.65;
+    white-space: nowrap;
+}
+
+.regrade-history-list {
+    gap: 0.45em;
+    max-height: 22em;
+    overflow-y: auto;
+    min-width: 0;
+}
+
+.regrade-history-item {
+    gap: 0.35em;
+    padding: 0.6em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary);
+    min-width: 0;
+}
+
+.regrade-history-title {
+    font-size: 0.85em;
+    font-weight: 700;
+}
+
+.regrade-history-date {
+    font-size: 0.78em;
+    opacity: 0.7;
+}
+
+/* Label above, value below on its own full-width line -- rather than side
+   by side, which squeezed a long value (e.g. instructor feedback) down to
+   almost nothing and forced even short words like "None" to wrap one
+   letter per line. */
+.regrade-history-change {
+    font-size: 0.82em;
+    min-width: 0;
+    gap: 0.15em;
+}
+
+.regrade-history-key {
+    opacity: 0.75;
+}
+
+/* Deliberately not a flex row: flexbox distributes shrinkage between
+   siblings proportional to their own (unshrunk) size, so pairing a short
+   value ("None") with a very long one (e.g. instructor feedback) here made
+   even the short one get squeezed down to nothing -- its own overflow-wrap
+   lets it shrink that far, and the long sibling's huge size dominates the
+   math regardless. Plain inline flow wraps each word on its own terms
+   instead, which is what we actually want. */
+.regrade-history-values {
+    font-weight: 600;
+}
+
+.regrade-history-value {
+    overflow-wrap: break-word;
+}
+
+.regrade-history-arrow {
+    font-size: 1em;
+    opacity: 0.55;
+    vertical-align: middle;
+    margin: 0 0.3em;
+}
+
+.regrade-response-input {
+    width: 100%;
+    min-height: 5.5em;
+    box-sizing: border-box;
+    resize: vertical;
+    padding: 0.65em 0.75em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background-color: var(--primary-highlight);
+    color: var(--color-text);
+    font: inherit;
+}
+
+.regrade-response-input:focus {
+    outline: none;
+    border-color: var(--highlight2);
+}
+
+/* Scan / Answer Key Preview Panels */
+
+.regrade-preview-row {
+    min-height: 14em;
+    align-items: flex-start;
+}
+
+.regrade-preview-panel {
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    background-color: var(--primary-darkened);
+    gap: 0.5em;
+    padding: 1em;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+/* Basis 0 so the panels split the row purely by this ratio rather than by
+   their own content width -- the scan panel's 58em-wide page nav would
+   otherwise claim most of the row regardless of flex-grow. */
+.regrade-preview-panel--scan {
+    align-items: center;
+    overflow-x: auto;
+    flex: 3 1 0;
+}
+
+.regrade-preview-panel--key {
+    flex: 1 1 0;
+}
+
+.regrade-preview-title {
+    font-size: 0.85em;
+    font-weight: 700;
+    align-self: flex-start;
+}
+
+.regrade-preview-placeholder {
+    font-size: 0.85em;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.answer-key-list {
+    gap: 0.6em;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.answer-key-row {
+    gap: 0.3em;
+    padding: 0.6em 0.75em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary);
+}
+
+.answer-key-question {
+    font-size: 0.9em;
+    font-weight: 700;
+}
+
+.answer-key-label {
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.answer-key-value {
+    font-size: 0.85em;
+    font-weight: 600;
+}

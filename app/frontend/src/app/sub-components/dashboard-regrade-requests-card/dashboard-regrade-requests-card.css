@@ -1,0 +1,42 @@
+.regrade-card {
+    border-bottom: 1px solid var(--primary-darkened);
+    padding: 0.6em 0;
+    align-items: center;
+}
+
+:host(:last-child) .regrade-card {
+    border-bottom: none;
+}
+
+.regrade-student {
+    font-weight: 600;
+    font-size: 1em;
+    color: var(--color-text);
+}
+
+.regrade-meta {
+    font-size: 0.8em;
+    opacity: 0.7;
+    margin-top: 0.1em;
+}
+
+.regrade-reason {
+    font-size: 0.85em;
+    margin-top: 0.3em;
+    opacity: 0.85;
+}
+
+.regrade-right {
+    flex-shrink: 0;
+    align-items: flex-end;
+    gap: 0.4em;
+}
+
+
+.regrade-date {
+    font-size: 0.75em;
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+

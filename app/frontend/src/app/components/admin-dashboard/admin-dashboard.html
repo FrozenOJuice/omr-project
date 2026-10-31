@@ -1,0 +1,320 @@
+<div class="admin-dashboard-container col-flex-container">
+
+    <div class="page-header row-flex-container align-items-center mb-3">
+        <h1 class="page-title">Admin Dashboard</h1>
+    </div>
+
+    @if (errorMessage) {
+        <div class="dashboard-state dashboard-state--error row-flex-container align-items-center">
+            <span class="material-icons-outlined">error</span>
+            <span>{{ errorMessage }}</span>
+            <button class="action-btn action-btn--sm" (click)="loadDashboard()">Retry</button>
+        </div>
+    }
+
+    @if (userNotice) {
+        <div class="dashboard-state row-flex-container align-items-center">
+            <span class="material-icons-outlined">mail</span>
+            <span>{{ userNotice }}</span>
+            <button class="action-btn action-btn--sm action-btn--outline" (click)="userNotice = ''">Dismiss</button>
+        </div>
+    }
+
+    @if (isLoading && !hasLoadedOnce) {
+        <div class="dashboard-state row-flex-container align-items-center">
+            <span class="material-icons-outlined">hourglass_empty</span>
+            <span>Loading admin data...</span>
+        </div>
+    }
+
+    <!-- Charts Row -->
+    <div class="row-flex-container gap dashboard-grid dashboard-grid--charts">
+        <div class="card graph-card col-flex-container">
+            <span class="card-title">Logins This Week</span>
+            <div class="chart-wrapper grow">
+                <canvas #loginsChart aria-label="Weekly login activity chart"></canvas>
+            </div>
+            <hr class="card-divider">
+            <span class="card-footer">Login history unavailable</span>
+        </div>
+
+        <div class="card graph-card col-flex-container">
+            <span class="card-title">Users by Role</span>
+            <div class="chart-wrapper grow">
+                <canvas #roleDistChart aria-label="User role distribution chart"></canvas>
+            </div>
+            <hr class="card-divider">
+            <span class="card-footer">{{ totalUsers }} total users</span>
+        </div>
+
+        <div class="card graph-card col-flex-container">
+            <span class="card-title">Session Activity</span>
+            <div class="chart-wrapper grow">
+                <canvas #sessionActivityChart aria-label="Session activity chart"></canvas>
+                <div class="doughnut-center">
+                    <span class="doughnut-percent">{{ activeSessionsCount }}</span>
+                    <span class="doughnut-label">Active now</span>
+                </div>
+            </div>
+            <hr class="card-divider">
+            <span class="card-footer">{{ offlineUsersCount }} users offline</span>
+        </div>
+    </div>
+
+    <!-- Stat Cards Row -->
+    <div class="row-flex-container gap mt-3 dashboard-grid dashboard-grid--stats">
+        <div class="card info-card">
+            <span class="card-title">Total Users</span>
+            <span class="card-data">{{ totalUsers }}</span>
+        </div>
+        <div class="card info-card">
+            <span class="card-title">Admins</span>
+            <span class="card-data">{{ totalAdmins }}</span>
+        </div>
+        <div class="card info-card">
+            <span class="card-title">Professors</span>
+            <span class="card-data">{{ totalProfessors }}</span>
+        </div>
+        <div class="card info-card">
+            <span class="card-title">Students</span>
+            <span class="card-data">{{ totalStudents }}</span>
+        </div>
+    </div>
+
+    <section class="card site-branding-card mt-3" aria-labelledby="site-logo-heading">
+        <div class="site-branding-main">
+            <div class="site-branding-copy">
+                <h2 id="site-logo-heading" class="card-title">Site logo</h2>
+                <p>Shown to every user.</p>
+                <small>PNG, JPEG, or WebP · 2 MB maximum</small>
+            </div>
+
+            <div class="site-logo-preview">
+                <img [src]="siteBranding().logo_url" alt="OMR System logo" />
+            </div>
+
+            <div class="site-logo-controls">
+                <input
+                    #siteLogoInput
+                    class="site-logo-file-input"
+                    id="site-logo-file"
+                    data-testid="site-logo-file"
+                    type="file"
+                    aria-label="Upload a new site logo"
+                    [accept]="siteLogoAccept"
+                    [disabled]="isSavingLogo"
+                    (change)="onLogoFileSelected($event)"
+                />
+                <label
+                    class="site-logo-file-field"
+                    [class.site-logo-file-field--disabled]="isSavingLogo"
+                    for="site-logo-file"
+                >
+                    <span class="site-logo-file-button">Choose file</span>
+                    <span class="site-logo-filename">
+                        {{ selectedLogoFile?.name || 'No file chosen' }}
+                    </span>
+                </label>
+            </div>
+
+            <div class="site-logo-actions">
+                <button
+                    class="action-btn action-btn--sm"
+                    data-testid="upload-site-logo"
+                    [disabled]="!selectedLogoFile || isSavingLogo"
+                    (click)="uploadSiteLogo()"
+                >
+                    <span class="material-icons-outlined">upload</span>
+                    {{ isSavingLogo ? 'Saving...' : 'Apply logo' }}
+                </button>
+                @if (siteBranding().is_custom_logo) {
+                    <button
+                        class="action-btn action-btn--sm action-btn--outline"
+                        data-testid="reset-site-logo"
+                        [disabled]="isSavingLogo"
+                        (click)="resetSiteLogo()"
+                    >
+                        Restore default
+                    </button>
+                }
+                @if (logoNotice) {
+                    <span class="site-logo-inline-notice" role="status">{{ logoNotice }}</span>
+                }
+            </div>
+        </div>
+
+        @if (logoError) {
+            <div class="site-logo-message--error" role="alert">{{ logoError }}</div>
+        }
+    </section>
+
+    <div class="mt-3">
+        <app-academic-term-manager
+            mode="preset"
+            institution="ubc"
+            [allowInstitutionSelection]="true"
+        />
+    </div>
+
+    <!-- User Management Table -->
+    <div class="mt-3">
+        @if (hasLoadedOnce && !errorMessage) {
+            <app-admin-user-table
+                [users]="users"
+                [total]="tableTotal"
+                [limit]="tableLimit"
+                [offset]="tableOffset"
+                [search]="userSearch"
+                [role]="roleFilter"
+                [status]="statusFilter"
+                [isLoading]="isLoading"
+                [busyUserId]="busyUserId"
+                (createUser)="openCreateUser()"
+                (filterChange)="onUserFiltersChange($event)"
+                (pageChange)="onUserPageChange($event)"
+                (saveUser)="onSaveUser($event)"
+                (forceLogout)="onForceLogout($event)"
+                (deleteUser)="onDeleteUser($event)"
+                (resendSetupEmail)="onResendSetupEmail($event)"
+            />
+        }
+    </div>
+
+    <!-- Active Sessions Table -->
+    <div class="mt-3">
+        @if (hasLoadedOnce && !errorMessage) {
+            @if (sessions.length > 0) {
+                <app-admin-sessions-table [sessions]="sessions" (forceLogout)="onForceLogout($event)" />
+            } @else {
+                <div class="dashboard-state row-flex-container align-items-center">
+                    <span class="material-icons-outlined">sensors</span>
+                    <span>Detailed session rows unavailable. {{ activeSessionsCount }} active sessions counted.</span>
+                </div>
+            }
+        }
+    </div>
+
+</div>
+
+@if (isUserModalOpen) {
+    <div class="modal-overlay" (click)="closeUserModal()">
+        <div class="modal-card card col-flex-container" (click)="$event.stopPropagation()">
+            <div class="modal-header row-flex-container align-items-center">
+                <span class="modal-title">{{ editingUser ? 'Edit User' : 'New User' }}</span>
+                <button
+                    class="icon-btn icon-btn--ghost"
+                    title="Close"
+                    aria-label="Close"
+                    [disabled]="isSavingUser"
+                    (click)="closeUserModal()"
+                >
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="modal-body col-flex-container">
+                @if (userFormError) {
+                    <div class="form-error row-flex-container align-items-center">
+                        <span class="material-icons-outlined">error</span>
+                        <span>{{ userFormError }}</span>
+                    </div>
+                }
+
+                <div class="form-grid row-flex-container">
+                    <label class="field-group col-flex-container grow">
+                        <span>First name</span>
+                        <input
+                            class="modal-input"
+                            type="text"
+                            [(ngModel)]="userForm.firstName"
+                            [disabled]="isSavingUser"
+                        />
+                    </label>
+
+                    <label class="field-group col-flex-container grow">
+                        <span>Last name</span>
+                        <input
+                            class="modal-input"
+                            type="text"
+                            [(ngModel)]="userForm.lastName"
+                            [disabled]="isSavingUser"
+                        />
+                    </label>
+                </div>
+
+                <label class="field-group col-flex-container">
+                    <span>Email</span>
+                    <input
+                        class="modal-input"
+                        type="email"
+                        [(ngModel)]="userForm.email"
+                        [disabled]="isSavingUser"
+                    />
+                </label>
+
+                @if (!editingUser) {
+                    <label class="field-group col-flex-container">
+                        <span>Password</span>
+                        <input
+                            class="modal-input"
+                            type="password"
+                            [(ngModel)]="userForm.password"
+                            [disabled]="isSavingUser"
+                        />
+                    </label>
+
+                    <div class="form-grid row-flex-container">
+                        <label class="field-group col-flex-container grow">
+                            <span>Role</span>
+                            <select class="filter-dropdown" [(ngModel)]="userForm.role" [disabled]="isSavingUser">
+                                <option value="Student">Student</option>
+                                <option value="Professor">Professor</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </label>
+
+                        <label class="field-group col-flex-container grow">
+                            <span>Status</span>
+                            <select class="filter-dropdown" [(ngModel)]="userForm.status" [disabled]="isSavingUser">
+                                <option value="active">Active</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    @if (userForm.role === 'Student') {
+                        <label class="field-group col-flex-container">
+                            <span>Student number</span>
+                            <input
+                                class="modal-input"
+                                type="text"
+                                inputmode="numeric"
+                                [(ngModel)]="userForm.studentNumber"
+                                [disabled]="isSavingUser"
+                                placeholder="8-digit student number"
+                            />
+                        </label>
+                    }
+                }
+            </div>
+
+            <div class="modal-footer row-flex-container">
+                <button
+                    class="action-btn action-btn--outline"
+                    [disabled]="isSavingUser"
+                    (click)="closeUserModal()"
+                >
+                    Cancel
+                </button>
+                <button
+                    class="action-btn"
+                    [disabled]="isSavingUser"
+                    (click)="submitUserForm()"
+                >
+                    <span class="material-icons-outlined">save</span>
+                    {{ isSavingUser ? 'Saving...' : 'Save' }}
+                </button>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,26 @@
+<div class="card sessions-card col-flex-container">
+    <span class="card-title">Active Sessions</span>
+    <div class="sessions-container">
+        @if (sessions.length === 0) {
+            <div class="empty-state col-flex-container align-items-center">
+                <span class="material-icons-outlined empty-icon">sensors_off</span>
+                <span class="empty-title">No active sessions</span>
+            </div>
+        }
+        @for (session of sessions; track session.userId; let last = $last) {
+            <div class="session-row row-flex-container align-items-center gap" [class.last]="last">
+                <div class="session-info col-flex-container grow">
+                    <span class="session-name">{{ session.name }}</span>
+                    <span class="session-email">{{ session.email }}</span>
+                </div>
+                <span class="session-time">{{ session.loginTime }}</span>
+                <button
+                    class="action-btn action-btn--sm action-btn--danger"
+                    (click)="forceLogout.emit(session.userId)"
+                >
+                    Force Out
+                </button>
+            </div>
+        }
+    </div>
+</div>

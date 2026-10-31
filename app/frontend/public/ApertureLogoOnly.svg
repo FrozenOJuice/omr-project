@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1000mm"
+   height="1000mm"
+   viewBox="0 0 1000 1000"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="ApertureLogoOnly.svg"
+   inkscape:export-filename="Desktop\ApertureLogos\ApertureLogoOnly.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.17972959"
+     inkscape:cx="1727.5953"
+     inkscape:cy="1961.2797"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="1000"
+       height="1000"
+       id="page2"
+       margin="0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path5"
+       style="fill:#000000;stroke:none;stroke-width:5.3;stroke-linecap:round;stroke-dasharray:none;paint-order:stroke fill markers"
+       d="M 500,134.91453 A 361.40518,365.08551 0 0 0 356.78394,164.80366 L 678.23873,333.68379 621.29027,156.08895 A 361.40518,365.08551 0 0 0 500,134.91453 Z m 135.72815,26.72498 107.90917,346.79124 83.81039,-162.93166 A 361.40518,365.08551 0 0 0 635.72815,161.63951 Z m -292.83226,9.5741 A 361.40518,365.08551 0 0 0 164.90314,363.25563 l 343.52735,-106.8927 z m -9.21235,150.54791 -174.17697,55.85241 a 361.40518,365.08551 0 0 0 -20.9119,122.38633 361.40518,365.08551 0 0 0 27.74714,140.28756 z M 833.65819,359.7127 666.31646,678.23899 840.49343,622.38658 A 361.40518,365.08551 0 0 0 861.40533,500.00026 361.40518,365.08551 0 0 0 833.65819,359.7127 Z M 256.36267,491.56976 172.55229,654.50142 A 361.40518,365.08551 0 0 0 364.27133,838.361 Z m 578.73419,145.17409 -343.52735,106.89373 165.53408,85.14933 h 5.2e-4 A 361.40518,365.08551 0 0 0 835.09686,636.74385 Z m -513.33559,29.57287 56.94846,177.59484 A 361.40518,365.08551 0 0 0 500,865.08547 361.40518,365.08551 0 0 0 643.21606,835.19685 Z" />
+  </g>
+</svg>

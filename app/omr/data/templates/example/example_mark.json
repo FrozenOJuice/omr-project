@@ -1,0 +1,23 @@
+{
+	"config": {
+		"fillThreshold": 0.5,
+		"bubbleInset": 0.75
+	},
+	"pages": [
+		{
+			"questions": [
+				{
+					"id": "Q1",
+					"bubbleWidth": 30,
+					"bubbleHeight": 30,
+					"options": [
+						{ "label": "A", "x": 100, "y": 200 },
+						{ "label": "B", "x": 150, "y": 200 },
+						{ "label": "C", "x": 200, "y": 200 },
+						{ "label": "D", "x": 250, "y": 200 }
+					]
+				}
+			]
+		}
+	]
+}

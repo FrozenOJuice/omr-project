@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="2500mm"
+   height="1000mm"
+   viewBox="0 0 2500 1000"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(253.17731,-31.29858)">
+    <path
+       id="path5"
+       style="fill:#000000;stroke:none;stroke-width:5.3;stroke-linecap:round;stroke-dasharray:none;paint-order:stroke fill markers"
+       d="M 401.00033,166.21311 A 361.40518,365.08551 0 0 0 257.78427,196.10224 L 579.23906,364.98237 522.2906,187.38753 A 361.40518,365.08551 0 0 0 401.00033,166.21311 Z m 135.72815,26.72498 107.90917,346.79124 83.81039,-162.93166 A 361.40518,365.08551 0 0 0 536.72848,192.93809 Z m -292.83226,9.5741 A 361.40518,365.08551 0 0 0 65.903471,394.55421 L 409.43082,287.66151 Z M 234.68387,353.0601 60.506901,408.91251 A 361.40518,365.08551 0 0 0 39.594999,531.29884 361.40518,365.08551 0 0 0 67.342143,671.5864 Z M 734.65852,391.01128 567.31679,709.53757 741.49376,653.68516 A 361.40518,365.08551 0 0 0 762.40566,531.29884 361.40518,365.08551 0 0 0 734.65852,391.01128 Z M 157.363,522.86834 73.552616,685.8 A 361.40518,365.08551 0 0 0 265.27166,869.65958 Z m 578.73419,145.17409 -343.52735,106.89373 165.53408,85.14933 h 5.2e-4 A 361.40518,365.08551 0 0 0 736.09719,668.04243 Z M 222.7616,697.6153 279.71006,875.21014 a 361.40518,365.08551 0 0 0 121.29027,21.17391 361.40518,365.08551 0 0 0 143.21606,-29.88862 z" />
+    <text
+       xml:space="preserve"
+       style="font-size:765.105px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:17.2542;stroke-linecap:round;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="768.28735"
+       y="809.43365"
+       id="text7"><tspan
+         id="tspan7"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:17.2542;stroke-dasharray:none"
+         x="768.28735"
+         y="809.43365">MR</tspan></text>
+  </g>
+</svg>

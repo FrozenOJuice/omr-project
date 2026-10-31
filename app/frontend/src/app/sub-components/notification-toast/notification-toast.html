@@ -1,0 +1,26 @@
+<div class="toast-stack">
+  @for (toast of toasts(); track toast.id) {
+    <div
+      class="notification-toast row-flex-container align-items-center"
+      [class.notification-toast--error]="toast.severity === 'error'"
+      (click)="open(toast)"
+    >
+      <span class="material-icons-outlined notification-toast-icon">
+        {{ toast.severity === 'error' ? 'error_outline' : 'notifications' }}
+      </span>
+      <div class="notification-toast-body">
+        <span class="notification-toast-title">{{ toast.title }}</span>
+        @if (toast.subtitle) {
+          <span class="notification-toast-subtitle">{{ toast.subtitle }}</span>
+        }
+      </div>
+      <button
+        class="icon-btn notification-toast-close"
+        (click)="dismiss(toast); $event.stopPropagation()"
+        aria-label="Dismiss"
+      >
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+  }
+</div>

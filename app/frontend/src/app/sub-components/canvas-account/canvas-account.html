@@ -1,0 +1,148 @@
+<div class="card section-card col-flex-container">
+  <div class="row-flex-container align-items-center justify-content-between">
+    <span class="section-title">Canvas</span>
+    @if (connection?.connected) {
+      <span class="canvas-status row-flex-container align-items-center">
+        <span class="canvas-status-dot"></span>
+        Connected
+      </span>
+    }
+  </div>
+  <hr class="divider" />
+
+  @if (notice) {
+    <span class="canvas-message canvas-message--success">{{ notice }}</span>
+  }
+  @if (error) {
+    <span class="field-error">{{ error }}</span>
+  }
+
+  @if (loading && !connection) {
+    <span class="security-sublabel">Loading Canvas connection...</span>
+  } @else if (!connection?.connected) {
+    <form class="canvas-token-form col-flex-container" (ngSubmit)="connect()">
+      <div class="canvas-token-heading row-flex-container align-items-center">
+        <label class="field-label" for="canvas-access-token">Canvas access token</label>
+        <div class="canvas-token-help">
+          @if (settingsUrl) {
+            <a
+              class="canvas-info-button"
+              [href]="settingsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open Canvas settings"
+              aria-describedby="canvas-token-instructions"
+            >
+              <span class="material-icons-outlined" aria-hidden="true">info</span>
+            </a>
+          } @else {
+            <button
+              class="canvas-info-button"
+              type="button"
+              aria-label="How to get a Canvas access token"
+              aria-describedby="canvas-token-instructions"
+            >
+              <span class="material-icons-outlined" aria-hidden="true">info</span>
+            </button>
+          }
+          <div id="canvas-token-instructions" class="canvas-token-tooltip" role="tooltip">
+            <strong>Generate a Canvas token:</strong>
+            <ol>
+              <li>Open <strong>Account → Settings</strong> in Canvas.</li>
+              <li>
+                Under <strong>Approved Integrations</strong>, select
+                <strong>+ New Access Token</strong>.
+              </li>
+              <li>Generate the token, copy it, and paste it here.</li>
+            </ol>
+            <span>OMR stores the token encrypted and never displays it again.</span>
+          </div>
+        </div>
+      </div>
+      <div class="canvas-token-row row-flex-container">
+        <input
+          id="canvas-access-token"
+          class="field-input"
+          type="password"
+          name="canvasAccessToken"
+          [(ngModel)]="accessToken"
+          autocomplete="off"
+          autocapitalize="off"
+          maxlength="4096"
+          spellcheck="false"
+          placeholder="Paste your token"
+          [disabled]="actionPending"
+        />
+        <button class="action-btn" type="submit" [disabled]="actionPending || !accessToken.trim()">
+          {{ actionPending ? 'Connecting...' : 'Connect' }}
+        </button>
+      </div>
+    </form>
+  } @else {
+    <div class="canvas-account row-flex-container align-items-center justify-content-between">
+      <div class="col-flex-container">
+        <span class="security-label">{{ connection?.user_name ?? 'Canvas account' }}</span>
+        <span class="security-sublabel">{{ connection?.login_id }}</span>
+      </div>
+      <div class="canvas-account-actions row-flex-container">
+        <button
+          type="button"
+          class="action-btn action-btn--sm action-btn--outline"
+          (click)="replaceToken()"
+          [disabled]="actionPending || replacingToken"
+        >
+          Replace token
+        </button>
+        <button
+          type="button"
+          class="action-btn action-btn--sm action-btn--outline"
+          (click)="disconnect()"
+          [disabled]="actionPending"
+        >
+          Disconnect
+        </button>
+      </div>
+    </div>
+
+    @if (replacingToken) {
+      <form
+        class="canvas-token-form canvas-token-form--replacement col-flex-container"
+        (ngSubmit)="connect()"
+      >
+        <label class="field-label" for="replacement-canvas-access-token"
+          >New Canvas access token</label
+        >
+        <div class="canvas-token-row row-flex-container">
+          <input
+            id="replacement-canvas-access-token"
+            class="field-input"
+            type="password"
+            name="replacementCanvasAccessToken"
+            [(ngModel)]="accessToken"
+            autocomplete="off"
+            autocapitalize="off"
+            maxlength="4096"
+            spellcheck="false"
+            placeholder="Paste your new token"
+            [disabled]="actionPending"
+          />
+          <button
+            type="button"
+            class="action-btn action-btn--outline"
+            (click)="cancelReplacement()"
+            [disabled]="actionPending"
+          >
+            Cancel
+          </button>
+          <button
+            class="action-btn"
+            type="submit"
+            [disabled]="actionPending || !accessToken.trim()"
+          >
+            {{ actionPending ? 'Verifying...' : 'Save' }}
+          </button>
+        </div>
+      </form>
+    }
+  }
+</div>

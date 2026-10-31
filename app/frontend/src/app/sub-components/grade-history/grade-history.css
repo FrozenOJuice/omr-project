@@ -1,0 +1,77 @@
+.modal-card {
+    width: 32em;
+    gap: 1.0em;
+}
+
+.modal-header {
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1em;
+}
+
+.modal-title {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.modal-subtitle {
+    font-size: 0.82em;
+    opacity: 0.6;
+    margin-top: 0.15em;
+}
+
+.history-body {
+    display: flex;
+    flex-direction: column;
+    max-height: 22em;
+    overflow-y: auto;
+}
+
+.empty-text {
+    font-size: 0.88em;
+    opacity: 0.55;
+    text-align: center;
+    padding: 1.5em 0;
+}
+
+.history-row {
+    padding: 0.6em 0;
+    border-bottom: 1px solid var(--primary-darkened);
+    gap: 0.2em;
+}
+
+.history-row.last {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.history-actor {
+    font-size: 0.92em;
+    font-weight: 600;
+}
+
+.history-badge {
+    flex-shrink: 0;
+    padding: 0.15em 0.55em;
+    border: var(--border-size) solid color-mix(in oklab, var(--tag-blue), transparent 55%);
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--tag-blue), transparent 88%);
+    color: var(--tag-blue);
+    font-size: 0.68em;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.history-timestamp {
+    font-size: 0.78em;
+    opacity: 0.6;
+}
+
+.history-summary {
+    font-size: 0.85em;
+}
+
+.history-score {
+    font-size: 0.78em;
+    opacity: 0.7;
+}

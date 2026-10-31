@@ -1,0 +1,5 @@
+production:
+  encryption_key: <%= ENV.fetch("CANVAS_ENCRYPTION_KEY") %>
+  jwt_encryption_keys:
+    - <%= ENV.fetch("CANVAS_JWT_ENCRYPTION_KEY") %>
+  lti_iss: https://canvas.instructure.com

@@ -1,0 +1,30 @@
+{
+	"width": 1200,
+	"height": 1700,
+	"config": {
+		"blurSize": 5,
+		"morphCloseSize": 3,
+		"minAnchorConfidence": 0.5
+	},
+	"pages": [
+		{
+			"anchors": [
+				{
+					"path": "anchors/logo.jpg",
+					"center": { "X": 938, "Y": 161 },
+					"roi": { "Min": { "X": 759, "Y": 0 }, "Max": { "X": 1200, "Y": 415 } }
+				},
+				{
+					"path": "anchors/footer.jpg",
+					"center": { "X": 596, "Y": 1592 },
+					"roi": { "Min": { "X": 76, "Y": 1453 }, "Max": { "X": 1124, "Y": 1700 } }
+				},
+				{
+					"path": "anchors/info.jpg",
+					"center": { "X": 161, "Y": 214 },
+					"roi": { "Min": { "X": 0, "Y": 125 }, "Max": { "X": 341, "Y": 374 } }
+				}
+			]
+		}
+	]
+}

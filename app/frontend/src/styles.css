@@ -1,0 +1,857 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* UBC Palette (:root default -- applied whenever no scheme-* body class is
+   present, i.e. UBC, id 'ubc' in theme.service.ts). UBC is the default
+   scheme applied on first visit -- see DEFAULT_SCHEME_ID in theme.service.ts
+   and the fallback in index.html's bootstrap script. The original launch
+   palette is still available, verbatim, as the "Ugly" scheme further down
+   (body.scheme-ugly). */
+/* 002145 · FFFFFF · 0055B7 · 6EC4E8 */
+:root {
+    /* Site Colours */
+    --primary:           #FFFFFF; /* page background  */
+    --primary-highlight: color-mix(in oklab, #FFFFFF, #6EC4E8 8%); /* card surfaces     */
+    --primary-darkened:  color-mix(in oklab, #FFFFFF, #002145 8%); /* input backgrounds */
+
+    /* Fixed accents used for a handful of structural UI elements (drag
+       selection, focus rings, badge text) that intentionally don't vary
+       by scheme -- no scheme block below overrides these. */
+    --secondary-darkened: #272D48;
+    --secondary: #384166;
+    --highlight1: #0CDC2A;
+
+    --highlight2: #0055B7; /* focus rings       */
+    --highlight3: #002145; /* buttons & accents */
+
+    --ubc-blue: #002145;
+
+    --border-size: 2px;
+
+    --card-border-radius: 10px;
+    --input-border-radius: 5px;
+    --menu-border-radius: 16px;
+    --menu-item-border-radius: 8px;
+
+    --hover-darken: white 8%;
+
+    --color-text:   #002145; /* page body text */
+    --color-border: #0055B7; /* all borders       */
+    --nav-text:     #FFFFFF; /* sidebar/navbar text */
+    /* Foreground for anything solid-filled with --highlight3 (buttons, active
+       chips, badges). Usually just the page text colour (see the "Ugly"
+       scheme and others below) -- UBC needs its own value because
+       --highlight3 and --color-text are the same navy here. */
+    --on-highlight3: #FFFFFF;
+    /* Background behind the public-page logo (.site-logo-card, on the auth
+       pages) and the sidebar logo (.logo-wrapper) -- both artefacts have a
+       transparent/white-baked background, so they need an opaque colour
+       that isn't necessarily --primary-highlight/--primary verbatim. */
+    --crest-bg: #FFFFFF;
+    --logo-bg:  #FFFFFF;
+
+    /* Tag Colours */
+    --tag-red:    color-mix(in oklab, #f94144, #FFFFFF 15%);
+    --tag-orange: color-mix(in oklab, #f3722c, #FFFFFF 15%);
+    --tag-amber:  color-mix(in oklab, #f8961e, #FFFFFF 15%);
+    --tag-yellow: color-mix(in oklab, #ffbb00, #FFFFFF 15%);
+    --tag-green:  color-mix(in oklab, #4ab95c, #FFFFFF 15%);
+    --tag-teal:   color-mix(in oklab, #6EC4E8, #002145 10%);
+    --tag-blue:   color-mix(in oklab, #0055B7, #FFFFFF 10%);
+
+    /* Shade tag text/backgrounds are mixed toward, and how much of the
+       card shows through the tint -- black/light-fade on light-surfaced
+       schemes, flipped to white/heavier-fade wherever a scheme's card
+       surface (--primary-highlight) is dark (see dark-mode, scheme-ocean). */
+    --tag-text-shade: black;
+    --tag-bg-fade: 75%;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background-color: var(--primary);
+    font-family:sans-serif;
+    color: var(--color-text);
+    margin: 0;
+}
+
+/* Inputs */
+
+input { 
+    padding: 1em;
+    background-color: var(--primary-darkened);
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+
+    font-size: x-large;
+    color: var(--color-text);
+}
+
+input[type="checkbox"] {
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: var(--border-size) solid var(--color-border);
+    margin-left: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+}
+
+input[type="checkbox"]:hover {
+    border-color: color-mix(in oklab, var(--color-border), var(--hover-darken));
+    background-color: color-mix(in oklab, var(--primary), var(--hover-darken));
+}
+
+/* Draw the checkmark */
+input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 6.5px;
+    top: 1.5px;
+    width: 7px;
+    height: 11px;
+    border: var(--border-size) solid var(--color-border);
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+}
+
+input:focus {
+    border-color: color-mix(in oklab, var(--color-border), var(--hover-darken));
+}
+
+:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--highlight2),
+                0 0 0 4px color-mix(in oklab, var(--highlight2), transparent 65%);
+}
+
+/* Card Classes */
+
+.card { 
+    padding: 1.5em;
+    background-color: var(--primary-highlight);
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    width: fit-content;
+    height: fit-content;
+    box-sizing: border-box;
+    box-shadow: 0 2px 12px rgba(0, 33, 69, 0.25);
+}
+
+/* Flex Classes */
+
+.row-flex-container { 
+    display: flex;
+    flex-direction: row;
+}
+
+.col-flex-container { 
+    display: flex;
+    flex-direction: column;
+}
+
+.justify-content-center { 
+    justify-content: center;
+}
+
+.justify-content-between { 
+    justify-content:space-between;
+}
+
+.align-content-center { 
+    align-content: center;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.align-items-end {
+    align-items: flex-end;
+}
+
+.grow { 
+    flex-grow: 1;
+}
+
+.gap { 
+    gap: 1.0em;
+}
+
+/* Size Classes */
+
+.full { 
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Margin Classes */
+
+    /* Bottom */
+    .mb-1 { 
+        margin-bottom: 0.25em;
+    }
+
+    .mb-2 { 
+        margin-bottom: 0.5em;
+    }
+
+    .mb-3 { 
+        margin-bottom: 1.0em;
+    }
+
+    /* Top */
+    .mt-1 { 
+        margin-top: 0.25em;
+    }
+
+    .mt-2 { 
+        margin-top: 0.5em;
+    }
+
+    .mt-3 { 
+        margin-top: 1.0em;
+    }
+
+    /* Left */
+    .ml-1 { 
+        margin-left: 0.25em;
+    }
+
+    .ml-2 { 
+        margin-left: 0.5em;
+    }
+
+    .ml-3 { 
+        margin-left: 1.0em;
+    }
+
+    /* Right */
+    .mr-1 { 
+        margin-right: 0.25em;
+    }
+
+    .mr-2 { 
+        margin-right: 0.5em;
+    }
+
+    .mr-3 { 
+        margin-right: 1.0em;
+    }    
+
+/* Text Classes */
+
+.text-sm { 
+    font-size: small;
+}
+
+.text-md { 
+    font-size: medium;
+}
+
+.text-lg { 
+    font-size: large;
+}
+
+.text-xl {
+    font-size: x-large;
+}
+
+/* Page Header Classes */
+
+.page-header {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-title {
+    font-size: 1.8em;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1;
+}
+
+.page-subtitle {
+    font-size: 0.9em;
+    opacity: 0.6;
+    margin-top: 0.15em;
+}
+
+.page-actions {
+    flex-shrink: 0;
+}
+
+.filter-dropdown {
+    padding: 0.5em 1.0em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    font-size: 0.95em;
+    cursor: pointer;
+    align-self: stretch;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+    padding: 0.5em 1.0em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background-color: var(--highlight3);
+    color: var(--on-highlight3);
+    font-size: 0.95em;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.action-btn:hover {
+    background-color: color-mix(in oklab, var(--highlight3), var(--hover-darken));
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-btn--sm {
+    padding: 0.35em 0.8em;
+    font-size: 0.82em;
+    font-weight: 500;
+    white-space: nowrap;
+    justify-content: center;
+}
+
+.action-btn--outline {
+    background-color: transparent;
+    color: var(--color-text);
+}
+
+.action-btn--outline:hover {
+    border-color: color-mix(in oklab, var(--color-border), var(--hover-darken));
+    background-color: color-mix(in oklab, var(--primary-highlight), var(--hover-darken));
+}
+
+.action-btn--yellow {
+    background-color: #ffc400;
+    color: var(--color-text);
+}
+
+.action-btn--yellow:hover {
+    background-color: color-mix(in oklab, #ffc400, var(--hover-darken));
+}
+
+.action-btn--danger {
+    background-color: var(--tag-red);
+    color: var(--color-text);
+}
+
+.action-btn--danger:hover {
+    background-color: color-mix(in oklab, var(--tag-red), var(--hover-darken));
+}
+
+.action-btn--success {
+    background-color: var(--tag-green);
+    color: var(--color-text);
+}
+
+.action-btn--success:hover {
+    background-color: color-mix(in oklab, var(--tag-green), var(--hover-darken));
+}
+
+/* Icon Button */
+
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: var(--input-border-radius);
+    border: var(--border-size) solid var(--color-border);
+    background-color: var(--highlight3);
+    color: var(--on-highlight3);
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background-color: color-mix(in oklab, var(--highlight3), var(--hover-darken));
+}
+
+.icon-btn .material-icons-outlined {
+    font-size: 1.4em;
+}
+
+.icon-btn--danger {
+    background-color: var(--tag-red);
+    color: var(--color-text);
+}
+
+.icon-btn--danger:hover {
+    background-color: color-mix(in oklab, var(--tag-red), var(--hover-darken));
+}
+
+.icon-btn--success {
+    background-color: var(--tag-green);
+    color: var(--color-text);
+}
+
+.icon-btn--success:hover {
+    background-color: color-mix(in oklab, var(--tag-green), var(--hover-darken));
+}
+
+.icon-btn--outline {
+    background-color: transparent;
+    color: var(--color-text);
+}
+
+.icon-btn--outline:hover {
+    background-color: color-mix(in oklab, var(--primary-highlight), var(--hover-darken));
+}
+
+.icon-btn--ghost {
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    opacity: 0.45;
+    transition: opacity 150ms ease, background-color 150ms ease;
+}
+
+.icon-btn--ghost:hover {
+    opacity: 1;
+    background-color: var(--primary-darkened);
+}
+
+.icon-btn--ghost.delete-btn:hover {
+    color: var(--tag-red);
+}
+
+.icon-btn--lg {
+    width: 3em;
+    height: 3em;
+}
+
+.icon-btn--lg .material-icons-outlined {
+    font-size: 1.8em;
+}
+
+/* Status Badge */
+
+.status-badge {
+    padding: 0.25em 0.75em;
+    border-radius: 999px;
+    border: var(--border-size) solid currentColor;
+    font-size: 0.8em;
+    font-weight: 600;
+    white-space: nowrap;
+    width: fit-content;
+}
+
+/* Tag Classes */
+
+.tag-outline {
+    background-color: transparent;
+    color: var(--color-text);
+}
+
+.tag-red {
+    background-color: color-mix(in oklab, var(--tag-red), transparent var(--tag-bg-fade));
+    color: color-mix(in oklab, var(--tag-red), var(--tag-text-shade) 20%);
+}
+
+.tag-orange {
+    background-color: color-mix(in oklab, var(--tag-orange), transparent var(--tag-bg-fade));
+    color: color-mix(in oklab, var(--tag-orange), var(--tag-text-shade) 20%);
+}
+
+.tag-amber {
+    background-color: color-mix(in oklab, var(--tag-amber), transparent var(--tag-bg-fade));
+    color: color-mix(in oklab, var(--tag-amber), var(--tag-text-shade) 30%);
+}
+
+.tag-yellow {
+    background-color: color-mix(in oklab, var(--tag-yellow), transparent var(--tag-bg-fade));
+    color: color-mix(in oklab, var(--tag-yellow), var(--tag-text-shade) 35%);
+}
+
+.tag-green {
+    background-color: color-mix(in oklab, var(--tag-green), transparent var(--tag-bg-fade));
+    color: color-mix(in oklab, var(--tag-green), var(--tag-text-shade) 30%);
+}
+
+.tag-teal {
+    background-color: color-mix(in oklab, var(--tag-teal), transparent var(--tag-bg-fade));
+    color: color-mix(in oklab, var(--tag-teal), var(--tag-text-shade) 20%);
+}
+
+.tag-blue {
+    background-color: color-mix(in oklab, var(--tag-blue), transparent var(--tag-bg-fade));
+    color: color-mix(in oklab, var(--tag-blue), var(--tag-text-shade) 10%);
+}
+
+/* Error Toast */
+
+.error-toast {
+    position: fixed;
+    top: 1.25em;
+    right: 1.25em;
+    z-index: 1100;
+    background: var(--primary, #1e2130);
+    border: var(--border-size, 1px) solid var(--danger, #e05a5a);
+    border-left: 4px solid var(--danger, #e05a5a);
+    border-radius: var(--input-border-radius, 6px);
+    padding: 0.75em 1em;
+    gap: 0.6em;
+    max-width: 26em;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    animation: toast-in 0.2s ease;
+}
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateY(-0.5em); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.error-toast-icon {
+    color: var(--danger, #e05a5a);
+    font-size: 1.2em;
+    flex-shrink: 0;
+}
+
+.error-toast-message {
+    font-size: 0.85em;
+    flex: 1;
+}
+
+.error-toast-close {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.error-toast-close:hover {
+    opacity: 1;
+}
+
+/* "Ugly" Palette -- the original launch palette, kept verbatim and just
+   moved out of :root into its own scheme block now that UBC is the
+   default (see the top of this file). */
+body.scheme-ugly {
+    --primary: #e3dba9;
+    --primary-highlight: #F8F1C0;
+    --primary-darkened: #D0CAA2;
+    --highlight2: #0B735F;
+    --highlight3: #639D75;
+    --hover-darken: black 10%;
+    --color-text:   var(--secondary);
+    --color-border: var(--secondary);
+    --nav-text:     var(--color-text);
+    --on-highlight3: var(--color-text);
+    --crest-bg: var(--primary-highlight);
+    --logo-bg:  var(--primary);
+
+    /* Tag Colours */
+    --tag-red:    #f94144;
+    --tag-orange: #f3722c;
+    --tag-amber:  #f8961e;
+    --tag-yellow: #ffbb00;
+    --tag-green:  #4ab95c;
+    --tag-teal:   #43aa8b;
+    --tag-blue:   #577590;
+}
+
+body.scheme-ugly .card {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+body.scheme-ugly .gradient {
+    background: radial-gradient(ellipse 90% 80% at left center, color-mix(in oklab, var(--primary), var(--highlight3) 20%) 40%, var(--highlight3), var(--highlight2));
+    background-size: 200% 200%;
+    animation: gradient-shift 15s ease infinite;
+}
+
+/* Dark mode */
+
+body.dark-mode {
+    --primary:           #1a1d2e; /* near-black, cool tint  — page background  */
+    --primary-highlight: #242840; /* dark navy              — card surfaces     */
+    --primary-darkened:  #2e3352; /* mid navy               — input backgrounds */
+    --highlight2:        #0CDC2A; /* deep green       — focus rings       */
+    --highlight3:        #0B735F; /* vibrant green    — buttons & accents */
+    --hover-darken:      white 8%;
+    --color-text:        #f0ece0; /* warm off-white         — all text          */
+    --color-border:      #4a5080; /* mid-tone navy          — all borders       */
+    --nav-text:          var(--color-text); /* sidebar/navbar text */
+    --on-highlight3:     var(--color-text);
+    --crest-bg: #f0ece0;
+    --logo-bg:  #f0ece0;
+
+    --tag-red:    color-mix(in oklab, #f94144, #FFFFFF 15%);
+    --tag-orange: color-mix(in oklab, #f3722c, #FFFFFF 15%);
+    --tag-amber:  color-mix(in oklab, #f8961e, #FFFFFF 15%);
+    --tag-yellow: color-mix(in oklab, #ffbb00, #FFFFFF 15%);
+    --tag-green:  color-mix(in oklab, #4ab95c, #FFFFFF 20%);
+    --tag-teal:   color-mix(in oklab, #7FB3C7, #FFFFFF 20%);
+    --tag-blue:   color-mix(in oklab, #2F6690, #FFFFFF 20%);
+
+    --tag-text-shade: white;
+    --tag-bg-fade: 55%;
+}
+
+
+body.dark-mode .card {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .gradient {
+    background: radial-gradient(ellipse 90% 80% at left center, color-mix(in oklab, var(--primary), var(--highlight3) 20%) 40%, #0a3d2e 70%, var(--highlight3) 100%);
+    background-size: 200% 200%;
+    animation: gradient-shift 15s ease infinite;
+}
+
+/* Ocean Palette */
+
+/* E8F1F5 · 7FB3C7 · 2F6690 · 16324F */
+body.scheme-ocean {
+    --primary:           #16324F; /* page background  */
+    --primary-highlight: #2F6690; /* card surfaces     */
+    --primary-darkened:  color-mix(in oklab, #2F6690, #16324F 35%); /* input backgrounds */
+    --highlight2:        #98d4ec; /* focus rings       */
+    --highlight3:        #4a8ba5; /* buttons & accents */
+    --hover-darken:      white 8%;
+    --color-text:        #E8F1F5; /* all text          */
+    --color-border:      #438ec8; /* all borders       */
+    --nav-text:          var(--color-text); /* sidebar/navbar text */
+    --on-highlight3:     var(--color-text);
+    --crest-bg: #E8F1F5;
+    --logo-bg:  #E8F1F5;
+
+    /* Tag Colours */
+    --tag-red:    color-mix(in oklab, #f94144, #000000 15%);
+    --tag-orange: color-mix(in oklab, #f3722c, #000000 15%);
+    --tag-amber:  color-mix(in oklab, #f8961e, #000000 15%);
+    --tag-yellow: color-mix(in oklab, #ffbb00, #000000 15%);
+    --tag-green:  color-mix(in oklab, #4ab95c, #000000 20%);
+    --tag-teal:   color-mix(in oklab, #7FB3C7, #000000 25%);
+    --tag-blue:   color-mix(in oklab, #98d4ec, #000000 10%);
+
+    --tag-text-shade: white;
+    --tag-bg-fade: 55%;
+}
+
+body.scheme-ocean .card {
+    box-shadow: 0 2px 12px rgba(8, 20, 34, 0.55);
+}
+
+body.scheme-ocean .gradient {
+    background: radial-gradient(ellipse 90% 80% at left center, color-mix(in oklab, var(--primary), var(--highlight3) 20%) 40%, var(--highlight3));
+    background-size: 200% 200%;
+    animation: gradient-shift 15s ease infinite;
+}
+
+/* Slate Palette */
+
+/* bacece · 9db5b4 · 5f8483 · 4c706f · 395d5c */
+body.scheme-slate {
+    --primary:           color-mix(in oklab, #bacece, gray 5%); /* page background  */
+    --primary-highlight: color-mix(in oklab, #bacece, #ffffff 25%); /* card surfaces     */
+    --primary-darkened:  color-mix(in oklab, #bacece, #000000 8%); /* input backgrounds */
+    --highlight2:        #395d5c; /* focus rings       */
+    --highlight3:        color-mix(in oklab, #4c706f, gray 20%); /* buttons & accents */
+    --hover-darken:      black 8%;
+    --color-text:        #0e1616; /* page body text */
+    --color-border:      #5f8483; /* all borders       */
+    --nav-text:          #ffffff; /* sidebar/navbar text */
+    --on-highlight3:     #ffffff;
+    --crest-bg: #ffffff;
+    --logo-bg:  #ffffff;
+
+    /* Tag Colours */
+
+    --tag-red:    color-mix(in oklab, #f94144, #FFFFFF 15%);
+    --tag-orange: color-mix(in oklab, #f3722c, #FFFFFF 15%);
+    --tag-amber:  color-mix(in oklab, #f8961e, #FFFFFF 15%);
+    --tag-yellow: color-mix(in oklab, #ffbb00, #FFFFFF 15%);
+    --tag-green:  color-mix(in oklab, #4ab95c, #FFFFFF 20%);
+    --tag-teal:   color-mix(in oklab, #146C7A, #FFFFFF 15%);
+    --tag-blue:   color-mix(in oklab, #16324F, #FFFFFF 15%);
+}
+
+body.scheme-slate .card {
+    box-shadow: 0 2px 12px rgba(20, 30, 30, 0.35);
+}
+
+body.scheme-slate .gradient {
+    background: radial-gradient(ellipse 90% 80% at left center, color-mix(in oklab, var(--primary), var(--highlight3) 20%) 40%, var(--highlight3), var(--highlight2));
+    background-size: 200% 200%;
+    animation: gradient-shift 15s ease infinite;
+}
+
+/* Amethyst Palette */
+
+/* BFAED0 · 9C81B5 · 63178F · 4D1375 · 390F5C */
+body.scheme-amethyst {
+    --primary:           #BFAED0; /* page background  */
+    --primary-highlight: color-mix(in oklab, #BFAED0, #ffffff 25%); /* card surfaces     */
+    --primary-darkened:  color-mix(in oklab, #BFAED0, #000000 8%); /* input backgrounds */
+    --highlight2:        #390F5C; /* focus rings       */
+    --highlight3:        color-mix(in oklab, #63178F, black 15%); /* buttons & accents */
+    --hover-darken:      black 8%;
+    --color-text:        #12051d; /* page body text */
+    --color-border:      #4D1375; /* all borders       */
+    --nav-text:          #ffffff; /* sidebar/navbar text */
+    --on-highlight3:     #ffffff;
+    --crest-bg: #ffffff;
+    --logo-bg:  #ffffff;
+
+    /* Tag Colours */
+
+    --tag-red:    color-mix(in oklab, #f94144, #FFFFFF 15%);
+    --tag-orange: color-mix(in oklab, #f3722c, #FFFFFF 15%);
+    --tag-amber:  color-mix(in oklab, #f8961e, #FFFFFF 15%);
+    --tag-yellow: color-mix(in oklab, #ffbb00, #FFFFFF 15%);
+    --tag-green:  color-mix(in oklab, #4ab95c, #FFFFFF 20%);
+    --tag-teal:   color-mix(in oklab, #6EC4E8, #002145 10%);
+    --tag-blue:   color-mix(in oklab, #577590, #FFFFFF 15%);
+}
+
+body.scheme-amethyst .card {
+    box-shadow: 0 2px 12px rgba(40, 15, 60, 0.35);
+}
+
+body.scheme-amethyst .gradient {
+    background: radial-gradient(ellipse 90% 80% at left center, color-mix(in oklab, var(--primary), var(--highlight3) 20%) 40%, var(--highlight3), var(--highlight2));
+    background-size: 200% 200%;
+    animation: gradient-shift 15s ease infinite;
+}
+
+/* Shared by every scheme's ".gradient" override above -- keeps the auth
+   pages' background gradient drifting no matter which colour scheme is
+   active. */
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gradient,
+    body.scheme-ugly .gradient,
+    body.dark-mode .gradient,
+    body.scheme-ocean .gradient,
+    body.scheme-slate .gradient,
+    body.scheme-amethyst .gradient {
+        animation: none;
+    }
+}
+
+/* Reusable keyboard-accessible tooltip. Keep this global so feature
+   components do not duplicate the same positioning and surface styles. */
+.app-tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: help;
+    outline: none;
+}
+
+.app-tooltip .metric-help {
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+.app-tooltip:focus-visible {
+    border-radius: 0.2rem;
+    outline: 2px solid var(--highlight2);
+    outline-offset: 2px;
+}
+
+.app-tooltip__content {
+    position: absolute;
+    z-index: 1000;
+    bottom: calc(100% + 0.45rem);
+    left: 50%;
+    width: max-content;
+    max-width: min(14rem, 70vw);
+    padding: 0.45rem 0.6rem;
+    transform: translate(-50%, 0.2rem);
+    border: 1px solid #9ca3af;
+    border-radius: 0.35rem;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.14);
+    color: #1f2937;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
+}
+
+.app-tooltip__content strong,
+.app-tooltip__content span {
+    display: block;
+}
+
+.app-tooltip__content strong {
+    margin-bottom: 0.2rem;
+}
+
+.app-tooltip--start .app-tooltip__content {
+    left: 0;
+    transform: translateY(0.2rem);
+}
+
+.app-tooltip--end .app-tooltip__content {
+    right: 0;
+    left: auto;
+    transform: translateY(0.2rem);
+}
+
+.app-tooltip:hover .app-tooltip__content,
+.app-tooltip:focus .app-tooltip__content,
+.app-tooltip:focus-within .app-tooltip__content {
+    visibility: visible;
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.app-tooltip--start:hover .app-tooltip__content,
+.app-tooltip--start:focus .app-tooltip__content,
+.app-tooltip--start:focus-within .app-tooltip__content,
+.app-tooltip--end:hover .app-tooltip__content,
+.app-tooltip--end:focus .app-tooltip__content,
+.app-tooltip--end:focus-within .app-tooltip__content {
+    transform: translateY(0);
+}
+
+/* UBC's palette now lives in :root (see the top of this file) since it's
+   the default scheme -- there is no body.scheme-ubc block anymore. The
+   navy-on-navy collision that used to require a one-off override here per
+   component (course badge, action/icon buttons, auth submit buttons,
+   notifications filter chip/pagination, regrade list selection, create-exam
+   duration chips) is handled at the source instead: every component that
+   solid-fills an element with --highlight3 uses `color: var(--on-highlight3)`
+   directly, and --on-highlight3 is the one place that needs to know a
+   scheme's --highlight3 collides with its --color-text. */

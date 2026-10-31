@@ -1,0 +1,145 @@
+<div class="modal-overlay" (click)="cancel.emit()">
+  <div class="card retention-card col-flex-container" (click)="$event.stopPropagation()">
+    @if (mode === 'loading') {
+      <div class="retention-heading row-flex-container align-items-center gap">
+        <span class="material-icons-outlined retention-icon">policy</span>
+        <div class="col-flex-container">
+          <span class="retention-title">Loading retention policy</span>
+          <span class="retention-body">Checking how archived course records should be handled.</span>
+        </div>
+      </div>
+      @if (error) {
+        <div class="retention-error">{{ error }}</div>
+        <div class="retention-actions row-flex-container gap">
+          <button class="action-btn action-btn--sm action-btn--outline grow" (click)="cancel.emit()">Cancel</button>
+          <button class="action-btn grow" (click)="loadPolicy()">Retry</button>
+        </div>
+      }
+    } @else if (mode === 'configure' || mode === 'edit') {
+      <div class="retention-heading row-flex-container align-items-center gap">
+        <span class="material-icons-outlined retention-icon">policy</span>
+        <div class="col-flex-container">
+          <span class="retention-title">{{ isEditing ? 'Change Retention Policy' : 'Set Retention Policy' }}</span>
+          <span class="retention-body">
+            {{ isEditing
+              ? 'These settings will apply to this and future course archives.'
+              : 'Before your first archive, choose how long scanned images and exam records are retained.' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="ubc-default-note">
+        <strong>UBC default:</strong> retain examinations and instructor grade records for at least 12 months.
+        Examination papers may be retained for up to 72 months.
+      </div>
+
+      <div class="retention-fields col-flex-container gap">
+        <label class="retention-field col-flex-container">
+          <span class="retention-label">Scanned exam images</span>
+          <div class="retention-number row-flex-container align-items-center gap">
+            <input
+              class="field-input"
+              type="number"
+              min="12"
+              [max]="maximumRetentionMonths"
+              step="1"
+              [(ngModel)]="draft.scanned_image_retention_months"
+            />
+            <span>months</span>
+          </div>
+          <span class="retention-help">Raw uploads and OMR page images are eligible for secure deletion after this period.</span>
+        </label>
+
+        <label class="retention-field col-flex-container">
+          <span class="retention-label">Student-level exam records</span>
+          <div class="retention-number row-flex-container align-items-center gap">
+            <input
+              class="field-input"
+              type="number"
+              min="12"
+              [max]="maximumRetentionMonths"
+              step="1"
+              [(ngModel)]="draft.exam_record_retention_months"
+            />
+            <span>months</span>
+          </div>
+          <span class="retention-help">Grades, answers, review details, and student-linked statistics are retained until this deadline.</span>
+        </label>
+
+        <label class="analytics-toggle row-flex-container align-items-center gap">
+          <input type="checkbox" [(ngModel)]="draft.retain_anonymized_analytics" />
+          <span class="col-flex-container">
+            <strong>Keep anonymized aggregate analytics</strong>
+            <span class="retention-help">Preserves course-level comparisons without retaining individual student results.</span>
+          </span>
+        </label>
+      </div>
+
+      @if (!draftIsValid) {
+        <div class="retention-error">Retention periods must be whole numbers between 12 and {{ maximumRetentionMonths }} months.</div>
+      }
+      @if (error) {
+        <div class="retention-error">{{ error }}</div>
+      }
+
+      @if (recommended?.source_urls?.length) {
+        <div class="policy-sources">
+          Policy basis:
+          @for (url of recommended!.source_urls; track url; let index = $index) {
+            <a [href]="url" target="_blank" rel="noopener">UBC source {{ index + 1 }}</a>
+          }
+        </div>
+      }
+
+      <div class="retention-actions row-flex-container gap">
+        <button
+          class="action-btn action-btn--sm action-btn--outline grow"
+          [disabled]="isWorking"
+          (click)="cancelPolicyForm()"
+        >
+          {{ isEditing ? 'Back' : 'Cancel' }}
+        </button>
+        <button
+          class="action-btn grow"
+          [disabled]="isWorking || !draftIsValid"
+          (click)="savePolicy()"
+        >
+          {{ isWorking ? 'Saving...' : (isEditing ? 'Save Changes' : 'Save Policy and Archive') }}
+        </button>
+      </div>
+    } @else if (policy) {
+      <div class="retention-heading row-flex-container align-items-center gap">
+        <span class="material-icons-outlined retention-icon retention-icon--warning">archive</span>
+        <div class="col-flex-container">
+          <span class="retention-title">Are you sure?</span>
+          <span class="retention-body">
+            Archive {{ course().code }}, {{ course().name }} using your current retention policy?
+          </span>
+        </div>
+      </div>
+
+      <div class="policy-summary">
+        <div><span>Scanned images</span><strong>{{ policy.scanned_image_retention_months }} months</strong></div>
+        <div><span>Exam records</span><strong>{{ policy.exam_record_retention_months }} months</strong></div>
+        <div>
+          <span>Aggregate analytics</span>
+          <strong>{{ policy.retain_anonymized_analytics ? 'Retained anonymously' : 'Removed' }}</strong>
+        </div>
+      </div>
+
+      @if (error) {
+        <div class="retention-error">{{ error }}</div>
+      }
+
+      <div class="retention-actions retention-actions--confirm row-flex-container gap">
+        <button class="action-btn action-btn--sm action-btn--outline" [disabled]="isWorking" (click)="cancel.emit()">No</button>
+        <button class="action-btn action-btn--sm action-btn--outline grow" [disabled]="isWorking" (click)="changePolicy()">
+          Change Retention Policy
+        </button>
+        <button class="action-btn action-btn--danger" [disabled]="isWorking" (click)="confirmArchive()">
+          {{ isWorking ? 'Archiving...' : (requiresActiveOverride ? 'Archive Anyway' : 'Yes') }}
+        </button>
+      </div>
+    }
+  </div>
+</div>

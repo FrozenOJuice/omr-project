@@ -1,0 +1,208 @@
+<div class="modal-card card col-flex-container">
+
+    <div class="modal-header row-flex-container align-items-center">
+        <div class="col-flex-container">
+            <span class="modal-title">Upload Scans</span>
+            <span class="modal-subtitle">{{ exam.name }}</span>
+        </div>
+        <button class="icon-btn icon-btn--danger" (click)="close.emit()">
+            <span class="material-icons-outlined">close</span>
+        </button>
+    </div>
+
+    @if (wizardStep) {
+        <app-wizard-steps [current]="wizardStep" />
+    }
+
+    @if (allScans().length > 0 || scanListError()) {
+        <div class="scan-list col-flex-container">
+            <div class="scan-list-header row-flex-container align-items-center">
+                <span class="scan-list-title">Uploaded scans</span>
+                <div class="row-flex-container align-items-center">
+                    <button
+                        class="action-btn action-btn--sm action-btn--danger"
+                        [disabled]="allScans().length === 0"
+                        (click)="confirmDeleteAll()"
+                    >
+                        Delete All
+                    </button>
+                    <button class="icon-btn icon-btn--ghost" title="Refresh scans" (click)="loadScans()">
+                        <span class="material-icons-outlined">refresh</span>
+                    </button>
+                </div>
+            </div>
+            @if (scanListError()) {
+                <span class="error-text">{{ scanListError() }}</span>
+            }
+            <span class="scan-help">Scans can be downloaded for inspection, deleted, and replaced with a corrected upload.</span>
+            @if (duplicateConflictCount > 0) {
+                <div class="duplicate-warning row-flex-container gap" role="alert">
+                    <span class="material-icons-outlined">warning</span>
+                    <span>
+                        {{ duplicateConflictCount }}
+                        {{ duplicateConflictCount === 1 ? 'scan may duplicate' : 'scans may duplicate' }}
+                        another result for the same student. Review the flagged results before
+                        releasing grades.
+                    </span>
+                </div>
+            }
+            <div class="scan-list-items col-flex-container">
+                @for (scan of allScans(); track scan.id) {
+                    <div class="scan-row row-flex-container align-items-center gap">
+                        <div class="col-flex-container grow scan-info">
+                            <span class="scan-name">{{ scanFileName(scan) }}</span>
+                            <span class="scan-meta">
+                                {{ scan.page_count || 'Unknown' }} page{{ scan.page_count === 1 ? '' : 's' }}
+                                @if (scan.batch_index) {
+                                    <span>&nbsp;&middot;&nbsp;Batch item {{ scan.batch_index }}</span>
+                                }
+                            </span>
+                        </div>
+                        <span
+                            class="status-badge"
+                            [class.tag-green]="scan.status === 'completed'"
+                            [class.tag-red]="scan.status === 'failed'"
+                            [class.tag-blue]="scan.status === 'pending'"
+                        >
+                            {{ scanStatusLabel(scan) }}
+                        </span>
+                        <button class="icon-btn icon-btn--ghost" title="Download scan" (click)="downloadScan(scan)">
+                            <span class="material-icons-outlined">download</span>
+                        </button>
+                        <button
+                            class="icon-btn icon-btn--ghost delete-btn"
+                            title="Delete scan"
+                            [disabled]="deletingScanId() === scan.id"
+                            (click)="deleteScan(scan)"
+                        >
+                            <span class="material-icons-outlined">delete</span>
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (!uploadSuccess()) {
+        <div class="col-flex-container form-body">
+
+            <label class="file-drop col-flex-container align-items-center" [class.has-file]="files().length > 0">
+                <span class="material-icons-outlined file-icon">{{ files().length > 0 ? 'picture_as_pdf' : 'upload_file' }}</span>
+                @if (files().length === 0) {
+                    <span class="file-label">Choose PDF files</span>
+                } @else if (files().length === 1) {
+                    <span class="file-label">{{ files()[0].name }}</span>
+                    <span class="file-size">{{ (files()[0].size / (1024 * 1024)).toFixed(2) }} MB</span>
+                } @else {
+                    <span class="file-label">{{ files().length }} files selected</span>
+                    <span class="file-size">{{ (totalFileSize() / (1024 * 1024)).toFixed(2) }} MB total</span>
+                }
+                <input type="file" accept=".pdf" multiple (change)="onFileChange($event)" class="file-input" />
+            </label>
+
+            @if (isUploading() && uploadProgress() > 0) {
+                <div class="progress-wrap col-flex-container">
+                    <div class="progress-track">
+                        <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+                    </div>
+                    <span class="progress-label">{{ uploadProgress() }}%</span>
+                </div>
+            }
+
+            @if (uploadError()) {
+                <span class="error-text">{{ uploadError() }}</span>
+            }
+
+            <div class="row-flex-container gap">
+                @if (wizardStep) {
+                    <button class="icon-btn" title="Back to answer key" (click)="backRequested.emit()">
+                        <span class="material-icons-outlined">arrow_back</span>
+                    </button>
+                }
+                @if (files().length > 0) {
+                    <button class="action-btn action-btn--sm action-btn--outline" (click)="clearFile()">
+                        Clear
+                    </button>
+                }
+                <button
+                    class="action-btn action-btn--sm"
+                    [disabled]="files().length === 0 || isUploading()"
+                    (click)="upload()"
+                >
+                    <span class="material-icons-outlined">upload</span>
+                    {{ isUploading() ? 'Uploading...' : 'Upload' }}
+                </button>
+            </div>
+
+        </div>
+    } @else {
+        <div class="success-state col-flex-container align-items-center">
+            <span
+                class="material-icons-outlined success-icon"
+                [class.success-icon--pending]="processingIcon() === 'sync'"
+                [class.success-icon--failed]="anyFailed()"
+            >
+                {{ processingIcon() }}
+            </span>
+            <span class="success-title">
+                @if (justUploaded()) {
+                    {{ uploadedScans().length > 1 ? uploadedScans().length + ' scans uploaded successfully' : 'Scan uploaded successfully' }}
+                } @else {
+                    {{ uploadedScans().length > 1 ? uploadedScans().length + ' scans on file' : 'Scan on file' }}
+                }
+            </span>
+            @if (uploadedScans().length > 0) {
+                <span
+                    class="success-subtitle"
+                    [class.success-subtitle--failed]="anyFailed()"
+                >
+                    {{ processingMessage() }}
+                </span>
+            }
+        </div>
+        <div class="row-flex-container gap">
+            @if (wizardStep) {
+                <button class="icon-btn" title="Back to answer key" (click)="backRequested.emit()">
+                    <span class="material-icons-outlined">arrow_back</span>
+                </button>
+            }
+            <button class="action-btn action-btn--sm action-btn--outline" (click)="clearFile()">
+                Upload Another
+            </button>
+            @if (allCompleted()) {
+                <button class="action-btn action-btn--sm action-btn--outline" (click)="refreshRequested.emit()">
+                    Refresh Exams
+                </button>
+            }
+            <button class="action-btn action-btn--sm" (click)="close.emit()">
+                Done
+            </button>
+        </div>
+    }
+
+    @if (confirmingDeleteAll()) {
+        <div class="modal-overlay" (click)="cancelDeleteAll()">
+            <div class="card confirm-card col-flex-container" (click)="$event.stopPropagation()" role="alertdialog" aria-modal="true">
+                <div class="row-flex-container align-items-center gap">
+                    <span class="material-icons-outlined confirm-icon">warning</span>
+                    <div class="col-flex-container">
+                        <span class="confirm-title">Delete All Scans?</span>
+                        <span class="confirm-body">
+                            All {{ allScans().length }} uploaded scan{{ allScans().length === 1 ? '' : 's' }} for this exam,
+                            and any markings and grades derived from them, will be permanently removed. This can't be undone.
+                        </span>
+                    </div>
+                </div>
+                <div class="row-flex-container confirm-actions gap">
+                    <button class="action-btn action-btn--sm action-btn--outline grow" [disabled]="isDeletingAll()" (click)="cancelDeleteAll()">
+                        Cancel
+                    </button>
+                    <button class="action-btn action-btn--danger grow" [disabled]="isDeletingAll()" (click)="executeDeleteAll()">
+                        {{ isDeletingAll() ? 'Deleting...' : 'Delete All' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

@@ -1,0 +1,86 @@
+<div class="card user-table-card col-flex-container">
+    <div class="table-header row-flex-container align-items-center">
+        <span class="card-title">User Management</span>
+        <button class="action-btn action-btn--sm" (click)="createUser.emit()">
+            <span class="material-icons-outlined">person_add</span>
+            New User
+        </button>
+    </div>
+
+    <div class="table-controls row-flex-container align-items-center">
+        <div class="search-wrapper">
+            <span class="material-icons-outlined search-icon">search</span>
+            <input
+                class="search-input"
+                type="search"
+                placeholder="Search users..."
+                [(ngModel)]="search"
+                (ngModelChange)="onSearchInput()"
+            />
+        </div>
+
+        <select class="filter-dropdown" [(ngModel)]="role" (change)="applyFilters()" aria-label="Filter by role">
+            @for (roleOption of roles; track roleOption) {
+                <option [ngValue]="roleOption">{{ roleOption || 'All roles' }}</option>
+            }
+        </select>
+
+        <select class="filter-dropdown" [(ngModel)]="status" (change)="applyFilters()" aria-label="Filter by status">
+            @for (statusOption of statuses; track statusOption) {
+                <option [ngValue]="statusOption">
+                    {{ !statusOption ? 'All statuses' : statusOption === 'active' ? 'Active' : 'Disabled' }}
+                </option>
+            }
+        </select>
+
+        <div class="table-control-actions row-flex-container">
+            <button class="action-btn action-btn--sm action-btn--outline" (click)="clearFilters()">
+                <span class="material-icons-outlined">filter_alt_off</span>
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <div class="user-table-container" [class.user-table-container--loading]="isLoading">
+        @if (users.length === 0) {
+            <div class="empty-state col-flex-container align-items-center">
+                <span class="material-icons-outlined empty-icon">person_search</span>
+                <span class="empty-title">No users found</span>
+            </div>
+        }
+        @for (user of users; track user.id) {
+            <app-admin-user-row
+                [user]="user"
+                [busy]="busyUserId === user.id"
+                (saveUser)="saveUser.emit($event)"
+                (forceLogout)="forceLogout.emit($event)"
+                (deleteUser)="deleteUser.emit($event)"
+                (resendSetupEmail)="resendSetupEmail.emit($event)"
+            />
+        }
+    </div>
+
+    <div class="pagination-row row-flex-container align-items-center">
+        <span class="pagination-label">{{ pageStart }}-{{ pageEnd }} of {{ total }}</span>
+        <div class="pagination-actions row-flex-container">
+            <button
+                class="icon-btn icon-btn--outline"
+                title="Previous page"
+                aria-label="Previous page"
+                [disabled]="!canGoPrevious"
+                (click)="previousPage()"
+            >
+                <span class="material-icons-outlined">chevron_left</span>
+            </button>
+            <button
+                class="icon-btn icon-btn--outline"
+                title="Next page"
+                aria-label="Next page"
+                [disabled]="!canGoNext"
+                (click)="nextPage()"
+            >
+                <span class="material-icons-outlined">chevron_right</span>
+            </button>
+        </div>
+    </div>
+</div>

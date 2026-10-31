@@ -1,0 +1,15 @@
+<div class="regrade-card row-flex-container gap">
+    <div class="regrade-info col-flex-container grow">
+        <span class="regrade-student">{{ request.student_name }}</span>
+        <span class="regrade-meta">{{ request.exam_name }}</span>
+        <span class="regrade-reason">{{ request.student_comment }}</span>
+    </div>
+    <div class="regrade-right col-flex-container align-content-center">
+        <span class="status-badge" [ngClass]="RegradeStatusClass[request.status]">{{ RegradeStatusLabel[request.status] }}</span>
+        <span class="regrade-date" [title]="request.created_at | date:'medium'">{{ request.created_at | date:'MMM d, y' }}</span>
+    </div>
+
+    <button class="icon-btn icon-btn--lg view-btn" title="Open in Re-grade Requests" (click)="redirectToRequest()">
+        <span class="material-icons-outlined">read_more</span>
+    </button>
+</div>

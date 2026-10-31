@@ -1,0 +1,486 @@
+<div class="stats-overlay" (click)="goBack()">
+  <main
+    class="exam-stats-dialog"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'Statistics for ' + (exam?.name ?? 'exam')"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="popup-header row-flex-container align-items-center gap">
+      <span class="exam-context">{{ exam?.name ?? 'Loading exam...' }}</span>
+      <span class="grow"></span>
+      <button class="icon-btn icon-btn--ghost" title="Close statistics" (click)="goBack()">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </header>
+
+    @if (releaseError) {
+      <section class="feedback-panel feedback-panel--error col-flex-container" aria-live="polite">
+        <span>{{ releaseError }}</span>
+        @if (releaseBlockers.length) {
+          <ul class="release-blockers-list">
+            @for (blocker of releaseBlockers; track blocker.id) {
+              <li>
+                {{ blocker.type === 'grade' ? 'Grade' : 'Scan' }} flagged:
+                {{ blocker.reason || 'unresolved' }}
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    <nav class="results-tabs row-flex-container gap" aria-label="Exam statistics sections">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-btn--active]="resultsTab === 'stats'"
+        (click)="selectResultsTab('stats')"
+      >
+        Overview
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-btn--active]="resultsTab === 'questions'"
+        (click)="selectResultsTab('questions')"
+      >
+        Questions
+      </button>
+    </nav>
+
+    @if (resultsTab === 'stats') {
+      <section class="stats-section overview-section">
+        @if (isLoadingStats) {
+          <div class="stats-empty">Loading statistics...</div>
+        } @else if (statsError) {
+          <div class="stats-empty">{{ statsError }}</div>
+        } @else if (examStats) {
+          <div class="graph-panel">
+            <div class="graph-toolbar row-flex-container align-items-center gap">
+              <div class="col-flex-container grow">
+                <span class="panel-label">Score distribution</span>
+                <span class="muted-text"
+                  >Actual submissions grouped into ten-point score ranges.</span
+                >
+              </div>
+              <div class="segmented-control" aria-label="Distribution graph type">
+                <button
+                  type="button"
+                  [class.active]="overviewGraphMode === 'line'"
+                  (click)="setOverviewGraphMode('line')"
+                >
+                  Line graph
+                </button>
+                <button
+                  type="button"
+                  [class.active]="overviewGraphMode === 'bar'"
+                  (click)="setOverviewGraphMode('bar')"
+                >
+                  Bar graph
+                </button>
+              </div>
+            </div>
+
+            @if (examStats.score_distribution.length) {
+              <div class="distribution-chart">
+                <span class="distribution-y-label">Submissions</span>
+                <div class="distribution-plot">
+                  <span class="distribution-y-tick distribution-y-tick--top">{{
+                    distributionMaxCount
+                  }}</span>
+                  <span class="distribution-y-tick distribution-y-tick--middle">{{
+                    distributionMaxCount / 2
+                  }}</span>
+                  <span class="distribution-y-tick distribution-y-tick--bottom">0</span>
+                  <svg
+                    viewBox="0 0 1000 200"
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label="Submission count by score range"
+                  >
+                    <line class="distribution-gridline" x1="0" x2="1000" y1="40" y2="40" />
+                    <line class="distribution-gridline" x1="0" x2="1000" y1="107.5" y2="107.5" />
+                    <line class="distribution-axis" x1="0" x2="1000" y1="175" y2="175" />
+                    @if (overviewGraphMode === 'line') {
+                      <path class="distribution-line" [attr.d]="distributionLinePath" />
+                    } @else {
+                      @for (
+                        bucket of examStats.score_distribution;
+                        track bucket.lower_bound;
+                        let index = $index
+                      ) {
+                        <rect
+                          class="distribution-bar"
+                          [attr.x]="distributionX(index) - 32"
+                          [attr.y]="distributionY(bucket.count)"
+                          width="64"
+                          [attr.height]="175 - distributionY(bucket.count)"
+                          rx="5"
+                        />
+                      }
+                    }
+                  </svg>
+
+                  @for (
+                    bucket of examStats.score_distribution;
+                    track bucket.lower_bound;
+                    let index = $index
+                  ) {
+                    <button
+                      type="button"
+                      class="distribution-point app-tooltip"
+                      [class.distribution-point--bar]="overviewGraphMode === 'bar'"
+                      [class.app-tooltip--start]="index === 0"
+                      [class.app-tooltip--end]="index === examStats.score_distribution.length - 1"
+                      [style.left.%]="distributionX(index) / 10"
+                      [style.top.%]="(distributionY(bucket.count) / 200) * 100"
+                      [attr.aria-label]="
+                        bucket.label +
+                        ': ' +
+                        bucket.count +
+                        ' submissions, ' +
+                        bucket.percentage +
+                        '%'
+                      "
+                    >
+                      <span class="distribution-count">{{ bucket.count }}</span>
+                      <span class="distribution-dot"></span>
+                      <span class="app-tooltip__content" role="tooltip">
+                        <strong>{{ bucket.label }}</strong>
+                        <span>{{ bucket.count }} of {{ examStats.graded_count }} submissions</span>
+                        <span>{{ bucket.percentage }}% of the class</span>
+                      </span>
+                    </button>
+                  }
+                </div>
+                <div class="distribution-labels" aria-hidden="true">
+                  @for (bucket of examStats.score_distribution; track bucket.lower_bound) {
+                    <span>{{ bucket.label }}</span>
+                  }
+                </div>
+                <span class="distribution-x-label">Score range</span>
+              </div>
+            } @else {
+              <div class="graph-empty">No graded scores to chart yet.</div>
+            }
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-tile">
+              <span class="stat-label">Graded</span
+              ><span class="stat-value">{{ examStats.graded_count }}</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-label">Average</span
+              ><span class="stat-value">{{ formatStat(examStats.mean_percentage, '%') }}</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-label">Median score</span
+              ><span class="stat-value">{{ formatStat(examStats.median_score) }}</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-label">Percentage std. dev.</span
+              ><span class="stat-value">{{
+                formatStat(examStats.standard_deviation_percentage, '%')
+              }}</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-label">Min</span
+              ><span class="stat-value">{{ formatStat(examStats.min_percentage, '%') }}</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-label">First quartile</span
+              ><span class="stat-value">{{ formatStat(examStats.q1_percentage, '%') }}</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-label">Median</span
+              ><span class="stat-value">{{ formatStat(examStats.median_percentage, '%') }}</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-label">Third quartile</span
+              ><span class="stat-value">{{ formatStat(examStats.q3_percentage, '%') }}</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-label">Max</span
+              ><span class="stat-value">{{ formatStat(examStats.max_percentage, '%') }}</span>
+            </div>
+          </div>
+        }
+
+        @if (examStats && examStats.version_stats.length > 1) {
+          <section class="version-overview">
+            <span class="panel-label">Version comparison</span>
+            @if (versionComparisonInsights.length) {
+              <div class="version-insights col-flex-container">
+                @for (insight of versionComparisonInsights; track insight) {
+                  <span>{{ insight }}</span>
+                }
+              </div>
+            }
+            <div class="version-comparison-grid">
+              @for (version of examStats.version_stats; track version.exam_version ?? 'single') {
+                <article class="question-row version-comparison-card">
+                  <div class="question-summary">
+                    <span class="question-title">{{ formatExamVersion(version.exam_version) }}</span>
+                    <span class="question-meta">{{ version.graded_count }} submissions</span>
+                    <span class="question-percent">{{ formatStat(version.mean_percentage, '%') }} mean</span>
+                  </div>
+                  <div class="version-metrics">
+                    <div class="stat-tile question-metric">
+                      <span class="stat-label"
+                        >Avg. difficulty
+                        <span class="app-tooltip app-tooltip--start" tabindex="0"
+                          ><span class="material-icons-outlined metric-help">help_outline</span
+                          ><span class="app-tooltip__content"
+                            ><span
+                              >This shows how often students answered correctly; higher values
+                              mean an easier question.</span
+                            ><strong>Target ranges</strong><span>0.80: Good upper target</span
+                            ><span>0.30-0.79: Typical</span><span>Below 0.30: Difficult</span
+                            ><span>0.00: Too hard or mis-keyed</span></span
+                          ></span
+                        >
+                      </span>
+                      <span class="stat-value">{{
+                        formatIndex(version.average_item_difficulty)
+                      }}</span>
+                    </div>
+                    <div class="stat-tile question-metric">
+                      <span class="stat-label"
+                        >Avg. discrimination
+                        <span class="app-tooltip" tabindex="0"
+                          ><span class="material-icons-outlined metric-help">help_outline</span
+                          ><span class="app-tooltip__content"
+                            ><span
+                              >This shows how well the question separates stronger and weaker
+                              overall performance.</span
+                            ><strong>Target ranges</strong><span>0.40+: Strong</span
+                            ><span>0.30-0.39: Good</span><span>0.20-0.29: Marginal</span
+                            ><span>Below 0.20: Review</span></span
+                          ></span
+                        >
+                      </span>
+                      <span class="stat-value">{{
+                        formatIndex(version.average_discrimination_index)
+                      }}</span>
+                    </div>
+                    <div class="stat-tile question-metric">
+                      <span class="stat-label"
+                        >Avg. distractors
+                        <span class="app-tooltip app-tooltip--end" tabindex="0"
+                          ><span class="material-icons-outlined metric-help">help_outline</span
+                          ><span class="app-tooltip__content"
+                            ><span
+                              >This shows how many incorrect options attracted plausible responses
+                              instead of being ignored.</span
+                            ><strong>Target ranges</strong><span>0.75+: Strong</span
+                            ><span>0.50-0.74: Acceptable</span
+                            ><span>Below 0.50: Review</span></span
+                          ></span
+                        >
+                      </span>
+                      <span class="stat-value">{{
+                        formatIndex(version.average_distractor_efficiency)
+                      }}</span>
+                    </div>
+                    <div class="stat-tile question-metric"><span class="stat-label">Difficult questions</span><span class="stat-value">{{ version.difficult_question_count }}</span></div>
+                    <div class="stat-tile question-metric"><span class="stat-label">Fairness flags</span><span class="stat-value">{{ version.low_discrimination_question_count }}</span></div>
+                    <div class="stat-tile question-metric"><span class="stat-label">Weak distractors</span><span class="stat-value">{{ version.weak_distractor_question_count }}</span></div>
+                  </div>
+                </article>
+              }
+            </div>
+          </section>
+        }
+
+        <button
+          type="button"
+          class="comparison-card"
+          [disabled]="!exam?.course_id"
+          (click)="openCourseComparison()"
+        >
+          <span class="material-icons-outlined">compare_arrows</span>
+          <span><strong>Compare results with other courses</strong><small>Open historical course performance</small></span>
+        </button>
+      </section>
+    } @else if (resultsTab === 'questions') {
+      <section class="stats-section questions-section">
+        <div class="section-toolbar row-flex-container align-items-center gap">
+          <div class="version-selector row-flex-container align-items-center gap grow">
+            <span class="question-meta">Exam version</span>
+            @for (
+              version of examStats?.version_stats ?? [];
+              track version.exam_version ?? 'single'
+            ) {
+              <button
+                type="button"
+                class="version-btn"
+                [class.version-btn--active]="selectedQuestionVersion === version.exam_version"
+                (click)="selectQuestionVersion(version.exam_version)"
+              >
+                {{ formatExamVersion(version.exam_version) }} ({{ version.graded_count }})
+              </button>
+            }
+          </div>
+          <div class="row-flex-container gap">
+            <button
+              type="button"
+              class="action-btn action-btn--sm action-btn--outline"
+              [disabled]="allQuestionsExpanded"
+              (click)="setAllQuestionsExpanded(true)"
+            >
+              Expand all
+            </button>
+            <button
+              type="button"
+              class="action-btn action-btn--sm action-btn--outline"
+              [disabled]="expandedQuestions.size === 0"
+              (click)="setAllQuestionsExpanded(false)"
+            >
+              Collapse all
+            </button>
+          </div>
+        </div>
+
+        @if (isLoadingStats) {
+          <div class="stats-empty">Loading question statistics...</div>
+        } @else if (statsError) {
+          <div class="stats-empty">{{ statsError }}</div>
+        } @else if (selectedQuestionVersionStats; as versionStats) {
+          @if (versionStats.question_stats.length === 0) {
+            <div class="stats-empty">
+              No question statistics for {{ formatExamVersion(versionStats.exam_version) }} yet.
+            </div>
+          } @else {
+            <div class="question-list">
+              @for (question of versionStats.question_stats; track question.question_number) {
+                <article
+                  class="question-row question-analysis-row"
+                  [class.question-row--expanded]="isQuestionExpanded(question.question_number)"
+                >
+                  <button
+                    type="button"
+                    class="question-toggle"
+                    [attr.aria-expanded]="isQuestionExpanded(question.question_number)"
+                    (click)="toggleQuestion(question.question_number)"
+                  >
+                    <span class="question-title">Question {{ question.question_number }}</span>
+                    <span class="question-warning">
+                      @if (questionWarningLevel(question); as warning) {
+                        <span class="material-icons-outlined">{{
+                          warning === 'danger' ? 'error_outline' : 'warning_amber'
+                        }}</span>
+                        <span>{{ questionWarningMessage(question) }}</span>
+                      }
+                    </span>
+                    <span class="question-count">{{ question.correct_count }}/{{ question.graded_count }} correct</span>
+                    <span
+                      class="question-percent"
+                      [class.question-percent--warning]="
+                        questionWarningLevel(question) === 'warning'
+                      "
+                      [class.question-percent--danger]="questionWarningLevel(question) === 'danger'"
+                      >{{ question.correct_percentage }}% correct</span
+                    >
+                    <span class="material-icons-outlined expand-icon">{{
+                      isQuestionExpanded(question.question_number) ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
+                    }}</span>
+                  </button>
+
+                  @if (isQuestionExpanded(question.question_number)) {
+                    <div class="question-details">
+                      <div class="option-chart" aria-label="Answer selection by option">
+                        <span class="option-chart-title">Answer selections</span>
+                        @for (choice of question.answer_choices; track choice.answer) {
+                          <div class="option-row" [class.option-row--correct]="choice.is_correct">
+                            <span class="option-label">
+                              {{ choice.answer === 'blank' ? 'Blank' : choice.answer }}
+                              @if (choice.is_correct) {
+                                <span class="correct-label">Correct</span>
+                              }
+                            </span>
+                            <span class="option-track">
+                              <span
+                                class="option-fill"
+                                [style.width.%]="choice.selected_percentage"
+                              ></span>
+                            </span>
+                            <span class="option-value">
+                              {{ choice.selected_count }}
+                              <small>{{ choice.selected_percentage }}%</small>
+                            </span>
+                          </div>
+                        }
+                      </div>
+
+                      <div class="question-metrics">
+                        <div class="stat-tile question-metric">
+                          <span class="stat-label"
+                            >Item difficulty
+                            <span class="app-tooltip app-tooltip--start" tabindex="0"
+                              ><span class="material-icons-outlined metric-help">help_outline</span
+                              ><span class="app-tooltip__content"
+                                ><span
+                                  >This shows how often students answered correctly; higher values
+                                  mean an easier question.</span
+                                ><strong>Target ranges</strong><span>0.80: Good upper target</span
+                                ><span>0.30-0.79: Typical</span><span>Below 0.30: Difficult</span
+                                ><span>0.00: Too hard or mis-keyed</span></span
+                              ></span
+                            >
+                          </span>
+                          <span class="stat-value">{{
+                            formatIndex(question.item_difficulty)
+                          }}</span>
+                        </div>
+                        <div class="stat-tile question-metric">
+                          <span class="stat-label"
+                            >Discrimination
+                            <span class="app-tooltip" tabindex="0"
+                              ><span class="material-icons-outlined metric-help">help_outline</span
+                              ><span class="app-tooltip__content"
+                                ><span
+                                  >This shows how well the question separates stronger and weaker
+                                  overall performance.</span
+                                ><strong>Target ranges</strong><span>0.40+: Strong</span
+                                ><span>0.30-0.39: Good</span><span>0.20-0.29: Marginal</span
+                                ><span>Below 0.20: Review</span></span
+                              ></span
+                            >
+                          </span>
+                          <span class="stat-value">{{
+                            formatIndex(question.discrimination_index)
+                          }}</span>
+                        </div>
+                        <div class="stat-tile question-metric">
+                          <span class="stat-label"
+                            >Distractor efficiency
+                            <span class="app-tooltip app-tooltip--end" tabindex="0"
+                              ><span class="material-icons-outlined metric-help">help_outline</span
+                              ><span class="app-tooltip__content"
+                                ><span
+                                  >This shows how many incorrect options attracted plausible
+                                  responses instead of being ignored.</span
+                                ><strong>Target ranges</strong><span>0.75+: Strong</span
+                                ><span>0.50-0.74: Acceptable</span
+                                ><span>Below 0.50: Review</span></span
+                              ></span
+                            >
+                          </span>
+                          <span class="stat-value">{{
+                            formatIndex(question.distractor_efficiency)
+                          }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </article>
+              }
+            </div>
+          }
+        }
+      </section>
+    }
+  </main>
+</div>

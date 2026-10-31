@@ -1,0 +1,117 @@
+.score-boxplot {
+    gap: 0.4em;
+    padding: 0.6em 0.75em;
+    flex-shrink: 0;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    background: var(--primary-darkened);
+    box-sizing: border-box;
+}
+
+.boxplot-header {
+    gap: 0.5em;
+}
+
+.boxplot-title {
+    font-weight: 700;
+    font-size: 0.85em;
+}
+
+.boxplot-subtitle {
+    font-size: 0.75em;
+    opacity: 0.6;
+}
+
+.boxplot-svg {
+    width: 100%;
+    height: auto;
+}
+
+.boxplot-tick-label {
+    fill: var(--color-text);
+    opacity: 0.55;
+    font-size: 9px;
+}
+
+.boxplot-whisker,
+.boxplot-cap {
+    stroke: var(--color-text);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.5;
+}
+
+.boxplot-box {
+    fill: color-mix(in oklab, var(--color-text), transparent 90%);
+    stroke: var(--color-text);
+    stroke-width: 2;
+    opacity: 0.7;
+}
+
+.boxplot-median {
+    stroke: var(--color-text);
+    stroke-width: 2;
+    opacity: 0.85;
+}
+
+/* A stroked halo in the surface color, not a separate filled disc: enough
+   to keep the dot legible where it crosses the whisker or box, without
+   fully covering a cap that happens to land at the same spot (min/max
+   highlighted score). */
+.boxplot-highlight {
+    fill: var(--highlight3);
+    stroke: var(--primary-darkened);
+    stroke-width: 1.5;
+}
+
+.boxplot-summary-point {
+    fill: var(--primary-darkened);
+    stroke: var(--color-text);
+    stroke-width: 1.5;
+    opacity: 0.75;
+    cursor: pointer;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 120ms ease, fill 120ms ease, opacity 120ms ease;
+}
+
+.boxplot-summary-point:hover,
+.boxplot-summary-point:focus-visible,
+.boxplot-summary-point--active {
+    fill: var(--highlight2);
+    opacity: 1;
+    outline: none;
+    transform: scale(1.45);
+}
+
+.boxplot-summary {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.25em;
+}
+
+.boxplot-summary-item {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.08em;
+    padding: 0.22em 0.1em;
+    border-radius: 0.35em;
+    transition: background 120ms ease, color 120ms ease;
+}
+
+.boxplot-summary-item--active {
+    color: var(--color-button-text, white);
+    background: var(--highlight2);
+}
+
+.boxplot-summary-label {
+    font-size: 0.62em;
+    opacity: 0.65;
+}
+
+.boxplot-summary-value {
+    font-size: 0.7em;
+    font-weight: 700;
+}

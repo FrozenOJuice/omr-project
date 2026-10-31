@@ -1,0 +1,170 @@
+<div class="modal-card card col-flex-container">
+  <div class="modal-header row-flex-container align-items-center">
+    <span class="modal-title">{{ isEditMode ? 'Edit Course' : 'New Course' }}</span>
+    <button class="icon-btn icon-btn--danger" (click)="close.emit()">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="col-flex-container modal-body">
+    <div class="field col-flex-container">
+      <label class="field-label" for="course-code">Course Code</label>
+      <input
+        id="course-code"
+        type="text"
+        class="field-input"
+        [class.invalid]="code.trim().length > 0 && !codeValid"
+        placeholder="e.g. COSC 304"
+        [(ngModel)]="code"
+      />
+      @if (code.trim().length > 0 && !codeValid) {
+        <span class="field-hint">Format: 2-4 letters, a space, then 2-4 digits and an optional letter (e.g. CS 12, COSC 304, MATH 100A)</span>
+      }
+    </div>
+
+    <div class="field col-flex-container">
+      <label class="field-label" for="course-name">Course Name</label>
+      <input
+        id="course-name"
+        type="text"
+        class="field-input"
+        placeholder="e.g. Introduction to Database Systems"
+        [(ngModel)]="name"
+      />
+    </div>
+
+    <div class="field col-flex-container">
+      <label class="field-label" for="course-year">Academic Year Starts</label>
+      <input
+        id="course-year"
+        type="number"
+        class="field-input"
+        min="2000"
+        max="2100"
+        [(ngModel)]="academicYearStart"
+      />
+    </div>
+
+    <div class="field col-flex-container">
+      <label class="field-label" for="course-term">Term</label>
+      <select
+        id="course-term"
+        class="field-input field-select"
+        [ngModel]="academicTermId"
+        (ngModelChange)="onTermSelection($event)"
+        [disabled]="isLoadingTerms"
+      >
+        <option value="" disabled>
+          {{ isLoadingTerms ? 'Loading terms...' : 'Select a term' }}
+        </option>
+        @for (term of selectableTerms; track term.id) {
+          <option [value]="term.id">
+            {{ termLabel(term)
+            }}{{
+              isCurrentTermFromAnotherInstitution(term)
+                ? ' (Current course term)'
+                : !term.is_active
+                  ? ' (Archived)'
+                  : ''
+            }}
+          </option>
+        }
+        <option value="__manage_terms__">Create custom term…</option>
+      </select>
+      @if (termsError) {
+        <span class="error-text">{{ termsError }}</span>
+      }
+    </div>
+
+    @if (error) {
+      <span class="error-text">{{ error }}</span>
+    }
+  </div>
+
+  <div class="modal-footer row-flex-container">
+    <button class="action-btn" [disabled]="!canSubmit || isLoading" (click)="submit()">
+      {{
+        isLoading
+          ? isEditMode
+            ? 'Saving...'
+            : 'Creating...'
+          : isEditMode
+            ? 'Save Changes'
+            : 'Create Course'
+      }}
+    </button>
+  </div>
+</div>
+
+@if (showCustomTermDialog) {
+  <div class="inline-dialog-overlay" (click)="closeCustomTermDialog()">
+    <div
+      class="inline-dialog card col-flex-container"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="custom-term-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header row-flex-container align-items-center">
+        <span class="modal-title" id="custom-term-title">Create custom term</span>
+        <button
+          class="icon-btn icon-btn--danger"
+          [disabled]="isCreatingCustomTerm"
+          (click)="closeCustomTermDialog()"
+        >
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+
+      @if (termInstitution === 'ubc') {
+        <span class="dialog-description">This term will be available to your UBC courses.</span>
+      } @else {
+        <span class="dialog-description"
+          >This term will be available when your institution is set to None.</span
+        >
+      }
+
+      <label class="field col-flex-container">
+        <span class="field-label">Term name</span>
+        <input
+          class="field-input"
+          type="text"
+          [(ngModel)]="customTermName"
+          placeholder="e.g. Fall Intensive"
+          [disabled]="isCreatingCustomTerm"
+          (keyup.enter)="createCustomTerm()"
+        />
+      </label>
+
+      <label class="field col-flex-container">
+        <span class="field-label">Year display</span>
+        <select
+          class="field-input field-select"
+          [(ngModel)]="customTermYearFormat"
+          [disabled]="isCreatingCustomTerm"
+        >
+          @for (option of yearFormatOptions; track option.value) {
+            <option [value]="option.value">{{ yearFormatLabel(option.value) }}</option>
+          }
+        </select>
+      </label>
+
+      @if (customTermError) {
+        <span class="error-text">{{ customTermError }}</span>
+      }
+
+      <div class="modal-footer row-flex-container gap">
+        <button
+          class="action-btn action-btn--outline"
+          [disabled]="isCreatingCustomTerm"
+          (click)="closeCustomTermDialog()"
+        >
+          Cancel
+        </button>
+        <button class="action-btn" [disabled]="!canCreateCustomTerm" (click)="createCustomTerm()">
+          {{ isCreatingCustomTerm ? 'Creating...' : 'Create term' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

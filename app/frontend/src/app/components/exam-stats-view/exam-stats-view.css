@@ -1,0 +1,657 @@
+:host {
+  display: block;
+}
+
+.stats-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  padding: 3vh 3vw;
+  background: color-mix(in oklab, black, transparent 42%);
+}
+
+.exam-stats-dialog {
+  box-sizing: border-box;
+  width: min(96vw, 100rem);
+  height: min(94vh, 70rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--color-text);
+  background: var(--primary);
+  border: var(--border-size) solid var(--color-border);
+  border-radius: calc(var(--card-border-radius) * 1.5);
+  box-shadow: 0 1.5em 4em rgb(0 0 0 / 28%);
+}
+
+.popup-header {
+  min-height: 3.25em;
+  padding: 0.45em 1.15em;
+  border-bottom: var(--border-size) solid var(--color-border);
+}
+
+.exam-context,
+.panel-label,
+.stats-section-title,
+.question-title {
+  font-weight: 700;
+}
+
+.exam-context {
+  font-size: 0.92em;
+}
+
+.results-tabs {
+  flex: 0 0 auto;
+  padding: 0 1.25em;
+  border-bottom: var(--border-size) solid var(--color-border);
+}
+
+.tab-btn {
+  padding: 0.75em 0.15em;
+  margin-bottom: calc(-1 * var(--border-size));
+  color: var(--color-text);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  opacity: 0.62;
+  cursor: pointer;
+}
+
+.tab-btn:hover,
+.tab-btn:focus-visible {
+  opacity: 0.9;
+}
+
+.tab-btn--active {
+  border-bottom-color: var(--highlight2);
+  opacity: 1;
+}
+
+.stats-section {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  overflow: auto;
+  padding: 1.15em 1.25em 1.35em;
+}
+
+.section-toolbar,
+.version-selector {
+  flex-wrap: wrap;
+}
+
+.muted-text,
+.question-meta {
+  font-size: 0.82em;
+  opacity: 0.68;
+}
+
+.feedback-panel {
+  margin: 0.75em 1.25em 0;
+  gap: 0.4em;
+  padding: 0.75em 0.9em;
+  border: var(--border-size) solid var(--color-border);
+  border-radius: var(--card-border-radius);
+}
+
+.feedback-panel--error,
+.correction-error {
+  color: color-mix(in oklab, var(--tag-red), black 15%);
+}
+
+.release-blockers-list {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.graph-panel {
+  padding: 1em 1.1em 0.65em;
+  border: var(--border-size) solid var(--color-border);
+  border-radius: var(--card-border-radius);
+  background: var(--primary-darkened);
+}
+
+.graph-toolbar {
+  flex-wrap: wrap;
+}
+
+.segmented-control {
+  display: inline-flex;
+  padding: 0.2em;
+  border: var(--border-size) solid color-mix(in oklab, var(--color-border), transparent 25%);
+  border-radius: var(--input-border-radius);
+  background: var(--primary);
+}
+
+.segmented-control button {
+  padding: 0.42em 0.7em;
+  color: var(--color-text);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--input-border-radius) * 0.75);
+  font: inherit;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.segmented-control button.active {
+  color: var(--color-button-text, white);
+  background: var(--highlight2);
+}
+
+.distribution-chart {
+  position: relative;
+  margin-top: 0.65em;
+}
+
+.distribution-plot {
+  position: relative;
+  height: clamp(12rem, 27vh, 17rem);
+  margin: 0 1em 0 3.2em;
+}
+
+.distribution-plot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.distribution-gridline,
+.distribution-axis {
+  stroke: color-mix(in oklab, var(--color-border), transparent 35%);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.distribution-axis {
+  stroke: color-mix(in oklab, var(--color-text), transparent 52%);
+}
+
+.distribution-line {
+  fill: none;
+  stroke: var(--highlight2);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.distribution-bar {
+  fill: color-mix(in oklab, var(--highlight2), transparent 24%);
+}
+
+.distribution-point {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.12em;
+  padding: 0;
+  color: var(--color-text);
+  background: none;
+  border: 0;
+  font: inherit;
+  transform: translate(-50%, -50%);
+  cursor: help;
+}
+
+.distribution-dot {
+  width: 0.62em;
+  height: 0.62em;
+  background: var(--primary);
+  border: 2px solid var(--highlight2);
+  border-radius: 50%;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.distribution-count {
+  position: absolute;
+  bottom: calc(100% + 0.18em);
+  min-width: 1.4em;
+  padding: 0.08em 0.25em;
+  border-radius: 0.4em;
+  background: var(--primary-darkened);
+  font-size: 0.7em;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.distribution-point--bar .distribution-dot {
+  opacity: 0;
+}
+
+.distribution-point:hover .distribution-dot,
+.distribution-point:focus-visible .distribution-dot {
+  transform: scale(1.35);
+  box-shadow: 0 0 0 0.35em color-mix(in oklab, var(--highlight2), transparent 72%);
+}
+
+.distribution-labels {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 0;
+  margin: -0.7em 1em 0 3.2em;
+  color: color-mix(in oklab, var(--color-text), transparent 33%);
+  font-size: 0.68em;
+  text-align: center;
+}
+
+.distribution-y-label,
+.distribution-x-label {
+  display: block;
+  color: color-mix(in oklab, var(--color-text), transparent 35%);
+  font-size: 0.72em;
+  font-weight: 600;
+  text-align: center;
+}
+
+.distribution-y-label {
+  position: absolute;
+  top: 50%;
+  left: -1.1em;
+  transform: rotate(-90deg) translateY(-50%);
+}
+
+.distribution-x-label {
+  margin-top: 0.35em;
+}
+
+.distribution-y-tick {
+  position: absolute;
+  left: -2.8em;
+  width: 2.2em;
+  font-size: 0.68em;
+  text-align: right;
+  opacity: 0.65;
+  transform: translateY(-50%);
+}
+
+.distribution-y-tick--top {
+  top: 20%;
+}
+
+.distribution-y-tick--middle {
+  top: 53.75%;
+}
+
+.distribution-y-tick--bottom {
+  top: 87.5%;
+}
+
+.graph-empty {
+  display: grid;
+  min-height: 12rem;
+  place-items: center;
+  opacity: 0.65;
+}
+
+.stats-grid {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(9, minmax(5.5rem, 1fr));
+  gap: 0.75em;
+  overflow-x: auto;
+}
+
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  padding: 0.8em;
+  border: var(--border-size) solid color-mix(in oklab, var(--color-border), transparent 48%);
+  border-radius: var(--card-border-radius);
+  background: color-mix(in oklab, var(--primary-darkened), var(--primary) 25%);
+}
+
+.stat-label {
+  font-size: 0.75em;
+  color: color-mix(in oklab, var(--color-text), transparent 35%);
+}
+
+.stat-value {
+  font-size: 1.2em;
+  font-weight: 700;
+}
+
+.version-insights,
+.comparison-card {
+  gap: 0.45em;
+  padding: 0.85em;
+  color: var(--color-text);
+  border: var(--border-size) solid color-mix(in oklab, var(--color-border), transparent 30%);
+  border-radius: var(--card-border-radius);
+  background: var(--primary-darkened);
+}
+
+.version-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+}
+
+.comparison-card {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.comparison-card > .material-icons-outlined {
+  color: var(--highlight2);
+}
+
+.comparison-card small {
+  display: block;
+  margin-top: 0.15em;
+  opacity: 0.68;
+}
+
+.version-btn {
+  padding: 0.43em 0.68em;
+  color: var(--color-text);
+  background: var(--primary);
+  border: var(--border-size) solid var(--color-border);
+  border-radius: var(--input-border-radius);
+  font: inherit;
+  font-size: 0.82em;
+  cursor: pointer;
+}
+
+.version-btn--active {
+  border-color: var(--highlight2);
+  background: color-mix(in oklab, var(--highlight2), transparent 88%);
+}
+
+.question-list {
+  column-count: 2;
+  column-gap: 0.75em;
+}
+
+.question-row {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 0.75em;
+  overflow: visible;
+  break-inside: avoid;
+  border: var(--border-size) solid var(--color-border);
+  border-radius: var(--card-border-radius);
+  background: var(--primary-darkened);
+}
+
+.question-row--expanded {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--highlight2), transparent 65%);
+}
+
+.question-toggle {
+  box-sizing: border-box;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  gap: 0.45em;
+  align-items: center;
+  padding: 0.85em;
+  color: var(--color-text);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.question-toggle:hover,
+.question-toggle:focus-visible {
+  background: color-mix(in oklab, var(--highlight2), transparent 94%);
+}
+
+.question-percent {
+  padding: 0.25em 0.45em;
+  border: 1px solid transparent;
+  border-radius: var(--input-border-radius);
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.question-percent--warning {
+  color: color-mix(in oklab, #a96900, var(--color-text) 15%);
+  background: color-mix(in oklab, #ffd54f, transparent 80%);
+  border-color: color-mix(in oklab, #d89a00, transparent 42%);
+}
+
+.question-percent--danger {
+  color: color-mix(in oklab, var(--tag-red), var(--color-text) 18%);
+  background: color-mix(in oklab, var(--tag-red), transparent 88%);
+  border-color: color-mix(in oklab, var(--tag-red), transparent 48%);
+}
+
+.question-warning {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  color: color-mix(in oklab, #a96900, var(--color-text) 15%);
+  font-size: 0.75em;
+  font-weight: 650;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.question-warning > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.question-count {
+  color: color-mix(in oklab, var(--color-text), transparent 25%);
+  font-size: 0.82em;
+  white-space: nowrap;
+}
+
+.question-warning--danger {
+  color: color-mix(in oklab, var(--tag-red), var(--color-text) 18%);
+}
+
+.question-warning .material-icons-outlined {
+  font-size: 1.15em;
+}
+
+.expand-icon {
+  justify-self: end;
+  width: 1.25em;
+  font-size: 1.15em;
+  opacity: 0.7;
+}
+
+.question-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  padding: 0.8em;
+  border-top: var(--border-size) solid color-mix(in oklab, var(--color-border), transparent 55%);
+}
+
+.option-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 0.65em;
+  border: var(--border-size) solid color-mix(in oklab, var(--color-border), transparent 58%);
+  border-radius: var(--input-border-radius);
+  background: color-mix(in oklab, var(--primary), transparent 8%);
+}
+
+.option-chart-title {
+  font-size: 0.78em;
+  font-weight: 700;
+}
+
+.option-row {
+  display: grid;
+  grid-template-columns: minmax(4.5em, auto) minmax(5em, 1fr) 4.25em;
+  gap: 0.55em;
+  align-items: center;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  font-size: 0.75em;
+  font-weight: 700;
+}
+
+.correct-label {
+  padding: 0.08em 0.3em;
+  color: color-mix(in oklab, var(--tag-green), var(--color-text) 25%);
+  border: 1px solid color-mix(in oklab, var(--tag-green), transparent 55%);
+  border-radius: 999px;
+  font-size: 0.82em;
+  font-weight: 600;
+}
+
+.option-track {
+  height: 0.72em;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-border), transparent 62%);
+}
+
+.option-fill {
+  display: block;
+  min-width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: color-mix(in oklab, var(--highlight2), transparent 22%);
+}
+
+.option-row--correct .option-fill {
+  background: color-mix(in oklab, var(--tag-green), transparent 20%);
+}
+
+.option-value {
+  font-size: 0.78em;
+  font-weight: 700;
+  text-align: right;
+}
+
+.option-value small {
+  display: block;
+  font-size: 0.85em;
+  font-weight: 500;
+  opacity: 0.68;
+}
+
+.question-metrics,
+.version-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5em;
+}
+
+.question-metric {
+  min-width: 0;
+  padding: 0.6em;
+}
+
+.question-metric .stat-value {
+  font-size: 1.02em;
+}
+
+.metric-help {
+  font-size: 1em;
+  vertical-align: -0.18em;
+}
+
+.version-insights span {
+  font-size: 0.85em;
+}
+
+.version-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75em;
+}
+
+.version-comparison-card {
+  padding: 0.85em;
+}
+
+.version-comparison-card .question-summary {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75em;
+  align-items: center;
+  margin-bottom: 0.7em;
+}
+
+.stats-empty {
+  padding: 2em;
+  border: var(--border-size) dashed var(--color-border);
+  border-radius: var(--card-border-radius);
+  text-align: center;
+  opacity: 0.68;
+}
+
+@media (max-width: 70em) {
+  .question-list {
+    column-count: 1;
+  }
+
+}
+
+@media (max-width: 52em) {
+  .version-comparison-grid,
+  .version-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 40em) {
+  .stats-overlay {
+    padding: 0;
+  }
+
+  .exam-stats-dialog {
+    width: 100vw;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .stats-section {
+    padding: 0.85em;
+  }
+
+  .results-tabs {
+    padding: 0 0.85em;
+  }
+
+  .version-comparison-card .question-summary,
+  .question-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .question-toggle {
+    gap: 0.35em;
+    padding: 0.7em;
+    font-size: 0.9em;
+  }
+}

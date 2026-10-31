@@ -1,0 +1,59 @@
+.sessions-card {
+    width: 100%;
+}
+
+.card-title {
+    font-size: 1.2em;
+    font-weight: 500;
+    margin-bottom: 0.5em;
+    flex-shrink: 0;
+}
+
+.sessions-container {
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+}
+
+.session-row {
+    border-bottom: var(--border-size) solid var(--color-border);
+    padding: 0.75em 1em;
+}
+
+.session-row.last {
+    border-bottom: none;
+}
+
+.session-name {
+    font-weight: 600;
+    font-size: 1em;
+    color: var(--color-text);
+}
+
+.session-email {
+    font-size: 0.8em;
+    opacity: 0.7;
+    margin-top: 0.1em;
+}
+
+.session-time {
+    font-size: 0.8em;
+    opacity: 0.6;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.empty-state {
+    gap: 0.5em;
+    padding: 3em 1em;
+    opacity: 0.5;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 2.5em;
+}
+
+.empty-title {
+    font-size: 1em;
+    font-weight: 600;
+}

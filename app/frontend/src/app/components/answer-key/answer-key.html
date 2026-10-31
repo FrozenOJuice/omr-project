@@ -1,0 +1,675 @@
+<div class="key-page card col-flex-container">
+  <div class="page-header row-flex-container align-items-center">
+    <div class="row-flex-container align-items-center gap grow">
+      <h1 class="page-title">Answer Keys</h1>
+      @if (courseName() || examName()) {
+        <span class="key-context">
+          @if (courseName()) { {{ courseName() }} }
+          @if (courseName() && examName()) { &middot; }
+          @if (examName()) { {{ examName() }} }
+        </span>
+      }
+      @if (template(); as t) {
+        @if (t.omr_template_id) {
+          <span class="status-badge tag-green">Registered with OMR</span>
+        }
+      }
+      @if (saved()) {
+        <span class="status-badge tag-green">Saved</span>
+      }
+    </div>
+    @if (wizardStep) {
+      <app-wizard-steps [current]="wizardStep" />
+    }
+    <button class="icon-btn icon-btn--danger" title="Close answer keys" (click)="close.emit()">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">Loading answer keys…</div>
+  } @else if (!template()) {
+    @if (error()) {
+      <div class="banner banner--error">{{ error() }}</div>
+    }
+  } @else {
+    <div class="key-layout col-flex-container gap">
+      @if (hasMultipleVersions()) {
+        @let collapsible = versionStripCollapsible();
+        @let isPeeking = collapsible && !versionStripExpanded();
+        <div class="card version-strip row-flex-container gap">
+          <div class="col-flex-container version-strip-label">
+            <span class="section-title">Exam versions</span>
+            <span class="muted">{{ completedVersionCount() }} of {{ versionSlots().length }} complete</span>
+            @if (collapsible && !isPeeking) {
+              <div class="version-legend col-flex-container">
+                <span class="version-legend-item"><i class="version-status-dot status-complete"></i> Complete</span>
+                <span class="version-legend-item"><i class="version-status-dot status-partial"></i> Saved draft</span>
+                <span class="version-legend-item"><i class="version-status-dot status-scanned"></i> Unsaved scan</span>
+              </div>
+            }
+          </div>
+
+          <div class="version-pills row-flex-container gap" [class.version-pills--collapsed]="isPeeking">
+            @for (slot of versionSlots(); track slot.version) {
+              <button type="button" class="version-pill"
+                [class.active]="selectedVersion() === slot.version"
+                [title]="slot.hasScannedDraft ? 'Scanned changes' : (slot.status === 'complete' ? 'Complete' : (slot.status === 'partial' ? 'In progress' : 'Not started'))"
+                (click)="selectVersion(slot.version)">
+                <span class="version-status-dot"
+                  [class.status-complete]="slot.status === 'complete'"
+                  [class.status-partial]="slot.status === 'partial'"
+                  [class.status-scanned]="slot.hasScannedDraft"></span>
+                {{ slot.label }}
+              </button>
+            }
+          </div>
+
+          @if (!collapsible) {
+            <div class="version-legend version-legend--inline row-flex-container align-items-center gap">
+              <span class="version-legend-item"><i class="version-status-dot status-complete"></i> Complete</span>
+              <span class="version-legend-item"><i class="version-status-dot status-partial"></i> Saved draft</span>
+              <span class="version-legend-item"><i class="version-status-dot status-scanned"></i> Unsaved scan</span>
+            </div>
+          }
+
+          @if (collapsible) {
+            <button type="button" class="version-fold-toggle"
+              [class.version-fold-toggle--open]="!isPeeking"
+              [title]="isPeeking ? 'Show all ' + versionSlots().length + ' versions' : 'Collapse'"
+              (click)="versionStripExpanded.set(!versionStripExpanded())">
+              <span class="version-fold-label">
+                {{ isPeeking ? '+' + versionStripHiddenCount() + ' more' : 'Collapse' }}
+              </span>
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+          }
+        </div>
+      }
+
+      <main class="key-main col-flex-container">
+
+    <div class="key-toolbar row-flex-container align-items-end gap">
+      <label class="field question-count-field">
+        <span class="field-label">Questions in this exam</span>
+        <div class="row-flex-container align-items-center gap">
+          <input type="number" min="1" [max]="questions().length" class="field-input tiny"
+            [disabled]="examGraded()"
+            [ngModel]="questionsUsed()" (ngModelChange)="setQuestionsUsed(+$event)" />
+          <span class="muted">of {{ questions().length }} available</span>
+        </div>
+      </label>
+
+      @if (copySources().length > 0) {
+        <label class="field copy-field">
+          <span class="field-label">Start from another key</span>
+          <div class="row-flex-container align-items-center gap">
+            <select class="field-input" [disabled]="examGraded()" [(ngModel)]="copySourceId">
+              <option value="" disabled>Select a version…</option>
+              @for (key of copySources(); track key.id) {
+                <option [value]="key.id">{{ versionLabel(key) }}</option>
+              }
+            </select>
+            <button type="button" class="action-btn action-btn--sm action-btn--outline"
+              [disabled]="!copySourceId || examGraded()" (click)="copyFromSelected()">Copy</button>
+          </div>
+        </label>
+      }
+
+      <span class="grow"></span>
+      <button type="button" class="action-btn action-btn--sm action-btn--outline"
+        [disabled]="isUploadingAnswerKeyScan() || isImporting() || examGraded()" (click)="openUploadModal()">
+        <span class="material-icons-outlined">upload_file</span>
+        {{ isUploadingAnswerKeyScan() ? 'Scanning…' : (isImporting() ? 'Importing…' : 'Upload Answer Key') }}
+      </button>
+      <div class="row-flex-container align-items-center gap">
+        @if (examGraded()) {
+          <span class="status-badge save-status-badge tag-amber" title="This exam already has graded submissions">Locked</span>
+        } @else if (saveStatus(); as status) {
+          <span class="status-badge save-status-badge" [class]="status.tagClass">{{ status.label }}</span>
+        }
+        <button class="action-btn save-key-btn" [disabled]="!canSave()" (click)="save()">
+          {{ isSaving() ? 'Saving…' : (selectedKeyId() ? 'Save ' + currentVersionLabel() : 'Create ' + currentVersionLabel()) }}
+        </button>
+      </div>
+      @if (currentKey(); as key) {
+        @if (confirmingClearKeyId() === key.id) {
+          <div class="clear-key-confirm row-flex-container align-items-center gap">
+            <span>Clear {{ currentVersionLabel() }}?</span>
+            <button type="button" class="action-btn action-btn--sm action-btn--outline"
+              [disabled]="isClearingKey()" (click)="cancelClearKey()">Cancel</button>
+            <button type="button" class="action-btn action-btn--sm action-btn--danger"
+              [disabled]="isClearingKey()" (click)="clearKey(key)">
+              {{ isClearingKey() ? 'Clearing…' : 'Clear' }}
+            </button>
+          </div>
+        } @else {
+          <button type="button" class="action-btn action-btn--sm action-btn--outline clear-key-btn"
+            [disabled]="examGraded()" (click)="requestClearKey(key)">
+            <span class="material-icons-outlined" aria-hidden="true">delete_outline</span>
+            Clear key
+          </button>
+        }
+      }
+    </div>
+
+    @if (examGraded()) {
+      <div class="banner banner--warning">
+        <span class="material-icons-outlined">lock</span>
+        This exam already has graded submissions, so the answer key is locked to keep grades consistent
+        with what was graded.
+      </div>
+    } @else if (error()) {
+      <div class="banner banner--error">{{ error() }}</div>
+    } @else if (isSavingScannedVersions()) {
+      <div class="banner banner--info">
+        Saving {{ confirmedAnswerKeyScanCount() }}
+        scanned answer-key sheet{{ confirmedAnswerKeyScanCount() === 1 ? '' : 's' }}…
+      </div>
+    } @else if (scanAutoSaveResult(); as result) {
+      @if (result.failures.length === 0) {
+        <div class="banner banner--success">
+          Saved {{ result.saved }} scanned answer-key sheet{{ result.saved === 1 ? '' : 's' }}.
+        </div>
+      } @else {
+        <div class="banner banner--warning">
+          <span class="material-icons-outlined">warning_amber</span>
+          <div class="col-flex-container">
+            <span>Saved {{ result.saved }} of {{ result.total }} scanned answer-key sheets.</span>
+            @for (failure of result.failures; track failure.version) {
+              <span>{{ failure.version ? 'Version ' + failure.version : 'Answer key' }}: {{ failure.message }}</span>
+            }
+          </div>
+        </div>
+      }
+    } @else if (answerKeyScanExtraction(); as extraction) {
+      <div class="banner banner--success">
+        Scanned {{ extraction.sheets.length }} answer-key sheet{{ extraction.sheets.length === 1 ? '' : 's' }}.
+      </div>
+    } @else if (hasMultipleVersions() && !canAdvanceWizard()) {
+      <div class="banner banner--warning">
+        <span class="material-icons-outlined">warning_amber</span>
+        {{ completedVersionCount() }} of {{ versionSlots().length }} versions complete.
+        Finish the rest before this exam is ready to scan.
+      </div>
+    }
+
+    <section class="answer-workspace">
+      <div class="workspace-heading row-flex-container align-items-center gap">
+        <div class="col-flex-container grow">
+          <span class="section-title">{{ currentVersionLabel() }}</span>
+          <span class="muted">Select the correct option, grading method, and points for every question.</span>
+        </div>
+        <span class="keyboard-tip">
+          <span class="material-icons-outlined">keyboard</span>
+          Type an option to answer · Arrows move · Delete clears
+        </span>
+      </div>
+
+      <div class="answer-sections">
+        @if (template()?.version_from_q1) {
+          <div class="question-card reserved-question">
+            <span class="q-num">Q1</span>
+            <div class="col-flex-container">
+              <strong>Exam version</strong>
+              <span class="muted">This question selects the version and is not graded.</span>
+            </div>
+          </div>
+        }
+
+        @for (section of answerSections(); track section.id; let sectionIndex = $index) {
+          <section class="answer-section-group">
+            <div class="answer-section-heading row-flex-container align-items-center gap">
+              <span class="answer-section-order">{{ sectionIndex + 1 }}</span>
+              <div class="col-flex-container grow">
+                <strong>{{ section.name }}</strong>
+                <span class="muted">
+                  {{ section.type === 'true_false' ? 'True / False' : 'Multiple choice' }}
+                  · {{ section.questions.length }} question{{ section.questions.length === 1 ? '' : 's' }}
+                </span>
+              </div>
+              <div class="section-bulk-controls row-flex-container align-items-end gap">
+                <label class="field">
+                  <span class="field-label">Section grading</span>
+                  <select class="field-input" aria-label="Section grading method" [disabled]="examGraded()"
+                    [ngModel]="sectionGradingType(section)"
+                    (ngModelChange)="applySectionGradingType(section, $event)">
+                    @if (sectionGradingType(section) === '') {
+                      <option value="" disabled>Mixed</option>
+                    }
+                    <option value="single">Single answer</option>
+                    <option value="multiple">Multiple answers</option>
+                    <option value="partial">Partial credit</option>
+                  </select>
+                </label>
+                <label class="field section-points-field">
+                  <span class="field-label">Points each</span>
+                  <input type="number" step="0.5" min="0" class="field-input tiny" [disabled]="examGraded()"
+                    [attr.aria-label]="'Points for every question in ' + section.name"
+                    [ngModel]="sectionPointDrafts()[section.id] ?? ''"
+                    (ngModelChange)="setSectionPointDraft(section.id, $event === '' ? null : +$event)" />
+                </label>
+                <button type="button" class="action-btn action-btn--sm section-apply-btn"
+                  [disabled]="examGraded() || sectionPointDrafts()[section.id] === null || sectionPointDrafts()[section.id] === undefined"
+                  (click)="applySectionPoints(section)">Set points</button>
+              </div>
+            </div>
+            <div class="section-question-list" [style.--question-rows]="section.gridRows">
+              @for (entry of section.questions; track entry.question.id) {
+                @let question = entry.question;
+                @let index = entry.index;
+                <article class="question-card" [attr.data-question-index]="index" [class.active-row]="activeQuestion() === index"
+                  [class.question-card--missing]="question.correctChoices.length === 0"
+                  (click)="setActive(index, $event)">
+                  <div class="question-main row-flex-container align-items-center gap">
+                    <span class="q-num">Q{{ question.id }}</span>
+                    <div class="answer-field col-flex-container grow">
+                      <span class="field-label">Correct answer{{ question.gradingType === 'single' ? '' : 's' }}</span>
+                      <div class="choice-toggles row-flex-container gap">
+                        @for (choice of question.choices; track choice) {
+                          <span class="choice-slot">
+                            @if (question.gradingType === 'partial' && isCorrect(question, choice)) {
+                              <button type="button" class="choice-chip selected" [disabled]="examGraded()"
+                                [title]="'Remove ' + choice + ' as a correct answer'"
+                                (click)="toggleCorrect(index, choice)">{{ choice }}</button>
+                              <label class="choice-weight-badge" [title]="'Percent of question points for ' + choice">
+                                <input type="number" min="0" max="100" step="5" class="choice-weight-input"
+                                  [disabled]="examGraded()"
+                                  [attr.aria-label]="'Credit percentage for option ' + choice"
+                                  [ngModel]="weightPercent(question, choice)"
+                                  (ngModelChange)="setWeight(index, choice, +$event / 100)" />
+                                <span>%</span>
+                              </label>
+                            } @else {
+                              <button type="button" class="choice-chip" [disabled]="examGraded()"
+                                [class.selected]="isCorrect(question, choice)"
+                                (click)="toggleCorrect(index, choice)">{{ choice }}</button>
+                            }
+                          </span>
+                        }
+                      </div>
+                    </div>
+                    <div class="field grading-field">
+                      <span class="field-label">Grading</span>
+                      <select class="field-input" aria-label="Grading method" [disabled]="examGraded()"
+                        [ngModel]="question.gradingType"
+                        (ngModelChange)="setGradingType(index, $event)">
+                        <option value="single">Single answer</option>
+                        <option value="multiple">Multiple answers</option>
+                        <option value="partial">Partial credit</option>
+                      </select>
+                    </div>
+                    <div class="field points-field">
+                      <span class="field-label">Points</span>
+                      <input type="number" step="0.5" min="0" class="field-input tiny" aria-label="Question points"
+                        [disabled]="examGraded()"
+                        [ngModel]="question.points"
+                        (ngModelChange)="setPoints(index, $event === '' || $event === null ? null : +$event)" />
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    </section>
+
+    <div class="footer row-flex-container align-items-center gap">
+      @if (validationError()) {
+        <span class="validation-message">
+          <span class="material-icons-outlined">info</span>
+          {{ validationError() }}
+        </span>
+      } @else if (unansweredQuestionCount() > 0) {
+        <span class="validation-message">
+          <span class="material-icons-outlined">edit_note</span>
+          {{ unansweredQuestionCount() }} unanswered, save now and continue later
+        </span>
+      }
+      <span class="grow"></span>
+      @if (canFinalizeTemplate()) {
+        <button class="action-btn action-btn--outline" [disabled]="isFinalizingTemplate()"
+          (click)="finalizeTemplate()">
+          {{ isFinalizingTemplate() ? 'Preparing…' : 'Prepare for scanning' }}
+        </button>
+      }
+      @if (canGenerateExamPdf()) {
+        <button class="action-btn action-btn--outline" [disabled]="isGeneratingExamPdf()"
+          (click)="generateExamPdf()">
+          {{ isGeneratingExamPdf() ? 'Generating…' : 'Generate exam PDF' }}
+        </button>
+      }
+      @if (wizardStep) {
+        <button
+          class="action-btn action-btn--outline"
+          [disabled]="!canAdvanceWizard()"
+          [title]="canAdvanceWizard() ? '' : 'Finish the answer key for every version before continuing'"
+          (click)="nextRequested.emit()"
+        >
+          Next: Exam PDFs
+        </button>
+      }
+    </div>
+      </main>
+    </div>
+  }
+</div>
+
+@if (uploadModalOpen()) {
+  <div class="upload-modal-overlay">
+    <section class="card upload-modal-dialog col-flex-container" role="dialog" aria-modal="true"
+      aria-labelledby="upload-modal-title">
+      <header class="upload-modal-header row-flex-container align-items-center gap">
+        <div class="col-flex-container grow">
+          <h2 id="upload-modal-title">Upload Answer Key</h2>
+          <span class="muted">Scan a completed answer-key sheet, or import a JSON/CSV export.</span>
+        </div>
+        <button type="button" class="icon-btn icon-btn--danger" title="Close upload"
+          [disabled]="isUploadingAnswerKeyScan() || isImporting()" (click)="closeUploadModal()">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </header>
+
+      <div class="tab-bar row-flex-container">
+        <button type="button" class="tab-btn" [class.active]="uploadModalTab() === 'scan'"
+          (click)="selectUploadModalTab('scan')">
+          <span class="material-icons-outlined tab-icon">document_scanner</span>
+          Upload Scan
+        </button>
+        <button type="button" class="tab-btn" [class.active]="uploadModalTab() === 'import'"
+          (click)="selectUploadModalTab('import')">
+          <span class="material-icons-outlined tab-icon">upload_file</span>
+          Import File
+        </button>
+      </div>
+
+      @if (uploadModalTab() === 'scan') {
+        <div class="tab-content col-flex-container">
+          <p class="hint-text">Upload one or more PDFs, each containing one or more completed answer-key sheets.</p>
+
+          <label class="upload-file-drop col-flex-container align-items-center"
+            [class.is-uploading]="isUploadingAnswerKeyScan()">
+            <span class="material-icons-outlined upload-file-icon">
+              {{ isUploadingAnswerKeyScan() ? 'document_scanner' : 'upload_file' }}
+            </span>
+            <span class="upload-file-label">
+              {{ isUploadingAnswerKeyScan() ? 'Scanning answer keys…' : 'Choose or drop a PDF file' }}
+            </span>
+            <span class="upload-file-help">PDF · maximum 10 MB each</span>
+            <input type="file" accept=".pdf,application/pdf" multiple class="upload-file-input"
+              [disabled]="isUploadingAnswerKeyScan()" (change)="onScanFilesChosen($event)" />
+          </label>
+
+          @if (stagedScanFiles().length > 0) {
+            <ul class="staged-file-list col-flex-container">
+              @for (file of stagedScanFiles(); track file.name) {
+                <li class="staged-file-row row-flex-container align-items-center gap">
+                  <span class="material-icons-outlined">description</span>
+                  <span class="staged-file-name grow">{{ file.name }}</span>
+                  <span class="muted">{{ (file.size / 1024).toFixed(1) }} KB</span>
+                  <button type="button" class="icon-btn icon-btn--sm" title="Remove file"
+                    [disabled]="isUploadingAnswerKeyScan()" (click)="removeStagedScanFile(file)">
+                    <span class="material-icons-outlined">close</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (error()) {
+            <div class="banner banner--error">{{ error() }}</div>
+          }
+
+          <div class="row-flex-container gap">
+            @if (stagedScanFiles().length > 0) {
+              <button type="button" class="action-btn action-btn--sm action-btn--outline"
+                [disabled]="isUploadingAnswerKeyScan()" (click)="clearStagedScanFiles()">Clear</button>
+            }
+            <button type="button" class="action-btn action-btn--sm"
+              [disabled]="stagedScanFiles().length === 0 || isUploadingAnswerKeyScan()"
+              (click)="uploadStagedScans()">
+              <span class="material-icons-outlined">upload</span>
+              {{ isUploadingAnswerKeyScan() ? 'Scanning…' : 'Upload' }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="tab-content col-flex-container">
+          <p class="hint-text">
+            Import one or more JSON or CSV answer-key exports. Each file becomes its own saved
+            answer key, no manual save needed.
+          </p>
+
+          <label class="upload-file-drop col-flex-container align-items-center"
+            [class.is-uploading]="isImporting()">
+            <span class="material-icons-outlined upload-file-icon">
+              {{ isImporting() ? 'hourglass_top' : 'upload_file' }}
+            </span>
+            <span class="upload-file-label">
+              {{ isImporting() ? 'Importing…' : 'Choose or drop JSON/CSV files' }}
+            </span>
+            <input type="file" accept=".json,.csv,application/json,text/csv" multiple class="upload-file-input"
+              [disabled]="isImporting()" (change)="onImportFilesChosen($event)" />
+          </label>
+
+          @if (stagedImportFiles().length > 0) {
+            <ul class="staged-file-list col-flex-container">
+              @for (file of stagedImportFiles(); track file.name) {
+                <li class="staged-file-row row-flex-container align-items-center gap">
+                  <span class="material-icons-outlined">description</span>
+                  <span class="staged-file-name grow">{{ file.name }}</span>
+                  <button type="button" class="icon-btn icon-btn--sm" title="Remove file"
+                    [disabled]="isImporting()" (click)="removeStagedImportFile(file)">
+                    <span class="material-icons-outlined">close</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (error()) {
+            <div class="banner banner--error">{{ error() }}</div>
+          }
+
+          @if (importResult(); as result) {
+            <div class="result-card col-flex-container">
+              <div class="result-row row-flex-container align-items-center gap">
+                <span class="material-icons-outlined result-icon"
+                  [class.result-icon--success]="result.failures.length === 0"
+                  [class.result-icon--warn]="result.failures.length > 0">
+                  {{ result.failures.length === 0 ? 'check_circle' : 'warning_amber' }}
+                </span>
+                <span class="result-label">Imported {{ result.imported }} of {{ result.total }} file(s)</span>
+              </div>
+              @if (result.failures.length > 0) {
+                <div class="col-flex-container errors-section">
+                  <span class="errors-title">Errors ({{ result.failures.length }})</span>
+                  @for (failure of result.failures; track failure.filename) {
+                    <span class="error-item">{{ failure.filename }}: {{ failure.message }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <div class="row-flex-container gap">
+            @if (stagedImportFiles().length > 0) {
+              <button type="button" class="action-btn action-btn--sm action-btn--outline"
+                [disabled]="isImporting()" (click)="clearStagedImportFiles()">Clear</button>
+            }
+            <button type="button" class="action-btn action-btn--sm"
+              [disabled]="stagedImportFiles().length === 0 || isImporting()"
+              (click)="importStagedFiles()">
+              <span class="material-icons-outlined">upload</span>
+              {{ isImporting() ? 'Importing…' : 'Import' }}
+            </button>
+          </div>
+        </div>
+      }
+    </section>
+  </div>
+}
+
+@if (answerKeyScanReviewOpen()) {
+  @if (answerKeyScanExtraction(); as extraction) {
+    <div class="scan-match-overlay">
+      <section class="card scan-match-dialog col-flex-container" role="dialog" aria-modal="true"
+        aria-labelledby="scan-match-title">
+        <header class="scan-match-header row-flex-container align-items-center gap">
+          <div class="col-flex-container grow">
+            <h2 id="scan-match-title">Match scanned answer keys</h2>
+            <span class="muted">
+              Review {{ extraction.sheets.length }} extracted sheet{{ extraction.sheets.length === 1 ? '' : 's' }}
+              before applying any answers.
+            </span>
+          </div>
+          <button type="button" class="icon-btn icon-btn--danger" title="Cancel scanned answer keys"
+            (click)="cancelAnswerKeyScanMatching()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </header>
+
+        <div class="scan-match-modes row-flex-container gap" role="group" aria-label="Matching mode">
+          <button type="button" class="scan-match-mode"
+            [class.active]="answerKeyScanMatchingMode() === 'automatic'"
+            (click)="setAnswerKeyScanMatchingMode('automatic')">
+            <span class="material-icons-outlined">auto_awesome</span>
+            <span class="col-flex-container">
+              <strong>Detected versions</strong>
+              <small>Match unique valid version marks</small>
+            </span>
+          </button>
+          <button type="button" class="scan-match-mode"
+            [class.active]="answerKeyScanMatchingMode() === 'ordered'"
+            (click)="setAnswerKeyScanMatchingMode('ordered')">
+            <span class="material-icons-outlined">format_list_numbered</span>
+            <span class="col-flex-container">
+              <strong>PDF order</strong>
+              <small>Sheet 1 is the first exam version</small>
+            </span>
+          </button>
+          <button type="button" class="scan-match-mode"
+            [class.active]="answerKeyScanMatchingMode() === 'manual'"
+            (click)="setAnswerKeyScanMatchingMode('manual')">
+            <span class="material-icons-outlined">touch_app</span>
+            <span class="col-flex-container">
+              <strong>Manual</strong>
+              <small>Choose every version yourself</small>
+            </span>
+          </button>
+        </div>
+
+        @if (answerKeyScanMatchError()) {
+          <div class="banner banner--error">{{ answerKeyScanMatchError() }}</div>
+        }
+
+        <div class="scan-match-sheet-list col-flex-container">
+          @for (sheet of extraction.sheets; track sheet.sheet_index) {
+            @if (answerKeyScanMatchFor(sheet.sheet_index); as match) {
+              <article class="scan-match-sheet" [class.scan-match-sheet--warning]="sheet.warnings.length > 0">
+                <div class="scan-match-sheet-main row-flex-container align-items-center gap">
+                  <div class="scan-match-sheet-number">{{ sheet.sheet_index + 1 }}</div>
+                  <div class="scan-match-sheet-summary col-flex-container">
+                    <strong>Sheet {{ sheet.sheet_index + 1 }}</strong>
+                    <span class="muted">{{ answerKeyScanPageLabel(sheet) }}</span>
+                    @if (answerKeyScanHasMultipleSourceFiles()) {
+                      <span class="muted scan-match-sheet-file" [title]="sheet.source_filename">
+                        {{ sheet.source_filename }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="scan-match-detection col-flex-container"
+                    [class.scan-match-detection--warning]="answerKeyScanHasVersionProblem(sheet)">
+                    <span class="field-label">Detected version</span>
+                    <strong>{{ answerKeyScanDetectedVersionLabel(sheet) }}</strong>
+                    <small>
+                      Confidence {{ answerKeyScanConfidenceLabel(sheet.version.confidence) }}
+                    </small>
+                  </div>
+
+                  <div class="scan-match-confidence col-flex-container">
+                    <span class="field-label">Minimum confidence</span>
+                    <strong>{{ answerKeyScanConfidenceLabel(sheet.minimum_confidence) }}</strong>
+                  </div>
+
+                  <label class="field scan-match-target">
+                    <span class="field-label">Use as</span>
+                    <select class="field-input" [ngModel]="answerKeyScanTargetValue(match)"
+                      (ngModelChange)="setAnswerKeyScanSheetTarget(sheet.sheet_index, $event)">
+                      <option value="__unresolved__" disabled>Choose a version…</option>
+                      @for (target of answerKeyScanTargetVersions(); track target) {
+                        <option [value]="target === null ? '__unversioned__' : target"
+                          [disabled]="isAnswerKeyScanVersionAssigned(target, sheet.sheet_index)">
+                          {{ answerKeyScanTargetLabel(target) }}
+                        </option>
+                      }
+                      <option value="__skip__">Skip this sheet</option>
+                    </select>
+                  </label>
+                </div>
+
+                @if (sheet.warnings.length > 0) {
+                  <details class="scan-match-warnings">
+                    <summary>
+                      <span class="material-icons-outlined">warning_amber</span>
+                      {{ sheet.warnings.length }} warning{{ sheet.warnings.length === 1 ? '' : 's' }}
+                    </summary>
+                    <ul>
+                      @for (warning of sheet.warnings; track $index) {
+                        <li>{{ warning.message }}</li>
+                      }
+                    </ul>
+                  </details>
+                }
+
+                @if (sortedAnswerEntries(sheet).length > 0) {
+                  <div class="scan-match-detected-answers">
+                    <button type="button" class="scan-match-detected-answers-toggle"
+                      (click)="toggleScanSheetExpanded(sheet.sheet_index)">
+                      <span class="material-icons-outlined">
+                        {{ isScanSheetExpanded(sheet.sheet_index) ? 'expand_less' : 'expand_more' }}
+                      </span>
+                      {{ isScanSheetExpanded(sheet.sheet_index) ? 'Hide detected answers' : 'View detected answers' }}
+                    </button>
+                    @if (isScanSheetExpanded(sheet.sheet_index)) {
+                      <div class="detected-answers-grid">
+                        @for (entry of sortedAnswerEntries(sheet); track entry.id) {
+                          <span class="detected-answer" [class.detected-answer--flagged]="entry.question.flagged"
+                            [title]="'Confidence ' + answerKeyScanConfidenceLabel(entry.question.confidence)">
+                            <strong>Q{{ entry.id }}</strong>
+                            {{ answerKeyScanAnswerLabel(entry.question) }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </article>
+            }
+          }
+        </div>
+
+        <footer class="scan-match-footer row-flex-container align-items-center gap">
+          @if (answerKeyScanMatchValidationError(); as validationError) {
+            <span class="validation-message grow">
+              <span class="material-icons-outlined">info</span>
+              {{ validationError }}
+            </span>
+          } @else {
+            <span class="scan-match-ready grow">
+              <span class="material-icons-outlined">check_circle</span>
+              Every sheet has a unique target or will be skipped.
+            </span>
+          }
+          <button type="button" class="action-btn action-btn--outline"
+            (click)="cancelAnswerKeyScanMatching()">Cancel</button>
+          <button type="button" class="action-btn"
+            [disabled]="!!answerKeyScanMatchValidationError()"
+            (click)="confirmAnswerKeyScanMatches()">Confirm &amp; save</button>
+        </footer>
+      </section>
+    </div>
+  }
+}

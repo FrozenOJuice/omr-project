@@ -1,0 +1,154 @@
+<div class="modal-card card col-flex-container">
+
+    <div class="modal-header row-flex-container align-items-center">
+        <span class="modal-title">{{ canvasAssignmentMode ? 'New Exam from Canvas' : 'New Exam' }}</span>
+        <button class="icon-btn icon-btn--danger" (click)="close.emit()">
+            <span class="material-icons-outlined">close</span>
+        </button>
+    </div>
+
+    @if (wizardStep) {
+        <app-wizard-steps [current]="wizardStep" />
+    }
+
+    <div class="col-flex-container modal-body">
+        @if (canvasAssignmentMode) {
+            <div class="field col-flex-container">
+                <label class="field-label">Canvas Assignment</label>
+                <select
+                    class="field-input"
+                    [ngModel]="canvasAssignmentId"
+                    (ngModelChange)="selectCanvasAssignment($event)"
+                    [disabled]="!canvasAssignmentsLoaded()"
+                >
+                    <option [ngValue]="null" disabled>Select a Canvas assignment…</option>
+                    @for (assignment of canvasAssignments(); track assignment.id) {
+                        @if (assignment.available) {
+                            <option [ngValue]="assignment.id" [disabled]="!!assignment.linked_exam_id">
+                                {{ assignment.name }}{{ assignment.linked_exam_id ? ' — already linked' : '' }}
+                            </option>
+                        }
+                    }
+                </select>
+                <span class="field-note">The Canvas assignment name will also be used as the exam name.</span>
+                @if (canvasAssignmentsError) {
+                    <span class="field-hint">{{ canvasAssignmentsError }}</span>
+                }
+            </div>
+        } @else {
+            <div class="field col-flex-container">
+                <label class="field-label">Exam Name</label>
+                <input
+                    type="text"
+                    class="field-input"
+                    placeholder="e.g. Midterm Exam"
+                    [(ngModel)]="name"
+                />
+            </div>
+        }
+
+        <div class="field col-flex-container">
+            <label class="field-label">Description (optional)</label>
+            <input
+                type="text"
+                class="field-input"
+                placeholder="e.g. Covers chapters 1–5"
+                [(ngModel)]="description"
+            />
+        </div>
+
+        <div class="field col-flex-container">
+            <label class="field-label">Bubble Sheet Template</label>
+            @if (templatesLoaded() && templates().length === 0) {
+                <span class="field-hint">You have no templates yet — create one first.</span>
+                <button type="button" class="action-btn action-btn--outline" (click)="goToTemplates()">
+                    Create a template
+                </button>
+            } @else {
+                <select class="field-input" [(ngModel)]="templateId">
+                    <option value="" disabled>Select a template…</option>
+                    @for (t of templates(); track t.id) {
+                        <option [value]="t.id">{{ t.name }} ({{ t.total_questions }}Q)</option>
+                    }
+                </select>
+                <button type="button" class="link-btn" (click)="goToTemplates()">Manage templates</button>
+            }
+        </div>
+
+        <div class="schedule-section col-flex-container">
+            <div class="schedule-heading col-flex-container">
+                <span class="schedule-title">Schedule <span>(optional)</span></span>
+                <span class="field-note">Leave blank to create an unscheduled exam. You can schedule it later.</span>
+            </div>
+
+            <div class="schedule-fields">
+                <div class="field col-flex-container grow">
+                    <label class="field-label" for="exam-date">Date</label>
+                    <input
+                        id="exam-date"
+                        type="date"
+                        class="field-input field-datetime schedule-control"
+                        [ngModel]="date"
+                        (ngModelChange)="setDate($event)"
+                    />
+                </div>
+
+                @if (date) {
+                    <div class="field col-flex-container grow">
+                        <label class="field-label" for="exam-start-time">Start time</label>
+                        <input
+                            id="exam-start-time"
+                            type="time"
+                            class="field-input field-datetime schedule-control"
+                            [(ngModel)]="startClock"
+                        />
+                    </div>
+                    <div class="field col-flex-container grow">
+                        <label class="field-label" for="exam-duration">Duration (minutes)</label>
+                        <input
+                            id="exam-duration"
+                            type="number"
+                            min="1"
+                            step="5"
+                            class="field-input schedule-control schedule-control--number"
+                            [(ngModel)]="durationMinutes"
+                        />
+                    </div>
+                }
+            </div>
+
+            @if (date) {
+                <div class="schedule-details row-flex-container align-items-center">
+                    <div class="duration-presets row-flex-container">
+                        @for (preset of durationPresets; track preset) {
+                            <button
+                                type="button"
+                                class="preset-chip"
+                                [class.active]="durationMinutes === preset"
+                                (click)="durationMinutes = preset"
+                            >{{ preset }}m</button>
+                        }
+                    </div>
+                    @if (!startClock) {
+                        <span class="schedule-status">Choose a start time.</span>
+                    } @else if (!durationMinutes || durationMinutes <= 0) {
+                        <span class="schedule-status">Enter a valid duration.</span>
+                    } @else if (endsAt) {
+                        <span class="schedule-status">Ends {{ endsAt }}</span>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (error) {
+            <span class="error-text">{{ error }}</span>
+        }
+    </div>
+
+    <div class="modal-footer row-flex-container">
+        <button class="action-btn" [disabled]="!canSubmit || isLoading" (click)="submit()">
+            {{ isLoading ? 'Creating...' : (wizardStep ? 'Next' : 'Create Exam') }}
+        </button>
+    </div>
+
+</div>

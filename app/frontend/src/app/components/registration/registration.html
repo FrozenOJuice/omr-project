@@ -1,0 +1,116 @@
+<div class="full row-flex-container auth-layout">
+    <div class="gradient grow">
+        <div style="margin-left: 2em; display: flex; flex-direction: column; height: 100%;">
+
+            <div style="margin-top: 2em;" class="row-flex-container">
+                <app-site-identity size="85px" />
+            </div>
+
+            <div style="padding-bottom: 60px; display: flex; align-items: center; flex: 1;">
+                <div style="width: 50%;" class="gradient-tagline">
+                    <h1 style="margin-bottom: 0;">Your one-stop shop for grading.</h1>
+                    <p class="text-lg">Scan, auto-grade and resolve re-grade requests in one place.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div style="padding-bottom: 60px;" class="form-card grow">
+        <div class="col-flex-container center">
+            <h1 id="formTitle">Create Account</h1>
+            <div class="auth-reveal">
+            <p class="auth-intro">Enter your details to get started.</p>
+
+            <form (ngSubmit)="createAccount($event)">
+                <div class="row-flex-container gap mb-1">
+                    <div class="col-flex-container grow">
+                        <label for="firstName" class="mb-1 text-lg">First name</label>
+                        <input id="firstName" type="text" [(ngModel)]="firstName" name="firstName" (input)="clearError()" autocomplete="given-name" placeholder="Enter your first name..">
+                    </div>
+
+                    <div class="col-flex-container grow">
+                        <label for="lastName" class="mb-1 text-lg">Last name</label>
+                        <input id="lastName" type="text" [(ngModel)]="lastName" name="lastName" (input)="clearError()" autocomplete="family-name" placeholder="Enter your last name..">
+                    </div>
+                </div>
+
+                <div class="col-flex-container mb-1">
+                    <label for="email" class="mb-1 text-lg">Email</label>
+                    <input id="email" type="email" [(ngModel)]="email" name="email" (input)="clearError()" autocomplete="email" placeholder="Enter email..">
+                </div>
+
+                <div class="col-flex-container mb-1">
+                    <label for="password" class="mb-1 text-lg">Password</label>
+                    <div class="password-input">
+                        <input id="password" [type]="showPasswords() ? 'text' : 'password'" [(ngModel)]="password" name="password" (input)="clearError()" autocomplete="new-password" placeholder="Enter password..">
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            [attr.aria-pressed]="showPasswords()"
+                            [attr.aria-label]="showPasswords() ? 'Hide passwords' : 'Show passwords'"
+                            [title]="showPasswords() ? 'Hide passwords' : 'Show passwords'"
+                            aria-controls="password confirmPassword"
+                            (click)="showPasswords.set(!showPasswords())">
+                            <span class="material-icons-outlined" aria-hidden="true">
+                                {{ showPasswords() ? 'visibility_off' : 'visibility' }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-flex-container mb-1">
+                    <label for="confirmPassword" class="mb-1 text-lg">Confirm password</label>
+                    <div class="password-input">
+                        <input id="confirmPassword" [type]="showPasswords() ? 'text' : 'password'" [(ngModel)]="confirmPassword" name="confirmPassword" (input)="clearError()" autocomplete="new-password" placeholder="Re-enter password..">
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            [attr.aria-pressed]="showPasswords()"
+                            [attr.aria-label]="showPasswords() ? 'Hide passwords' : 'Show passwords'"
+                            [title]="showPasswords() ? 'Hide passwords' : 'Show passwords'"
+                            aria-controls="password confirmPassword"
+                            (click)="showPasswords.set(!showPasswords())">
+                            <span class="material-icons-outlined" aria-hidden="true">
+                                {{ showPasswords() ? 'visibility_off' : 'visibility' }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-flex-container mb-1">
+                    <label for="role" class="mb-1 text-lg">Account type</label>
+                    <select id="role" [(ngModel)]="role" name="role" (change)="clearError()">
+                        <option value="student">Student</option>
+                        <option value="professor">Professor</option>
+                    </select>
+                </div>
+
+                @if (role === 'student') {
+                    <div class="col-flex-container mb-1">
+                        <label for="studentNumber" class="mb-1 text-lg">Student number</label>
+                        <input id="studentNumber" type="text" inputmode="numeric" [(ngModel)]="studentNumber" name="studentNumber" (input)="clearError()" placeholder="8-digit student number..">
+                    </div>
+                }
+
+                @if (errorMessage()) {
+                    <div class="error-message text-lg">{{ errorMessage() }}</div>
+                }
+
+                <button type="submit" [disabled]="isLoading()" class="mb-2">
+                    {{ isLoading() ? 'Creating account...' : 'Create Account' }}
+                </button>
+                <div class="row-flex-container text-lg account-prompt">
+                    <span>Already have an account?</span>
+                    <button type="button" (click)="navigateToLogin()" class="link-button">Sign in.</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="load-curtain" aria-hidden="true">
+        <div class="load-curtain-spacer"></div>
+        <div class="load-curtain-card"></div>
+    </div>
+</div>

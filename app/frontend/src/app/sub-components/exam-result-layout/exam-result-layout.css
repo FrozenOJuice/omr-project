@@ -1,0 +1,53 @@
+.exam-layout {
+    display: flex;
+    justify-content: center;
+    gap: 1.5em;
+}
+
+/* Same width as .exam-sidebar, so the page reads as evenly balanced around
+   the page image. Collapses to nothing when no content is projected (e.g.
+   an exam with a single grade has no roster or class distribution to show),
+   rather than leaving a bare gap. */
+.exam-left {
+    flex: 0 3 20em;
+    min-width: 16em;
+    gap: 1em;
+    max-height: calc(100vh + 5em);
+    min-height: 0;
+}
+
+.exam-left:empty {
+    display: none;
+}
+
+.exam-main {
+    gap: 1em;
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: center;
+}
+
+/* Fixed rather than sized to leftover space: a much wider sidebar wouldn't
+   help a text-based question list, it'd just leave it sparse. Shrinks faster
+   than .exam-main (higher flex-shrink) so the page image keeps the larger
+   share of space as the layout narrows, instead of absorbing the squeeze itself. */
+.exam-sidebar {
+    flex: 0 3 26em;
+    min-width: 20.5em;
+    gap: 1em;
+    max-height: calc(100vh + 5em);
+    min-height: 0;
+}
+
+@media (max-width: 64em) {
+    .exam-layout {
+        flex-direction: column;
+    }
+
+    .exam-left,
+    .exam-sidebar {
+        flex: none;
+        width: 100%;
+        max-height: none;
+    }
+}

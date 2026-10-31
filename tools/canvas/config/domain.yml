@@ -1,0 +1,3 @@
+production:
+  domain: <%= ENV.fetch("CANVAS_HOST", "localhost:6700") %>
+  ssl: false

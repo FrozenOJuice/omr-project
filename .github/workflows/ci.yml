@@ -1,0 +1,43 @@
+name: Repository checks
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repository:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check source syntax and documentation links
+        run: python tools/portfolio/check_repository.py
+      - name: Check Canvas script portability without services
+        run: bash tools/canvas/scripts/test-portability.sh
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/frontend/package-lock.json
+      - run: npm ci
+      - run: npm test -- --watch=false
+
+# Backend tests require disposable PostgreSQL and Garage resources. OMR tests
+# require the project's OpenCV image and expose CPU-metadata assumptions on
+# Docker Desktop. These suites remain documented local checks; this workflow
+# does not claim to run them. See docs/portfolio/testing.md.

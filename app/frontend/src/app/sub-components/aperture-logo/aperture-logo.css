@@ -1,0 +1,155 @@
+/*
+    Notes: this CSS has a bunch of weird hacks in it. Be careful
+    changing anything.
+
+    The things that are safe to change are:
+    - the `--logo-size` variable (roughly determines the height), set via
+      the component's `size` input.
+    - the `--aperture-size` variable (driven by the component's TS).
+    - all colors.
+
+    This is mostly based off of something found online:
+
+        <https://codepen.io/Rplus/pen/pVNKmL>
+
+    Shoutout to that guy.
+*/
+
+.logo {
+    --logo-size: 200px;
+    --aperture-size: -40deg;
+    --logo-text-color: black;
+    --logo-subtitle-color: color-mix(in oklab, black, transparent 25%);
+    --logo-accent-color: black;
+    --logo-accent-foreground: white;
+
+    width: fit-content;
+    height: fit-content;
+
+    font-size: calc(var(--logo-size) * 0.338);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+    font-family: sans-serif;
+
+    color: var(--logo-text-color);
+}
+
+body.dark-mode .logo {
+    --logo-text-color: white;
+    --logo-subtitle-color: color-mix(in oklab, white, transparent 25%);
+    --logo-accent-color: white;
+    --logo-accent-foreground: black;
+}
+
+.logo h1 {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    gap: 0.12em;
+
+    padding: 0;
+    margin: 0;
+
+    font-weight: 500;
+}
+
+.logo p {
+    color: var(--logo-subtitle-color);
+
+    padding: 0;
+    margin: 0;
+    width: 100%;
+
+    font-size: 0.45em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.3em;
+
+    transform: translateY(-20%);
+}
+
+.logo p .by {
+    font-size: 0.8em;
+}
+
+.camera-aperture {
+
+    font-size: 0.8em;
+    width: fit-content;
+    line-height: 1.4;
+    border-radius: 50%;
+    border: 0.02em solid var(--logo-accent-foreground);
+    box-shadow: 0 0 0 0.04em var(--logo-accent-color);
+    overflow: hidden;
+    transform: rotate(1deg);
+
+}
+
+.blade-box {
+    position: relative;
+    width: 1em;
+    height: 1em;
+    transform-style: preserve-3d;
+    transform: rotate(-200deg);
+}
+
+.blade:nth-of-type(1) { --i: 1; }
+.blade:nth-of-type(2) { --i: 2; }
+.blade:nth-of-type(3) { --i: 3; }
+.blade:nth-of-type(4) { --i: 4; }
+.blade:nth-of-type(5) { --i: 5; }
+.blade:nth-of-type(6) { --i: 6; }
+.blade:nth-of-type(7) { --i: 7; }
+.blade:nth-of-type(8) { --i: 8; }
+
+.blade {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    transform:
+        rotate(calc(var(--i) * 45deg))
+        rotateX(-45deg)
+        scaleY(2);
+    transform-origin: 0% 50%;
+}
+
+.blade::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow:
+        inset 0.01em 0 var(--logo-accent-foreground),
+        inset 1em 0 var(--logo-accent-color); /* acts as a sized background. */
+    transform-origin: 0% 0%;
+    transform: rotate(var(--aperture-size, -10deg));
+    transition: transform 400ms ease;
+}
+
+/*
+    I'm not 100% sure why, but this rule is necessary for the animation
+    to render correctly on Chromium. I think it's because Chromium
+    wants to convert our animation away from anything involving the
+    GPU, but this filter keeps it from doing that.
+*/
+.blade,
+.blade::before {
+    filter: opacity(0.999);
+}

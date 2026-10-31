@@ -1,0 +1,36 @@
+.modal-overlay { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.4); }
+.comparison-modal { width: min(72em, calc(100vw - 3em)); max-height: calc(100vh - 3em); overflow-y: auto; display: flex; flex-direction: column; gap: 1.25em; padding: 1.5em; }
+.modal-header, .historical-course-header, .historical-header-actions, .historical-summary { display: flex; align-items: center; gap: .75em; }
+.modal-header, .historical-course-header { justify-content: space-between; }
+.stats-title { font-size: 1.05em; font-weight: 700; }
+.stats-subtitle, .muted { font-size: .82em; opacity: .65; }
+.section-title { font-size: .95em; font-weight: 700; }
+.comparison-loading { min-height: 8em; display: flex; align-items: center; justify-content: center; }
+.error-text { font-size: .82em; color: var(--tag-red); }
+.stats-empty { padding: 1em; text-align: center; opacity: .65; }
+.historical-chart-card, .historical-course-section { padding: 1em; border: var(--border-size) solid var(--color-border); border-radius: var(--card-border-radius); background: var(--primary-darkened); }
+.historical-chart-wrapper { height: 18em; margin-top: .75em; }
+.historical-course-list, .historical-course-section { display: flex; flex-direction: column; gap: 1em; }
+.historical-header-actions, .historical-summary { flex-wrap: wrap; justify-content: flex-end; }
+.historical-summary { font-size: .82em; }
+.remove-btn { flex-shrink: 0; }
+.remove-btn:hover:not(:disabled) { color: var(--tag-red); border-color: var(--tag-red); }
+.historical-exam-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(17em, 1fr)); gap: .75em; }
+.historical-exam-card { padding: .85em; border: var(--border-size) solid var(--color-border); border-radius: var(--card-border-radius); background: var(--primary); }
+.exam-comparison-names { display: grid; grid-template-columns: minmax(0,1fr) 2rem minmax(0,1fr); align-items: center; column-gap: .75em; }
+.exam-comparison-names > .material-icons-outlined { width: 2rem; font-size: 1.2em; opacity: .6; text-align: center; }
+.exam-comparison-names strong { padding-right: .25em; }
+.mapping-select { width: 100%; min-width: 0; box-sizing: border-box; margin-left: .25em; padding: .5em; border: var(--border-size) solid var(--color-border); border-radius: var(--input-border-radius); background: var(--primary); color: var(--color-text); }
+.exam-card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .6em; margin-top: .8em; }
+.exam-card-stats div { display: flex; flex-direction: column; gap: .2em; padding: .55em; border-radius: var(--input-border-radius); background: var(--primary-darkened); }
+.exam-card-stats span { font-size: .72em; opacity: .65; }
+.comparison-actions { display: flex; justify-content: flex-end; }
+.add-comparison-course { display: flex; flex-direction: column; gap: .75em; padding-top: 1.25em; border-top: 1px solid var(--color-border); }
+.add-comparison-controls { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: .75em; align-items: center; }
+.field-input { width: 100%; box-sizing: border-box; padding: .8em; border: var(--border-size) solid var(--color-border); border-radius: var(--input-border-radius); background: var(--primary-darkened); color: var(--color-text); }
+@media (max-width:700px) {
+  .comparison-modal { width: calc(100vw - 1em); max-height: calc(100vh - 1em); padding: 1em; }
+  .historical-course-header { align-items: flex-start; flex-direction: column; }
+  .historical-header-actions, .historical-summary { justify-content: flex-start; }
+  .add-comparison-controls { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,42 @@
+<div class="modal-card card col-flex-container">
+
+    <div class="modal-header row-flex-container align-items-center">
+        <div class="col-flex-container">
+            <span class="modal-title">Grade History</span>
+            @if (studentLabel) {
+                <span class="modal-subtitle">{{ studentLabel }}</span>
+            }
+        </div>
+        <button class="icon-btn icon-btn--danger" (click)="close.emit()">
+            <span class="material-icons-outlined">close</span>
+        </button>
+    </div>
+
+    <div class="history-body">
+        @if (loading()) {
+            <span class="empty-text">Loading history...</span>
+        } @else if (error()) {
+            <span class="empty-text">{{ error() }}</span>
+        } @else if (rows().length === 0) {
+            <span class="empty-text">No history recorded for this grade.</span>
+        } @else {
+            @for (row of rows(); track row.id; let last = $last) {
+                <div class="history-row col-flex-container" [class.last]="last">
+                    <div class="row-flex-container align-items-center gap">
+                        <span class="history-actor">{{ row.actorLabel }}</span>
+                        @if (row.kind === 'release') {
+                            <span class="history-badge">Release</span>
+                        }
+                        <span class="grow"></span>
+                        <span class="history-timestamp">{{ row.timestamp }}</span>
+                    </div>
+                    <span class="history-summary">{{ row.summary }}</span>
+                    @if (row.scoreLabel) {
+                        <span class="history-score">Score: {{ row.scoreLabel }}</span>
+                    }
+                </div>
+            }
+        }
+    </div>
+
+</div>

@@ -1,0 +1,78 @@
+<div class="full row-flex-container auth-layout">
+    <div class="gradient grow">
+        <div style="margin-left: 2em; display: flex; flex-direction: column; height: 100%;">
+
+            <div style="margin-top: 2em;" class="row-flex-container">
+                <app-site-identity size="85px" />
+            </div>
+
+            <div style="padding-bottom: 60px; display: flex; align-items: center; flex: 1;">
+                <div style="width: 50%;" class="gradient-tagline">
+                    <h1 style="margin-bottom: 0;">Your one-stop shop for grading.</h1>
+                    <p class="text-lg">Scan, auto-grade and resolve re-grade requests in one place.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div style="padding-bottom: 60px;" class="form-card grow">
+        <div class="col-flex-container center">
+            <h1 id="formTitle">Welcome back</h1>
+            <div class="auth-reveal">
+            <p class="auth-intro">Sign in to continue.</p>
+
+            <form (ngSubmit)="signIn($event)">
+                <div class="col-flex-container mb-2">
+                    <label for="email" class="mb-1 text-lg">Email</label>
+                    <input id="email" type="email" [(ngModel)]="email" name="email" (input)="clearError()" autocomplete="email" placeholder="Enter email..">
+                </div>
+
+                <div class="col-flex-container mb-3">
+                    <label for="password" class="mb-1 text-lg">Password</label>
+                    <div class="password-input">
+                        <input id="password" [type]="showPassword() ? 'text' : 'password'" [(ngModel)]="password" name="password" (input)="clearError()" autocomplete="current-password" placeholder="Enter password..">
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            [attr.aria-pressed]="showPassword()"
+                            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                            [title]="showPassword() ? 'Hide password' : 'Show password'"
+                            aria-controls="password"
+                            (click)="showPassword.set(!showPassword())">
+                            <span class="material-icons-outlined" aria-hidden="true">
+                                {{ showPassword() ? 'visibility_off' : 'visibility' }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="justify-content: space-between; align-items: center;" class="row-flex-container">
+                    <div style="align-items: center; gap: 4px;" class="row-flex-container text-lg">
+                        <input id="remember" type="checkbox" [(ngModel)]="rememberMe" name="rememberMe">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <button type="button" (click)="navigateToForgotPassword()" class="link-button text-lg" style="margin-top: 0;">Forgot your password?</button>
+                </div>
+
+                @if (errorMessage()) {
+                    <div class="error-message text-lg">{{ errorMessage() }}</div>
+                }
+
+                <button type="submit" [disabled]="isLoading()" class="mb-2">
+                    {{ isLoading() ? 'Signing in...' : 'Sign in' }}
+                </button>
+                <div class="row-flex-container text-lg account-prompt">
+                    <span>Don't have an account?</span>
+                    <button type="button" (click)="navigateToRegistration()" class="link-button">Create one.</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="load-curtain" aria-hidden="true">
+        <div class="load-curtain-spacer"></div>
+        <div class="load-curtain-card"></div>
+    </div>
+</div>

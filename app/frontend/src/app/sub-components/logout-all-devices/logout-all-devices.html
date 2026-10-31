@@ -1,0 +1,7 @@
+<div class="col-flex-container">
+    <span class="card-title">Active Sessions</span>
+    <p class="card-description">Sign out of all devices and sessions, including this one. You will need to sign in again.</p>
+    <button type="button" class="action-btn action-btn--danger logout-action-btn" (click)="logoutAll()" [disabled]="isLoading">
+        {{ isLoading ? 'Signing out...' : 'Sign Out All Devices' }}
+    </button>
+</div>

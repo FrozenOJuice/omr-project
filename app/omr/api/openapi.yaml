@@ -1,0 +1,1901 @@
+openapi: 3.0.3
+
+info:
+  title: OMR Service
+  version: "0.0.1"
+  description: |
+    A service to perform Optical Mark Recognition (OMR) on scanned 
+    bubblesheets.
+
+    View system resource usage [here](http://localhost:3000/dashboard.html).
+    
+servers:
+  - url: http://localhost:3000/
+
+tags:
+  - name: Status
+    description: Service status and availability
+  - name: Scan
+    description: Tasks related to uploading and preprocessing scans
+  - name: Mark
+    description: Tasks related to marking uploaded scans
+  - name: Inspect
+    description: Tasks related to inspecting uploaded scans
+  - name: Job
+    description: Tasks related to managing asynchronous jobs
+  - name: sysadmin
+    description: Admin-only functionality
+
+paths:
+  /health:
+    get:
+      summary: |
+        Check the System Status
+      description: |
+        A simple endpoint to check that the OMR is up and running.
+      tags:
+        - Status
+      responses:
+        200:
+          description: |
+            The service is healthy.
+        500:
+          description: |
+            There's some problem with the service. Check the response message.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+  /system/logs:
+    get:
+      summary: |
+        Logs
+      description: |
+        Check the logs from the OMR server for debugging.
+      tags:
+        - sysadmin
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          example: 10
+          schema:
+            type: integer
+            description: |
+              The number of logs to read.
+      responses:
+        200:
+          description: |
+            OK.
+          content:
+            text/plain:
+              schema:
+                description: |
+                  The most recent logs from the OMR.
+                type: string
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+  /system/utilization:
+    get:
+      summary: |
+        Current Resource Usage
+      description: |
+        Check the utilization of system resources, including memory, CPU, and
+        disk storage.
+      tags:
+        - sysadmin
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          example: 10
+          schema:
+            type: integer
+            description: |
+              The number of past resource utilization samples to use. There is
+              one sample per second, so to get the resource utilization over 
+              the past 30 seconds you would use `limit=30`.
+      responses:
+        200:
+          description: |
+            OK.
+          content:
+            application/json:
+              schema:
+                description: |
+                  The most recent resource utilization for the system. The 
+                  last element represents the most recent utilization sample, 
+                  the second-to-last is the sample from 1 second ago, and so 
+                  on.
+                $ref: '#/components/schemas/ResourceUtilization'
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            There's some problem with the service. Check the response message.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+  /system/cpu:
+    get:
+      summary: |
+        CPU Usage
+      description: |
+        Check the utilization of the CPU.
+      tags:
+        - sysadmin
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          example: 10
+          schema:
+            type: integer
+            description: |
+              The number of past resource utilization samples to use. There is
+              one sample per second, so to get the resource utilization over 
+              the past 30 seconds you would use `limit=30`.
+      responses:
+        200:
+          description: |
+            OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedCpuInfo'
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            There's some problem with the service. Check the response message.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+  /system/memory:
+    get:
+      summary: |
+        Memory Usage
+      description: |
+        Check the utilization of the system memory.
+      tags:
+        - sysadmin
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          example: 10
+          schema:
+            type: integer
+            description: |
+              The number of past resource utilization samples to use. There is
+              one sample per second, so to get the resource utilization over 
+              the past 30 seconds you would use `limit=30`.
+      responses:
+        200:
+          description: |
+            OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - usageSamples
+                properties:
+                  usageSamples:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MemInfo'
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            There's some problem with the service. Check the response message.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+  /admin/authenticated:
+    get:
+      summary: |
+        Check Admin Key
+      description: |
+        Verifies that the provided administrator key is valid.
+
+        The administrator key must be supplied in the `OMR-Admin-Key` request
+        header. This should match the environment variable `OMR_ADMIN_KEY` used
+        to run the OMR process (if no such variable was set, the key will 
+        default to `admin`).
+      tags:
+        - sysadmin
+      parameters:
+        - $ref: '#/components/parameters/AdminKeyHeader'
+      responses:
+        204:
+          description: |
+            The administrator key is valid.
+        401:
+          description: |
+            The administrator key is incorrect.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: incorrect admin key
+  /job:
+    get:
+      summary: |
+        Job Status
+      description: |
+        Retrieves the details of a job that is currently running, or has been 
+        recently completed.
+      tags:
+        - Job
+      parameters:
+        - in: query
+          name: id
+          required: true
+          example: "00a0a849-c801-40fc-8c8b-e197ddae43cb"
+          schema:
+            type: string
+            description: |
+              The ID of the job to check.
+      responses:
+        200:
+          description: |
+            The job details were successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        404:
+          description: |
+            The given `id` was not recognized. It's worth noting that completed
+            jobs will be "forgotten" after a while (~24 hours).
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+  /job/result:
+    get:
+      summary: Retrieve Job Result
+      description: |
+        Retrieves the cached HTTP response produced by a completed background
+        job.
+
+        The response returned by this endpoint is identical to the response
+        that would have been returned if the job had been executed
+        synchronously. This includes the original status code, headers, and
+        response body.
+
+        Results are only available after the associated job has completed.
+      tags:
+        - Job
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: |
+            The ID of the completed job.
+          schema:
+            type: string
+          example: "9c0e7f3e-5b0a-4a89-b6a3-8f6b7c8d9e10"
+      responses:
+        default:
+          description: |
+            The cached response generated by the job.
+
+            The status code, headers, and body are determined by the original
+            handler that executed as part of the job.
+        400:
+          description: |
+            The job ID was not provided.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "id parameter is required"
+        404:
+          description: |
+            The requested job does not have an available result.
+
+            This occurs either because:
+            - the job exists but has not completed yet, or
+            - no job exists with the given ID.
+          content:
+            text/plain:
+              schema:
+                type: string
+                examples:
+                  pending:
+                    summary: Job has not completed yet
+                    value: "the job matching the given ID does not have a result yet"
+                  missing:
+                    summary: Unknown job ID
+                    value: "no job matches the given ID"
+  /jobs:
+    get:
+      summary: |
+        List Jobs
+      description: |
+        Returns all registered jobs, sorted from oldest to newest by their
+        creation time.
+
+        This endpoint requires the administrator API key.
+      tags:
+        - sysadmin
+      parameters:
+        - $ref: '#/components/parameters/AdminKeyHeader'
+      responses:
+        200:
+          description: |
+            A list of all registered jobs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobStatus'
+        401:
+          description: |
+            The administrator API key was missing or invalid.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: only admins can retrieve all jobs
+  /template/preprocess:
+    post:
+      summary: |
+        Upload a Preprocessing Template
+      description: |
+        This endpoint is used to upload a preprocessing template. Such a
+        template must be uploaded before any scans.
+      tags:
+        - Scan
+      requestBody:
+        description: |
+          The body defines a preprocessing template. The `template` field is a
+          JSON-encoded string, and the image fields are expected to be in 
+          `image/jpeg` encoding.
+
+          Each page has at least three anchors. The anchor `pageXanchorY` 
+          corresponds to `template.pages[X].anchors[Y]`.
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - template
+                - page0anchor0
+                - page0anchor1
+                - page0anchor2
+              properties:
+                template:
+                  $ref: "#/components/schemas/PreprocessingTemplate"
+                page0anchor0:
+                  type: string
+                  format: binary
+                page0anchor1:
+                  type: string
+                  format: binary
+                page0anchor2:
+                  type: string
+                  format: binary
+                page0anchor3:
+                  type: string
+                  format: binary
+                page1anchor0:
+                  type: string
+                  format: binary
+                page1anchor1:
+                  type: string
+                  format: binary
+                page1anchor2:
+                  type: string
+                  format: binary
+                page1anchor3:
+                  type: string
+                  format: binary
+            encoding:
+              template:
+                contentType: application/json
+              page0anchor0:
+                contentType: image/jpeg
+              page0anchor1:
+                contentType: image/jpeg
+              page0anchor2:
+                contentType: image/jpeg
+              page0anchor3:
+                contentType: image/jpeg
+      responses:
+        200:
+          description: |
+            The preprocessing template was uploaded successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - templateId
+                properties:
+                  templateId:
+                    description: |
+                      The ID of the newly-created preprocessing template.
+                    type: string
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            Something went wrong on the OMR's side. Check the OMR's logs and
+            the error message for details.
+          content:
+            text/plain:
+              schema: 
+                type: string
+                description: |
+                  A description of the error.
+    delete:
+      summary: |
+        Remove a Preprocessing Template
+      description: |
+        This endpoint is used to remove a preprocessing template. Redundant 
+        calls will return `200`.
+      tags:
+        - Scan
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            description: |
+              The ID of the preprocessing template to remove.
+      responses:
+        200:
+          description: |
+            The template has been removed.
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            Something went wrong on the OMR's side. Check the OMR's logs and
+            the error message for details.
+          content:
+            text/plain:
+              schema: 
+                type: string
+                description: |
+                  A description of the error.
+  /template/mark:
+    post:
+      summary: |
+        Upload a Marking Template
+      description: |
+        This endpoint is used to upload a marking template. Such a template
+        must be uploaded before any scans can be marked.
+      tags:
+        - Mark
+      requestBody:
+        description: |
+          The body describes the marking template for an exam.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkingTemplate"
+      responses:
+        200:
+          description: |
+            The template was successfully uploaded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - templateId
+                properties:
+                  templateId:
+                    description: |
+                      The ID of the newly-created marking template.
+                    type: string
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            Something went wrong on the OMR's side. Check the OMR's logs and
+            the error message for details.
+          content:
+            text/plain:
+              schema: 
+                type: string
+                description: |
+                  A description of the error.
+    delete:
+      summary: |
+        Remove a Marking Template
+      description: |
+        This endpoint is used to remove a marking template. Redundant calls 
+        will return `200`.
+      tags:
+        - Mark
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            description: |
+              The ID of the marking template to remove.
+      responses:
+        200:
+          description: |
+            The template has been removed.
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            Something went wrong on the OMR's side. Check the OMR's logs and
+            the error message for details.
+          content:
+            text/plain:
+              schema: 
+                type: string
+                description: |
+                  A description of the error.
+  /scan/images:
+    post:
+      summary: Upload a Scan
+      description: |
+        > This endpoint previously used the path `/scan`. That path is still supported at the time of writing. 
+        This endpoint lets you upload a scan. The OMR will perform any
+        preprocessing according to the specified template and store the
+        scans.
+      tags:
+        - Scan
+      parameters:
+        - in: query
+          name: template
+          required: true
+          schema:
+            type: string
+            description: |
+              The ID of the preprocessing template to use.
+      requestBody:
+        description: |
+          The image(s) used for the scan. There should be one image per 
+          page.
+
+          The image files can be in any format that is supported by version 4 
+          of OpenCV. The complete list is available [here](https://docs.opencv.org/4.12.0/d4/da8/group__imgcodecs.html#gacbaa02cffc4ec2422dfa2e24412a99e2).
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - page0
+              properties:
+                page0:
+                  type: string
+                  format: binary
+                page1:
+                  type: string
+                  format: binary
+      responses: 
+        200:
+          description: |
+            The scan was successfully preprocessed and stored.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - scanId
+                properties:
+                  scanId:
+                    description: |
+                      The ID of the newly uploaded scan.
+                    type: string
+        404:
+          description: |
+            The requested preprocessing template could not be found.
+          content: 
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            Something went wrong on the OMR's side. Check the OMR's logs and
+            the error message for details.
+          content:
+            text/plain:
+              schema: 
+                type: string
+                description: |
+                  A description of the error.
+  /job/scan/pdf:
+    post:
+      summary: Upload PDF Scans (Job)
+      description: |
+        This endpoint lets you upload scanned exam(s) in PDF format and starts
+        preprocessing asynchronously.
+
+        The OMR will create a background job and immediately return a job ID.
+        The job can be monitored using the job status endpoint, and the final
+        response can be retrieved once processing is complete.
+
+        The PDF may include as many exams as you want provided that each exam's
+        pages are grouped together. The preprocessor will tolerate pages that
+        are out of order or flipped upside-down.
+      tags:
+        - Scan
+      requestBody:
+        description: |
+          The PDF containing the scanned exam(s).
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                pdf:
+                  type: string
+                  format: binary
+                  description: |
+                    The PDF file containing the scanned exams.
+                preprocessingTemplate:
+                  type: string
+                  description: |
+                    The ID of the preprocessing template to use.
+                dpi:
+                  type: integer
+                  description: |
+                    The DPI (dots per inch) of the rendered images. Higher DPIs
+                    are much slower to compute but yield higher resolution 
+                    images, which may be necessary for the OMR to function 
+                    correctly. As a rule of thumb, 300 is high resolution (the
+                    default) and 74 is low. 
+                    
+                    If you want to maximize performance I would recommended 
+                    that you test out a few different DPI's for a given scan 
+                    template and use the lowest number you can get away with.
+                  example: 250
+              required:
+                - pdf
+                - preprocessingTemplate
+      responses:
+        202:
+          description: |
+            The PDF was accepted and a background job was created. Use the
+            returned job ID to monitor progress and retrieve the final result.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    description: |
+                      The ID of the newly created job.
+                    example: "9c0e7f3e-5b0a-4a89-b6a3-8f6b7c8d9e10"
+        500:
+          description: |
+            Something went wrong while creating the background job.
+            Check the OMR's logs and the error message for details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+  /scan/pdf:
+    post:
+      summary: Upload PDF Scans
+      description: |
+        This endpoint lets you upload scanned exam(s) in PDF format. The OMR 
+        will perform any preprocessing according to the specified template 
+        and store the scans for marking.
+
+        The PDF may include as many exams as you want provided that each exam's
+        pages are grouped together. The preprocessor will tolerate pages that 
+        are out of order or flipped upside-down.
+      tags:
+        - Scan
+      requestBody:
+        description: |
+          The PDF containing the scanned exam(s).
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                pdf:
+                  type: string
+                  format: binary
+                  description: |
+                    The PDF file containing the scanned exams.
+                preprocessingTemplate:
+                  type: string
+                  description: |
+                    The ID of the preprocessing template to use.
+                dpi:
+                  type: integer
+                  description: |
+                    The DPI (dots per inch) of the rendered images. Higher DPIs
+                    are much slower to compute but yield higher resolution 
+                    images, which may be necessary for the OMR to function 
+                    correctly. As a rule of thumb, 300 is high resolution (the
+                    default) and 74 is low. 
+                    
+                    If you want to maximize performance I would recommended 
+                    that you test out a few different DPI's for a given scan 
+                    template and use the lowest number you can get away with.
+                  example: 250
+              required:
+                - pdf
+                - preprocessingTemplate
+      responses: 
+        200:
+          description: |
+            At least one of the exams in the PDF was successfully preprocessed
+            and stored. To see how many exams failed/succeeded, refer to the
+            lists in the response body (if the length of the `"errors"` array 
+            is zero, then all of the exams were processed successfully).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResult'
+        400:
+          description: |
+            The request was missing something or the PDF was malformed. Check 
+            the error message for details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        404:
+          description: |
+            The requested preprocessing template could not be found.
+          content: 
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        413:
+          description: |
+            The attached PDF is too large.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        422:
+          description: |
+            The PDF was well-formed, but none of the exams passed preprocessing.
+            Check the error messages and consider increasing the DPI.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScanError'
+        500:
+          description: |
+            Something went wrong on the OMR's side. Check the OMR's logs and
+            the error message for details.
+          content:
+            text/plain:
+              schema: 
+                type: string
+                description: |
+                  A description of the error.
+  /scan:
+    delete:
+      summary: |
+        Remove Scans
+      description: |
+        This endpoint is used to remove one or more uploaded scans. Redundant 
+        calls will return `200`.
+      tags:
+        - Scan
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              description: |
+                A list of uploaded scan IDs to remove.            
+              items: 
+                type: string
+      responses:
+        200:
+          description: |
+            The scans were removed.
+        400:
+          description: |
+            The request was missing something. Check the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            Something went wrong on the OMR's side. Check the OMR's logs and
+            the error message for details.
+          content:
+            text/plain:
+              schema: 
+                type: string
+                description: |
+                  A description of the error.
+  /mark:
+    post:
+      summary: Request Marks
+      tags:
+        - Mark
+      description: |
+        This endpoint can be used to compute marks by specifying a list of scans
+        to mark and a template to mark them with.
+
+        A scan-specific failure (a missing scan, a page-count mismatch against
+        the template, or a marking failure) doesn't abort the rest of the
+        batch. It's reported in the `errors` list instead, and the other
+        scans are still marked.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - template
+                - scans
+              properties:
+                template:
+                  type: string
+                  description: |
+                    The ID of the marking template to use.
+                scans:
+                  type: array
+                  description: |
+                    A list of uploaded scan IDs to mark.            
+                  items: 
+                    type: string
+      responses:
+        200:
+          description: |
+            At least one scan in the batch was successfully marked. To see how
+            many scans failed/succeeded, refer to the lists in the response
+            body (if the length of the `errors` array is zero, then all scans
+            were marked successfully).
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - scans
+                  - pagesMarked
+                  - templateId
+                  - errors
+                properties:
+                  pagesMarked:
+                    type: integer
+                    description: |
+                      The total number of pages processed across successfully
+                      marked scans.
+                  templateId:
+                    type: string
+                    description: |
+                      The ID of the marking template that was used.
+                  errors:
+                    type: array
+                    description: |
+                      One entry per scan in the batch that failed to mark,
+                      e.g. the scan ID wasn't found, its page count didn't
+                      match the template, or marking itself failed.
+                    items:
+                      type: object
+                      required:
+                        - scanId
+                        - debug
+                      properties:
+                        scanId:
+                          type: string
+                          description: |
+                            The scan ID (as given in the request) that failed.
+                        debug:
+                          type: string
+                          description: |
+                            The error message. This is meant for debugging,
+                            not for end-users.
+                  scans:
+                    type: array
+                    items:
+                      type: object
+                      required: 
+                        - scanId
+                        - marks
+                      properties:
+                        scanId:
+                          type: string
+                          description: |
+                            The ID of the scan that was marked.
+                        marks:
+                          description: |
+                            A list of marked questions. The question IDs match the IDs given in 
+                            the marking template.
+                          type: array
+                          items:
+                            type: object
+                            required: 
+                              - questionId
+                              - flagged
+                              - selected
+                            properties:
+                              questionId:
+                                type: string
+                                description: |
+                                  The ID of the question as defined by the template.
+                              flagged:
+                                type: boolean
+                                description: |
+                                  Whether or not the question was flagged for manual review.
+                              selected:
+                                type: array
+                                items:
+                                  type: string
+                                description: |
+                                  A list of selected options that were detected for the question.
+                                  The options are named according to the marking template. For
+                                  example, `["A"]` or, if multiple options were selected, `["A", "B"]`.
+                              confidence:
+                                type: number
+                                description: |
+                                  How cleanly the detected answer separated from the alternatives
+                                  (0.0-1.0). Mirrors the value flagged against flagThreshold.
+                              pageIndex:
+                                type: integer
+                                description: |
+                                  The zero-based page (matching the scan's page images, and the
+                                  `page` parameter of GET /image) this question's bubbles were
+                                  found on. bounds and selectedBoxes below are in that page's
+                                  pixel coordinates only.
+                              bounds:
+                                type: object
+                                description: |
+                                  The bounding box enclosing every one of this question's bubbles,
+                                  not just the selected ones. Unlike selectedBoxes, this is present
+                                  even for a blank question, so it's meant as a generous hover/click
+                                  hit-region for the whole question rather than something to draw a
+                                  visible highlight from.
+                                required:
+                                  - x
+                                  - y
+                                  - width
+                                  - height
+                                properties:
+                                  x:
+                                    type: integer
+                                    description: |
+                                      Left edge, in scan pixel coordinates.
+                                  y:
+                                    type: integer
+                                    description: |
+                                      Top edge, in scan pixel coordinates.
+                                  width:
+                                    type: integer
+                                    description: |
+                                      Width of the bounding box.
+                                  height:
+                                    type: integer
+                                    description: |
+                                      Height of the bounding box.
+                              boxes:
+                                type: array
+                                description: |
+                                  One bounding box per option in the question, selected or not, in
+                                  template order. Each box is the bubble's position at the offset
+                                  actually used to detect it (template position plus whatever
+                                  alignment search found), not the raw template position, since
+                                  warping isn't pixel-perfect.
+                                items:
+                                  type: object
+                                  required:
+                                    - label
+                                    - selected
+                                    - x
+                                    - y
+                                    - width
+                                    - height
+                                  properties:
+                                    label:
+                                      type: string
+                                      description: |
+                                        Which option this box is for, e.g. "A".
+                                    selected:
+                                      type: boolean
+                                      description: |
+                                        Whether this option is one of the question's selected
+                                        answers (present in `selected` above).
+                                    x:
+                                      type: integer
+                                      description: |
+                                        Left edge of the bubble, in scan pixel coordinates.
+                                    y:
+                                      type: integer
+                                      description: |
+                                        Top edge of the bubble, in scan pixel coordinates.
+                                    width:
+                                      type: integer
+                                      description: |
+                                        Width of the bubble.
+                                    height:
+                                      type: integer
+                                      description: |
+                                        Height of the bubble.
+        400:
+          description: |
+            The request was missing something. Check the error message for
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        404:
+          description: |
+            The requested marking template could not be found. Note that an
+            unrecognized scan ID does *not* 404 the whole request. It's
+            reported per-scan in the 200/422 response's `errors` list instead.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of which resource couldn't be found.
+        422:
+          description: |
+            The template was found, but every scan in the batch failed to
+            mark. Check the error messages for details.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - scanId
+                    - debug
+                  properties:
+                    scanId:
+                      type: string
+                      description: |
+                        The scan ID (as given in the request) that failed.
+                    debug:
+                      type: string
+                      description: |
+                        The error message. This is meant for debugging, not
+                        for end-users.
+        500:
+          description: |
+            Something went wrong on the OMR's side. Check the OMR's logs and
+            the error message for details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+  /image:
+    get:
+      summary: View a Page
+      description: |
+        This endpoint lets you retrieve the page image from a previously 
+        uploaded scan.
+      tags:
+        - Inspect
+      parameters:
+        - in: query
+          name: scan
+          required: true
+          schema:
+            type: string
+            description: |
+              The ID of the scan.
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            description: |
+              The zero-based index of the page to retrieve.
+      responses:
+        200:
+          description: |
+            The image was successfully retrieved.
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: |
+            Something was missing from the request. See the error message for
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of what was wrong with the request.
+        404:
+          description: |
+            The identified scan or page could not be found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            Something went wrong on the OMR's end. See the error message for
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+  /image/snippet:
+    get:
+      summary: View a Question
+      description: |
+        > This endpoint previously used the path `/snippet`. That path is still supported at the time of writing. 
+        This endpoint lets you retrieve a cropped image that isolates a 
+        question.
+      tags:
+        - Inspect
+      parameters:
+        - in: query
+          name: template
+          required: true
+          schema:
+            type: string
+            description: |
+              The ID of the marking template to use. This is required to
+              identify the location of the question.
+        - in: query
+          name: scan
+          required: true
+          schema:
+            type: string
+            description: |
+              The ID of the scan.
+        - in: query
+          name: question
+          required: true
+          schema:
+            type: string
+            description: |
+              The ID of the question to read. This ID must be the same as the
+              ID used on the template.
+      responses: 
+        200:
+          description: |
+            The snippet was successfully retrieved.
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary 
+        400:
+          description: |
+            Something was missing from the request. See the error message for 
+            details.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of what was wrong with the request.
+        404:
+          description: |
+            The identified template, ID, or scan could not be found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: |
+                  A description of the error.
+        500:
+          description: |
+            Something went wrong on the OMR's end. See the error message for
+            details.
+          content:
+            text/plain:
+              schema: 
+                type: string
+                description: |
+                  A description of the error. 
+
+components:
+  parameters:
+    AdminKeyHeader:
+      name: OMR-Admin-Key
+      in: header
+      required: true
+      description: Administrator authentication key.
+      schema:
+        type: string
+  schemas:
+    Point:
+      description: |
+        Defines a point in the coordinates of a transformed image scan.
+      required:
+        - x
+        - y
+      properties:
+        x:
+          type: integer
+        y:
+          type: integer
+    ROI:
+      description: |
+        Defines a region of interest; that is, a rectangle.
+      required:
+        - min
+        - max
+      properties:
+        min: 
+          $ref: "#/components/schemas/Point"
+        max:
+          $ref: "#/components/schemas/Point"
+    PreprocessingConfig:
+      description: |
+        The configuration for the preprocessing of an image.
+      type: object
+      required:
+        - blurSize
+        - morphCloseSize
+        - minAnchorConfidence
+        - adaptiveBlockSize
+      properties:
+        blurSize:
+          type: integer
+          example: 5
+          description: |
+            Gaussian blur kernel size, **must be odd**. Increase for noisier 
+            scans.
+        morphCloseSize:
+          type: integer
+          example: 3
+          description: |
+            Morphological close kernel size. Helps fill gaps in pencil marks.
+        minAnchorConfidence:
+          type: number
+          example: 0.5
+          description: |
+            Minimum template-match score (0.0-1.0). Raise if anchors produce 
+            false positives.
+        adaptiveBlockSize:
+          type: integer
+          example: 91
+          description: |
+            Neighbourhood size (pixels, must be odd) for adaptive thresholding. 
+            Larger values use a wider local region to compute the threshold; 
+            recommended starting point is roughly 3 times the bubble diameter 
+            at scan resolution.
+        adaptiveC:
+          type: number
+          example: -15
+          description: |
+            Constant subtracted from the local mean before thresholding 
+            (`T = mean - C`). Positive values lower the threshold, giving 
+            cleaner ink/paper separation on high-contrast flatbed scans. 
+            Negative values raise the threshold, which can help detect lighter 
+            pencil marks but risks misclassifying clean white areas as ink.
+    PreprocessingPage:
+      description: |
+        Defines the anchors for a pages.
+      type: object
+      required:
+        - anchors
+      properties:
+        anchors:
+          type: array
+          items:
+            $ref: "#/components/schemas/PreprocessingAnchor"
+          description: |
+            The data for the three anchors of a preprocessing template page.
+    PreprocessingAnchor:
+      description: |
+        Describes information about an anchor.
+      type: object
+      required:
+        - center
+        - roi
+      properties:
+        center:
+          description: |
+            Where the center of this anchor should be in output space.
+          $ref: "#/components/schemas/Point"
+        roi:
+          description: |
+            The region of interest (ROI) for the anchor in output space. That is, the location of its top-left and bottom-right corners.
+          $ref: "#/components/schemas/ROI"
+    PreprocessingTemplate:
+      description: |
+        Represents the template used for preprocessing an image scan.
+      type: object
+      required:
+        - width
+        - height
+        - config
+        - pages
+      properties:
+        width:
+          type: integer
+          example: 800
+          description: |
+            The desired width of the image after preprocessing. Shared across all pages.
+        height:
+          type: integer
+          example: 1700
+          description: |
+            The desired height of the image after preprocessing. Shared across all pages.
+        config:
+          $ref: "#/components/schemas/PreprocessingConfig"
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/PreprocessingPage"
+    MarkingConfig:
+      description: |
+        Defines the configuration for marking.
+      type: object
+      required:
+        - fillThreshold
+        - bubbleInset
+      properties:
+        fillThreshold:
+          type: number
+          example: 0.25
+          description: |
+            The minimum fill ratio for a bubble to count as selected (0.0-1.0).
+        bubbleInset:
+          type: number
+          example: 0.75
+          description: |
+            The fraction of the bubble's radius that is sampled (0.0-1.0). Values
+            below 1.0 will exclude the printed border ring from the measurement.
+        flagThreshold:
+          type: number
+          example: 0.25
+          description: |
+            The minimum confidence below which an answer is flagged for manual
+            review. Set to 0.0 or omit to disable.
+        searchRadius:
+          type: integer
+          example: 3
+          description: |
+            Per-axis pixel search window around each bubble's template 
+            position. The maximum fill found across the (2r+1)² candidate 
+            centres is used. Set to 3 to 5 to tolerate small printer/scanner 
+            misalignment.
+    QuestionOption:
+      description: |
+        Defines an option for a question (e.g., "A", "B", and "C" might be options
+        for a multiple-choice question).
+      type: object
+      required:
+        - label
+        - x
+        - y
+      properties:
+        label:
+          type: string
+          example: "A"
+        x:
+          type: integer
+          description: |
+            The x-coordinate of the question option on the sheet.
+          example: 72
+        y: 
+          type: integer
+          description: |
+            The y-coordinate of the question option on the sheet.
+          example: 473
+    Question:
+      description: |
+        Defines a question on the exam to be marked.
+      type: object
+      required:
+        - id
+        - bubbleWidth
+        - bubbleHeight
+        - options
+      properties:
+        id:
+          type: string
+          example: "Q1"
+          description: |
+            An identifier for the question. **Question IDs must begin with Q**. 
+            No two question IDs on a given template should be the same.
+        bubbleWidth:
+          type: integer
+          example: 26
+          description: |
+            The width of the bubbles for this question.
+        bubbleHeight:
+          type: integer
+          example: 26
+          description: |
+            The height of bubbles for this equation.
+        type: 
+          type: string
+          example: "multi"
+          description: |
+            Set this field to "multi" if you want the OMR to know that it's normal
+            for the question to have multiple selected answers. Omit it if only
+            a single answer should be expected.
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionOption"      
+    MarkingTemplate:
+      description: |
+        Describes the template used for marking a scan.
+      type: object
+      required:
+        - config
+        - pages
+      properties:
+        config:
+          $ref: "#/components/schemas/MarkingConfig"
+        pages:
+          type: array
+          items:
+            type: object
+            required:
+              - questions
+            properties:
+              questions:
+                type: array
+                items: 
+                  $ref: "#/components/schemas/Question"
+    ScanError:
+      type: object
+      description: Describes an error that occurred while scanning a range of PDF pages.
+      required:
+        - from
+        - thru
+        - debug
+      properties:
+        from:
+          type: integer
+          format: uint32
+          minimum: 1
+          description: The starting page (1-based) of the PDF where the error occurred.
+        thru:
+          type: integer
+          format: uint32
+          minimum: 1
+          description: The ending page (1-based, inclusive) of the PDF where the error occurred.
+        debug:
+          type: string
+          description: The error message. Intended for debugging, not for end users.
+
+    ScanResult:
+      type: object
+      required:
+        - scanIds
+        - errors
+      properties:
+        scanIds:
+          type: array
+          description: Identifiers for the successfully processed scans.
+          items:
+            type: string
+
+        errors:
+          type: array
+          description: Errors encountered while processing the PDF.
+          items:
+            $ref: '#/components/schemas/ScanError'
+    
+    ResourceUtilization:
+      type: object
+      required:
+        - cpuHistory
+        - memoryHistory
+        - memoryPeak
+        - uptime
+        - disk
+      properties:
+        cpuHistory:
+          type: array
+          description: Historical CPU utilization samples.
+          items:
+            $ref: '#/components/schemas/CpuInfo'
+
+        memoryHistory:
+          type: array
+          description: Historical memory utilization samples.
+          items:
+            $ref: '#/components/schemas/MemInfo'
+        
+        memoryPeak:
+          type: integer
+          format: uint64
+          example: 2230198
+          description: |
+            The peak memory usage by the OMR since startup.
+
+        uptime:
+          type: integer
+          format: uint64
+          example: 259219
+          description: |
+            The number of seconds that the OMR has been running.
+
+        disk:
+          $ref: '#/components/schemas/DiskUtilization'
+
+    CpuInfo:
+      type: object
+      required:
+        - description
+        - overallPercent
+        - mhz
+        - threads
+      properties:
+        description:
+          type: string
+          description: Human-readable CPU model description.
+          example: Intel(R) Core(TM) i7-12700K
+
+        overallPercent:
+          type: number
+          format: double
+          description: Overall CPU utilization percentage.
+          example: 37.4
+
+        mhz:
+          type: number
+          format: double
+          description: Current operating frequency in MHz.
+          example: 3600.0
+
+        threads:
+          type: array
+          description: Per-thread CPU utilization.
+          items:
+            $ref: '#/components/schemas/CpuThreadInfo'
+
+    CpuThreadInfo:
+      type: object
+      required:
+        - percent
+      properties:
+        percent:
+          type: number
+          format: double
+          description: CPU utilization percentage for the thread.
+          example: 42.1
+
+    MemInfo:
+      type: object
+      required:
+        - inUseOmr
+        - inUseOther
+        - free
+      properties:
+        inUseOmr:
+          type: integer
+          format: uint64
+          description: Bytes of memory currently used by the OMR service.
+          example: 536870912
+
+        inUseOther:
+          type: integer
+          format: uint64
+          description: Bytes of memory used by all other processes.
+          example: 7432491008
+
+        free:
+          type: integer
+          format: uint64
+          description: Total free system memory in bytes.
+          example: 17179869184
+
+    DiskUtilization:
+      type: object
+      required:
+        - usage
+        - omrUsage
+      properties:
+        usage:
+          $ref: '#/components/schemas/DiskInfo'
+
+        omrUsage:
+          $ref: '#/components/schemas/OmrDiskUsage'
+
+    DiskInfo:
+      type: object
+      required:
+        - total
+        - free
+        - used
+      properties:
+        total:
+          type: integer
+          format: uint64
+          description: Total disk capacity in bytes.
+          example: 1000204886016
+
+        free:
+          type: integer
+          format: uint64
+          description: Available disk space in bytes.
+          example: 642345984000
+
+        used:
+          type: integer
+          format: uint64
+          description: Used disk space in bytes.
+          example: 357858902016
+
+    OmrDiskUsage:
+      type: object
+      required:
+        - database
+        - numberOfMatrices
+        - matrices
+        - numberOfPictures
+        - pictures
+        - total
+      properties:
+        database:
+          type: integer
+          format: uint64
+          description: Size of the OMR database in bytes.
+          example: 104857600
+
+        numberOfMatrices:
+          type: integer
+          description: Number of stored matrices.
+          example: 245
+
+        matrices:
+          type: integer
+          format: uint64
+          description: Total storage used by matrices in bytes.
+          example: 52428800
+
+        numberOfPictures:
+          type: integer
+          description: Number of stored pictures.
+          example: 1284
+
+        pictures:
+          type: integer
+          format: uint64
+          description: Total storage used by pictures in bytes.
+          example: 734003200
+
+        total:
+          type: integer
+          format: uint64
+          description: Total disk usage of all OMR data in bytes.
+          example: 891289600
+
+    CpuUsageSample:
+      type: object
+      required:
+        - overall
+        - perThread
+      properties:
+        overall:
+          type: number
+          format: double
+          description: Overall CPU utilization as a percentage.
+          example: 37.5
+        perThread:
+          type: array
+          description: |
+            CPU utilization for each logical processor as percentages.
+          items:
+            type: number
+            format: double
+          example: [42.1, 35.7, 39.8, 32.4]
+
+    DetailedCpuInfo:
+      type: object
+      required:
+        - description
+        - frequencyMhz
+        - usageSamples
+      properties:
+
+        description:
+          type: string
+          description: Human-readable CPU model description.
+          example: Intel(R) Core(TM) i7-12700K CPU
+
+        frequencyMhz:
+          type: number
+          format: double
+          description: Current or nominal CPU frequency in megahertz.
+          example: 3600.0
+
+        usageSamples:
+          type: array
+          description: |
+            Historical CPU utilization samples, ordered from oldest to newest.
+          items:
+            $ref: '#/components/schemas/CpuUsageSample'
+    JobStatus:
+      type: object
+      required:
+        - id
+        - method
+        - path
+        - progress
+        - startedTimestamp
+        - finishedTimestamp
+        - success
+        - notes
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the job.
+          example: "00a0a849-c801-40fc-8c8b-e197ddae43cb"
+        method:
+          type: string
+          description: HTTP method that initiated the job.
+          example: POST
+        path:
+          type: string
+          description: HTTP endpoint that initiated the job.
+          example: /scan
+        progress:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+          description: |
+            Fraction of the job that has completed. A value of `1.0`
+            indicates the job has finished.
+          example: 0.65
+        startedTimestamp:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp (milliseconds since the Unix epoch) when the job
+            was registered.
+          example: 1753894200123
+        finishedTimestamp:
+          type: integer
+          format: int64
+          description: |
+            Unix timestamp (milliseconds since the Unix epoch) when the job
+            completed. A value of `-62135596800000` (the zero value of Go's
+            `time.Time`) indicates the job has not yet finished.
+          example: 1753894218765
+        success:
+          type: boolean
+          description: |
+            Whether the job completed successfully. This field is only
+            meaningful once the job has finished.
+          example: true
+        notes:
+          type: string
+          description: |
+            Optional human-readable information about the job, such as its
+            size or an explanation of why it failed.
+          example: "Processed 120 pages successfully."

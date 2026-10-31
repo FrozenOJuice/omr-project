@@ -1,0 +1,303 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.account-container {
+    padding: 2em;
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    gap: 1.5em;
+}
+
+/* Two-column layout */
+
+.account-layout {
+    gap: 1.5em;
+    align-items: flex-start;
+}
+
+.left-col {
+    flex: 3;
+    gap: 1.5em;
+}
+
+.right-col {
+    flex: 2;
+    gap: 1.5em;
+}
+
+.account-terms-section {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Profile Card */
+
+.profile-card {
+    gap: 1.25em;
+    width: 100%;
+}
+
+.profile-header {
+    gap: 1.25em;
+}
+
+.avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: var(--highlight2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: var(--border-size) solid var(--color-border);
+}
+
+.avatar-initials {
+    color: #fff;
+    font-size: 1.4em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.profile-info {
+    gap: 0.2em;
+}
+
+.profile-name {
+    font-size: 1.15em;
+    font-weight: 700;
+}
+
+.profile-subtitle {
+    font-size: 0.85em;
+    opacity: 0.7;
+}
+
+/* Divider */
+
+.divider {
+    border: none;
+    border-top: var(--border-size) solid var(--color-border);
+    opacity: 0.2;
+    margin: 0;
+}
+
+/* Section Title */
+
+.section-title {
+    font-size: 1em;
+    font-weight: 700;
+}
+
+/* Form Fields */
+
+.form-fields {
+    gap: 1em;
+}
+
+.field {
+    gap: 0.3em;
+}
+
+.field-label {
+    font-size: 0.82em;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+.field-input {
+    padding: 0.6em 0.75em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    font-size: 0.9em;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.field-input::placeholder {
+    color: var(--color-text);
+    opacity: 0.45;
+}
+
+.field-readonly {
+    opacity: 0.75;
+    cursor: default;
+    user-select: text;
+    min-height: 2.5em;
+}
+
+.field-select {
+    cursor: pointer;
+    appearance: auto;
+    width: auto;
+    min-width: 9em;
+}
+
+.profile-institution-select {
+    width: 100%;
+    cursor: pointer;
+}
+
+
+/* Form Actions */
+
+.form-actions {
+    justify-content: flex-end;
+    gap: 0.6em;
+}
+
+/* Section cards (preferences / security) */
+
+.section-card {
+    gap: 0.85em;
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .account-layout {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 560px) {
+    .account-container {
+        padding: 1em;
+    }
+
+}
+
+/* Preference rows */
+
+.pref-row {
+    justify-content: space-between;
+    padding: 0.1em 0;
+}
+
+.pref-label {
+    font-size: 0.9em;
+}
+
+.pref-value {
+    font-size: 0.9em;
+    opacity: 0.7;
+}
+
+/* Toggle switch */
+
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 2.4em;
+    height: 1.35em;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.toggle-track {
+    position: absolute;
+    inset: 0;
+    background-color: var(--primary-darkened);
+    border: var(--border-size) solid var(--color-border);
+    border-radius: 999px;
+    transition: background-color 150ms ease;
+}
+
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(1.35em - 8px);
+    height: calc(1.35em - 8px);
+    background-color: var(--color-text);
+    border-radius: 50%;
+    transition: transform 150ms ease;
+}
+
+.toggle input:checked + .toggle-track {
+    background-color: var(--highlight2);
+    border-color: var(--highlight2);
+}
+
+.toggle input:checked + .toggle-track::after {
+    background-color: #fff;
+    transform: translateX(1.05em);
+}
+
+.toggle:has(input:disabled) {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+/* Security rows */
+
+.security-row {
+    justify-content: space-between;
+    gap: 1em;
+    padding: 0.1em 0;
+}
+
+.security-label {
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.security-sublabel {
+    font-size: 0.78em;
+    opacity: 0.6;
+    margin-top: 0.1em;
+}
+
+.field-error {
+    font-size: 0.82em;
+    color: var(--danger, #e05a5a);
+}
+
+/* Password modal */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-card {
+    width: 28em;
+    gap: 1.25em;
+}
+
+.modal-header {
+    justify-content: space-between;
+}
+
+.modal-title {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.modal-body {
+    gap: 0.9em;
+}
+
+.modal-footer {
+    justify-content: flex-end;
+    gap: 0.6em;
+}

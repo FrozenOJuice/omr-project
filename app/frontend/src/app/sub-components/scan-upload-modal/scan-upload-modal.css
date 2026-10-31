@@ -1,0 +1,296 @@
+.modal-card {
+    width: 34em;
+    gap: 1em;
+}
+
+.modal-header {
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1em;
+}
+
+.modal-title {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.modal-subtitle {
+    font-size: 0.82em;
+    opacity: 0.6;
+    margin-top: 0.15em;
+}
+
+/* Buttons don't inherit font-size from the page by default, so the back
+   icon-btn (no font-size of its own) renders off the browser's smaller
+   form-control default instead of matching its neighbouring
+   action-btn--sm buttons (~37px tall) -- see course-header.css for the
+   fuller explanation. View encapsulation scopes this to this component only. */
+.icon-btn {
+    font-size: 0.93em;
+}
+
+/* File picker */
+
+.form-body {
+    gap: 0.9em;
+}
+
+.file-drop {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--card-border-radius);
+    padding: 3em;
+    min-height: 10em;
+    justify-content: center;
+    gap: 0.6em;
+    cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease;
+    position: relative;
+    text-align: center;
+}
+
+.file-drop:hover,
+.file-drop.has-file {
+    background: var(--primary-darkened);
+    border-color: var(--highlight2);
+}
+
+.file-icon {
+    font-size: 3em;
+    opacity: 0.5;
+}
+
+.file-drop.has-file .file-icon {
+    opacity: 0.8;
+    color: var(--highlight2);
+}
+
+.file-label {
+    font-size: 0.88em;
+    font-weight: 600;
+}
+
+.file-size {
+    font-size: 0.78em;
+    opacity: 0.55;
+}
+
+.file-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    font-size: unset;
+}
+
+/* Form fields */
+
+.field-group {
+    gap: 0.35em;
+}
+
+.field-label {
+    font-size: 0.82em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.field-optional {
+    font-weight: 400;
+    opacity: 0.55;
+}
+
+.temp-badge {
+    font-size: 0.75em;
+    font-weight: 600;
+    background: var(--tag-amber);
+    color: #000;
+    border-radius: 3px;
+    padding: 0.1em 0.4em;
+    opacity: 0.8;
+}
+
+/* Progress bar */
+
+.progress-wrap {
+    gap: 0.35em;
+}
+
+.progress-track {
+    height: 6px;
+    background: var(--primary-darkened);
+    border-radius: 3px;
+    overflow: hidden;
+    border: var(--border-size) solid var(--color-border);
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--highlight2);
+    border-radius: 3px;
+    transition: width 150ms ease;
+}
+
+.progress-label {
+    font-size: 0.78em;
+    opacity: 0.6;
+    text-align: right;
+}
+
+/* Success state */
+
+.success-state {
+    gap: 0.5em;
+    padding: 1em 0;
+}
+
+.success-icon {
+    font-size: 2.5em;
+    color: var(--tag-green);
+}
+
+.success-icon--pending {
+    color: var(--highlight2);
+}
+
+.success-icon--failed {
+    color: var(--tag-red);
+}
+
+.success-title {
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+.success-subtitle {
+    font-size: 0.82em;
+    opacity: 0.65;
+}
+
+.success-subtitle--failed {
+    color: var(--tag-red);
+    opacity: 1;
+}
+
+/* Scan list */
+
+.scan-list {
+    gap: 0.45em;
+    padding: 0.75em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    background: var(--primary-darkened);
+}
+
+.scan-list-header {
+    justify-content: space-between;
+}
+
+.scan-list-title {
+    font-size: 0.86em;
+    font-weight: 700;
+}
+
+/* Caps the list at ~5 rows before scrolling, so a batch with several failed
+   scans doesn't blow up the modal's height past the viewport. */
+.scan-list-items {
+    max-height: 13.5em;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.scan-row {
+    min-height: 2.5em;
+    padding: 0.35em 0;
+    border-top: 1px solid color-mix(in oklab, var(--color-border), transparent 55%);
+}
+
+.scan-info {
+    min-width: 0;
+}
+
+.scan-name {
+    font-size: 0.84em;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.scan-meta {
+    font-size: 0.75em;
+    opacity: 0.6;
+}
+
+.scan-help {
+    font-size: 0.78em;
+    line-height: 1.35;
+    color: color-mix(in oklab, var(--tag-red), var(--color-text) 35%);
+}
+
+/* Shared */
+
+.error-text {
+    font-size: 0.82em;
+    color: var(--tag-red);
+}
+.duplicate-warning {
+    align-items: flex-start;
+    padding: 0.7em 0.8em;
+    border-left: 3px solid var(--tag-amber);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in srgb, var(--tag-amber) 12%, transparent);
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.duplicate-warning .material-icons-outlined {
+    color: var(--tag-amber);
+    font-size: 1.25em;
+}
+
+/* Delete-all confirmation. This modal is itself rendered inside its
+   parent's .modal-overlay, so this needs its own higher-stacked overlay
+   rather than relying on one from an ancestor. */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+
+.confirm-card {
+    width: 24em;
+    gap: 1.25em;
+}
+
+.confirm-icon {
+    font-size: 2em;
+    color: var(--tag-red);
+    flex-shrink: 0;
+}
+
+.confirm-title {
+    font-size: 1em;
+    font-weight: 700;
+}
+
+.confirm-body {
+    font-size: 0.85em;
+    opacity: 0.7;
+    margin-top: 0.2em;
+}
+
+.confirm-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}

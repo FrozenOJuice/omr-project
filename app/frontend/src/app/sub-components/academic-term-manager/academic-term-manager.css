@@ -1,0 +1,230 @@
+.term-manager {
+    width: 100%;
+    gap: 1em;
+    box-sizing: border-box;
+}
+
+.term-manager-header {
+    gap: 1em;
+}
+
+.term-heading-copy,
+.term-field,
+.institution-filter,
+.term-summary {
+    gap: 0.25em;
+}
+
+.section-title {
+    font-size: 1em;
+    font-weight: 700;
+}
+
+.term-description,
+.term-meta,
+.term-empty {
+    font-size: 0.8em;
+    opacity: 0.68;
+}
+
+.institution-filter,
+.term-field {
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.institution-filter {
+    min-width: 14em;
+}
+
+.new-term-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) max-content;
+    align-items: end;
+    gap: 0.75em;
+    width: min(42rem, 100%);
+}
+
+.term-name-field {
+    width: 100%;
+    min-width: 0;
+}
+
+.year-format-field {
+    width: 100%;
+    min-width: 0;
+}
+
+.term-input {
+    min-height: 2.6em;
+    padding: 0.55em 0.7em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.term-add {
+    min-height: 2.6em;
+}
+
+.term-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));
+    gap: 0.75em;
+    max-height: min(23em, 52vh);
+    padding: 0.15em 0.4em 0.15em 0.1em;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.term-row {
+    gap: 0.8em;
+    min-width: 0;
+    min-height: 7.25em;
+    padding: 0.85em;
+    border: var(--border-size) solid color-mix(in srgb, var(--color-border) 55%, transparent);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in srgb, var(--primary-darkened) 70%, transparent);
+    box-sizing: border-box;
+}
+
+.term-row--archived .term-summary {
+    opacity: 0.62;
+}
+
+.term-name-row,
+.term-actions {
+    gap: 0.5em;
+}
+
+.term-summary {
+    min-width: 0;
+}
+
+.term-actions {
+    margin-top: auto;
+    flex-wrap: wrap;
+}
+
+.term-edit-form {
+    width: 100%;
+    gap: 0.7em;
+}
+
+.term-name {
+    font-weight: 650;
+}
+
+.status-badge {
+    padding: 0.15em 0.45em;
+    border-radius: 999px;
+    background: var(--primary-darkened);
+    font-size: 0.7em;
+}
+
+.edit-format {
+    width: 100%;
+}
+
+.term-error {
+    gap: 0.4em;
+    color: var(--tag-red);
+    font-size: 0.85em;
+}
+
+.term-confirm-overlay {
+    position: fixed;
+    z-index: 1200;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1em;
+    background: rgb(0 0 0 / 45%);
+}
+
+.term-confirm-dialog {
+    width: min(28em, calc(100vw - 2em));
+    gap: 1em;
+    box-sizing: border-box;
+}
+
+.term-confirm-heading {
+    gap: 0.8em;
+}
+
+.term-confirm-heading .col-flex-container {
+    gap: 0.12em;
+}
+
+.term-confirm-icon {
+    display: grid;
+    place-items: center;
+    width: 2.3em;
+    height: 2.3em;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--tag-red) 14%, transparent);
+    color: var(--tag-red);
+    flex-shrink: 0;
+}
+
+.term-confirm-title {
+    font-size: 1.05em;
+    font-weight: 700;
+}
+
+.term-confirm-name {
+    font-size: 0.85em;
+    opacity: 0.72;
+}
+
+.term-confirm-description {
+    margin: 0;
+    font-size: 0.88em;
+    line-height: 1.45;
+    opacity: 0.78;
+}
+
+.term-confirm-actions {
+    justify-content: flex-end;
+    gap: 0.65em;
+}
+
+@media (max-width: 46em) {
+    .term-manager-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .institution-filter,
+    .term-name-field,
+    .year-format-field,
+    .edit-format,
+    .term-actions .action-btn {
+        width: 100%;
+    }
+
+    .term-actions {
+        flex-wrap: wrap;
+    }
+
+    .term-list {
+        grid-template-columns: 1fr;
+        max-height: min(25em, 58vh);
+    }
+
+    .new-term-form {
+        grid-template-columns: 1fr;
+    }
+
+    .term-confirm-actions {
+        flex-direction: column-reverse;
+    }
+
+    .term-confirm-actions .action-btn {
+        width: 100%;
+    }
+}

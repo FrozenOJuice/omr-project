@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Frontend</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+  <script>
+    // Kept in sync by hand with COLOUR_SCHEMES in theme.service.ts, which
+    // must run before this script can rely on Angular/TS existing.
+    (function () {
+      var SCHEME_CLASSES = { ubc: '', ugly: 'scheme-ugly', dark: 'dark-mode', ocean: 'scheme-ocean', slate: 'scheme-slate', amethyst: 'scheme-amethyst' };
+      function applyTheme() {
+        var stored = localStorage.getItem('theme:activeScheme');
+        var id = stored && SCHEME_CLASSES.hasOwnProperty(stored) ? stored : 'ubc';
+        Object.keys(SCHEME_CLASSES).forEach(function (k) {
+          if (SCHEME_CLASSES[k]) document.body.classList.remove(SCHEME_CLASSES[k]);
+        });
+        if (SCHEME_CLASSES[id]) document.body.classList.add(SCHEME_CLASSES[id]);
+      }
+      applyTheme();
+      window.addEventListener('pageshow', function (e) { if (e.persisted) applyTheme(); });
+    })();
+  </script>
+  <app-root></app-root>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<div class="col-flex-container student-list-root" [class.modal-card]="!embedded" [class.card]="!embedded">
+
+    <div class="modal-header row-flex-container align-items-center">
+        <div class="col-flex-container">
+            <span class="modal-title">Students</span>
+            @if (!embedded) {
+                <span class="modal-subtitle">{{ course.code }}, {{ course.name }}</span>
+            }
+        </div>
+        @if (!embedded) {
+            <button class="icon-btn icon-btn--danger" (click)="close.emit()">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        }
+    </div>
+
+    <div class="toolbar row-flex-container align-items-center gap">
+        <div class="search-wrapper grow">
+            <span class="material-icons-outlined search-icon">search</span>
+            <input
+                class="search-input"
+                type="text"
+                placeholder="Search by name, email, ID, or status..."
+                [(ngModel)]="searchQuery"
+            />
+        </div>
+        @if (isOwner) {
+            <button class="action-btn action-btn--sm" (click)="openAddStudents.emit()">
+                <span class="material-icons-outlined">person_add</span>
+                Add Students
+            </button>
+        }
+    </div>
+
+    @if (course.canManageCanvas) {
+        <div class="canvas-roster-tools row-flex-container align-items-center gap">
+            <div class="canvas-roster-label row-flex-container align-items-center gap">
+                <span class="status-badge tag-blue">Canvas</span>
+                <span>Roster tools</span>
+            </div>
+            <div class="canvas-roster-actions row-flex-container align-items-center gap">
+            @if (confirmingInviteAll) {
+                <span class="invite-confirm-text">Invite {{ pendingInvitationCount }} students?</span>
+                <button class="action-btn action-btn--sm action-btn--outline" [disabled]="invitingAll" (click)="cancelInviteAll()">Cancel</button>
+                <button class="action-btn action-btn--sm" [disabled]="invitingAll" (click)="inviteAll()">
+                    {{ invitingAll ? 'Sending...' : 'Send all' }}
+                </button>
+            } @else if (pendingInvitationCount) {
+                <button class="action-btn action-btn--sm action-btn--outline" [disabled]="syncingRoster || !!invitingStudentId" (click)="requestInviteAll()">
+                    <span class="material-icons-outlined">forward_to_inbox</span>
+                    Invite all
+                </button>
+            }
+            <button class="action-btn action-btn--sm action-btn--outline" [disabled]="syncingRoster || invitingAll" (click)="syncRoster()">
+                <span class="material-icons-outlined">sync</span>
+                {{ syncingRoster ? 'Syncing...' : 'Sync roster' }}
+            </button>
+            </div>
+        </div>
+    }
+
+    @if (removeError) {
+        <div class="remove-error">{{ removeError }}</div>
+    }
+    @if (promoteError) {
+        <div class="remove-error">{{ promoteError }}</div>
+    }
+
+    <div class="sort-bar row-flex-container">
+        <button class="sort-btn" [class.active]="sortField === 'name'" (click)="setSort('name')">
+            Name
+            @if (sortField === 'name') {
+                <span class="sort-dir">{{ sortDir === 'asc' ? '(ASC)' : '(DESC)' }}</span>
+            }
+        </button>
+        <button class="sort-btn" [class.active]="sortField === 'studentNumber'" (click)="setSort('studentNumber')">
+            Student ID
+            @if (sortField === 'studentNumber') {
+                <span class="sort-dir">{{ sortDir === 'asc' ? '(ASC)' : '(DESC)' }}</span>
+            }
+        </button>
+    </div>
+
+    <div class="student-list-body">
+        @if (filteredStudents.length === 0) {
+            <span class="empty-text">{{ searchQuery ? 'No students match your search.' : 'No students on the roster.' }}</span>
+        } @else {
+            @for (student of filteredStudents; track student.id; let last = $last) {
+                <div
+                    class="student-row row-flex-container align-items-center gap"
+                    [class.last]="last"
+                    [class.student-row--confirm]="pendingRemoval?.id === student.id"
+                    [class.student-row--inactive]="!student.active"
+                >
+                    <div class="student-avatar">{{ fullName(student).charAt(0) }}</div>
+                    <div class="col-flex-container grow">
+                        <span class="student-name">{{ fullName(student) }}</span>
+                        <span class="student-id">{{ student.email }} &middot; ID: {{ student.studentNumber ?? 'Not set' }}</span>
+                    </div>
+                    <span
+                        class="status-badge"
+                        [class.tag-green]="student.active && student.accountStatus === 'linked'"
+                        [class.tag-amber]="student.active && student.accountStatus === 'pending' && !student.invitedAt"
+                        [class.tag-blue]="student.active && student.accountStatus === 'pending' && !!student.invitedAt"
+                        [class.tag-outline]="!student.active"
+                    >
+                        {{ accountStatusLabel(student) }}
+                    </span>
+                    <div class="student-actions row-flex-container align-items-center">
+                        @if (pendingRemoval?.id === student.id) {
+                            <div class="student-confirm col-flex-container">
+                                <span class="student-confirm-text">Remove from this course?</span>
+                                <div class="row-flex-container gap">
+                                    <button
+                                        class="action-btn action-btn--sm action-btn--outline"
+                                        [disabled]="removingStudentId === student.id"
+                                        (click)="cancelRemoveStudent()"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        class="action-btn action-btn--sm action-btn--danger"
+                                        [disabled]="removingStudentId === student.id"
+                                        (click)="confirmRemoveStudent()"
+                                    >
+                                        {{ removingStudentId === student.id ? 'Removing...' : 'Remove' }}
+                                    </button>
+                                </div>
+                            </div>
+                        } @else if (pendingPromotion?.id === student.id) {
+                            <div class="student-confirm col-flex-container">
+                                <span class="student-confirm-text">Promote to professor? They'll be removed from this student roster.</span>
+                                <div class="row-flex-container gap">
+                                    <button
+                                        class="action-btn action-btn--sm action-btn--outline"
+                                        [disabled]="promotingStudentId === student.id"
+                                        (click)="cancelPromoteStudent()"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        class="action-btn action-btn--sm"
+                                        [disabled]="promotingStudentId === student.id"
+                                        (click)="confirmPromoteStudent()"
+                                    >
+                                        {{ promotingStudentId === student.id ? 'Promoting...' : 'Promote' }}
+                                    </button>
+                                </div>
+                            </div>
+                        } @else {
+                            @if (course.canManageCanvas && student.active && student.accountStatus === 'pending' && !student.invitedAt) {
+                                <button
+                                    class="action-btn action-btn--sm action-btn--outline invite-btn"
+                                    [disabled]="!!invitingStudentId || invitingAll"
+                                    (click)="inviteStudent(student)"
+                                >
+                                    <span class="material-icons-outlined">mail</span>
+                                    {{ invitingStudentId === student.id ? 'Sending...' : 'Invite' }}
+                                </button>
+                            }
+                            @if (canPromote(student)) {
+                                <button class="icon-btn icon-btn--ghost" title="Promote to professor" (click)="requestPromoteStudent(student)">
+                                    <span class="material-icons-outlined">military_tech</span>
+                                </button>
+                            }
+                            @if (student.source === 'canvas') {
+                                <span class="material-icons-outlined" title="Managed by Canvas roster sync">lock</span>
+                            } @else if (isOwner) {
+                                <button class="icon-btn icon-btn--ghost delete-btn" title="Remove student" (click)="requestRemoveStudent(student)">
+                                    <span class="material-icons-outlined">person_remove</span>
+                                </button>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="modal-footer row-flex-container">
+        <span class="student-count">
+            {{ filteredStudents.length }}{{ searchQuery ? ' of ' + course.studentList.length : '' }}
+            student{{ course.studentList.length !== 1 ? 's' : '' }}
+        </span>
+    </div>
+
+</div>

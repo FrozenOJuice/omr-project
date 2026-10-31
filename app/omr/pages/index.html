@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OMR | API Documentation</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="img/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="img/icons/favicon-16x16.png">
+    <link rel="manifest" href="img/icons/site.webmanifest">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">  
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+    <elements-api apiDescriptionUrl="/openapi.yaml" layout="sidebar" router="memory" tryItCredentialsPolicy="include" />
+    <script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css" />
+    <style>
+        * :not(pre, pre *), * :not(p, p *), * :not(code, code *)  {
+            font-family: "Space Grotesk", sans-serif !important;
+        }
+
+        p, p * {
+            font-family: "Roboto", sans-serif !important;
+        }
+
+        blockquote, blockquote * {
+            border-radius: 0 !important;
+        }
+
+        body>elements-api>div {
+            height: 100vh !important;
+        }
+    </style>
+
+    <script>
+        // Remove the ugly logo. Sorry.
+        window.addEventListener("DOMContentLoaded", () => {
+
+            function fixExternalLinks() {
+                let links = document.querySelectorAll("a")
+                for (let link of links) {
+                    if (link.href.startsWith("https://")) {
+                        link.lastChild.innerHTML = "Powered by Swalalala"
+                        link.href = "https://youtu.be/2Ax-TWSceLs?si=gvZhjODbIhNw-dSf"
+                    }
+                }                
+            }
+
+            fixExternalLinks()
+            setInterval(fixExternalLinks, 200)
+
+        })
+    </script>
+</body>
+
+</html>

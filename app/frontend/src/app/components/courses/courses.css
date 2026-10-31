@@ -1,0 +1,229 @@
+/* Empty States */
+
+.course-card--archived {
+    opacity: 0.82;
+    border-style: dashed;
+}
+
+.empty-state {
+    gap: 0.5em;
+    padding: 4em 1em;
+    opacity: 0.5;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 2.5em;
+}
+
+.empty-title {
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.empty-body {
+    font-size: 0.85em;
+}
+
+/* Modal Overlay */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.add-course-wrapper {
+    position: relative;
+}
+
+.add-course-menu {
+    position: absolute;
+    top: calc(100% + 0.45em);
+    right: 0;
+    z-index: 20;
+    width: 16.5em;
+    gap: 0.25em;
+    padding: 0.4em;
+}
+
+.add-course-option {
+    width: 100%;
+    padding: 0.7em;
+    border: 0;
+    border-radius: var(--input-border-radius);
+    background: transparent;
+    color: var(--color-text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.add-course-option:hover,
+.add-course-option:focus-visible {
+    background: var(--primary-darkened);
+}
+
+.add-course-option > .material-icons-outlined {
+    color: var(--tag-blue);
+}
+
+.add-course-option strong {
+    font-size: 0.86em;
+}
+
+.add-course-option span span {
+    margin-top: 0.15em;
+    font-size: 0.74em;
+    opacity: 0.62;
+}
+
+.restore-unavailable-modal {
+    width: min(28rem, calc(100vw - 2rem));
+    gap: 1rem;
+    padding: 1.25rem;
+}
+
+.restore-unavailable-icon {
+    color: var(--tag-red);
+    font-size: 1.6rem;
+}
+
+.restore-unavailable-body {
+    line-height: 1.5;
+}
+
+.modal-footer {
+    justify-content: flex-end;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.6em;
+    font-size: 1.1em;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.search-input {
+    padding: 0.5em 1.0em 0.5em 2.2em;
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    color: var(--color-text);
+    font-size: 0.95em;
+    width: 14em;
+    align-self: stretch;
+    box-sizing: border-box;
+}
+
+.course-container {
+    width: 100%;
+    padding: 1em;
+    box-sizing: border-box;
+}
+
+.courses-gap {
+    gap: 0.5em;
+}
+
+.archive-maintenance {
+    padding: 0.85em 1em;
+}
+
+.archive-maintenance-icon {
+    color: var(--tag-amber);
+    font-size: 1.7em;
+}
+
+.archive-maintenance-title {
+    font-weight: 700;
+}
+
+.archive-maintenance-body {
+    margin-top: 0.15em;
+    font-size: 0.82em;
+    opacity: 0.68;
+}
+
+.archive-cleanup-notice {
+    padding: 0.7em 0.9em;
+    border: var(--border-size) solid var(--tag-green);
+    border-radius: var(--input-border-radius);
+    background: color-mix(in oklab, var(--tag-green), transparent 85%);
+}
+
+.archive-cleanup-modal {
+    width: min(34rem, calc(100vw - 2rem));
+    gap: 1em;
+    padding: 1.25em;
+}
+
+.archive-cleanup-warning {
+    color: var(--tag-amber);
+    font-size: 1.7em;
+}
+
+.archive-cleanup-warning-body {
+    gap: 0.75em;
+    line-height: 1.5;
+}
+
+/* Course Card */
+
+.course-card {
+    width: 100%;
+    padding: 1em;
+}
+
+.course-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.course-header:hover .course-code {
+    color: color-mix(in oklab, var(--color-text), var(--hover-darken));
+}
+
+.course-badge {
+    width: 3em;
+    height: 3em;
+    background-color: var(--highlight3);
+    color: var(--on-highlight3);
+    border: var(--border-size) solid var(--color-border);
+    border-radius: var(--card-border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95em;
+    flex-shrink: 0;
+}
+
+.course-code {
+    font-size: 1em;
+    font-weight: 600;
+    transition: color 150ms ease;
+}
+
+.course-meta {
+    font-size: 0.82em;
+    opacity: 0.6;
+    margin-top: 0.2em;
+}
+
+.expand-icon {
+    font-size: 1.7em;
+    opacity: 0.85;
+    flex-shrink: 0;
+}

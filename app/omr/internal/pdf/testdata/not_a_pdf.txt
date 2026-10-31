@@ -1,0 +1,1 @@
+Synthetic malformed-PDF fixture. This is plain text, not a PDF.

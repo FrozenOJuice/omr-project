@@ -1,0 +1,26 @@
+@if (percentage() !== null) {
+<div class="score-summary row-flex-container gap">
+    <div class="stat-tile">
+        <div class="stat-header row-flex-container align-items-start">
+            <span class="stat-label">Your score</span>
+            <span class="grow"></span>
+            <span class="stat-value">{{ percentage() }}%</span>
+        </div>
+        <span class="stat-detail">{{ totalScore() }}/{{ maxScore() }}</span>
+    </div>
+    @if (classMeanPercent() !== null) {
+    <div class="stat-tile">
+        <div class="stat-header row-flex-container align-items-start">
+            <span class="stat-label">Class avg</span>
+            <span class="grow"></span>
+            <span class="stat-value">{{ classMeanPercent() }}%</span>
+        </div>
+        @if (percentDiff() !== null) {
+        <span class="stat-detail compare-diff" [class.above]="percentDiff()! >= 0" [class.below]="percentDiff()! < 0">
+            {{ percentDiff()! >= 0 ? '+' : '' }}{{ percentDiff() }}%
+        </span>
+        }
+    </div>
+    }
+</div>
+}

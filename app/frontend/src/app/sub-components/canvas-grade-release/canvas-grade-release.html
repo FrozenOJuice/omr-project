@@ -1,0 +1,234 @@
+<div class="canvas-release-overlay" (click)="close()">
+  <div class="card canvas-release-modal col-flex-container" (click)="$event.stopPropagation()">
+    <div class="release-header row-flex-container align-items-center justify-content-between gap">
+      <div class="col-flex-container">
+        <span class="release-title">Canvas assignment</span>
+        <span class="course-meta">{{ exam.name }}</span>
+      </div>
+      <button
+        type="button"
+        class="icon-btn icon-btn--danger"
+        [disabled]="saving() || sending()"
+        (click)="close()"
+        title="Close"
+      >
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    @if (loading()) {
+      <span class="release-empty">Loading assignments from Canvas...</span>
+    } @else {
+      @if (success()) {
+        <div class="release-message release-message--success">{{ success() }}</div>
+      }
+      @if (error()) {
+        <div class="release-message release-message--error">{{ error() }}</div>
+      }
+
+      @if (editingAssignment()) {
+        <div class="release-section col-flex-container">
+          <div class="col-flex-container">
+            <span class="release-label">Choose a Canvas destination</span>
+            <span class="course-meta">Link one Canvas assignment, or keep this exam OMR-only.</span>
+          </div>
+          <label
+            class="assignment-choice row-flex-container align-items-center gap"
+            [class.assignment-choice--selected]="selectedAssignmentId() === null"
+          >
+            <input
+              type="radio"
+              name="canvas-assignment"
+              [value]="null"
+              [ngModel]="selectedAssignmentId()"
+              (ngModelChange)="selectedAssignmentId.set($event)"
+            />
+            <span class="col-flex-container grow">
+              <span class="assignment-name">No Canvas assignment</span>
+              <span class="course-meta">Keep this exam in OMR only</span>
+            </span>
+          </label>
+          @for (assignment of assignments(); track assignment.id) {
+            <label
+              class="assignment-choice row-flex-container align-items-center gap"
+              [class.assignment-choice--selected]="selectedAssignmentId() === assignment.id"
+              [class.assignment-choice--disabled]="!canLink(assignment)"
+            >
+              <input
+                type="radio"
+                name="canvas-assignment"
+                [value]="assignment.id"
+                [ngModel]="selectedAssignmentId()"
+                (ngModelChange)="selectedAssignmentId.set($event)"
+                [disabled]="!canLink(assignment)"
+              />
+              <span class="col-flex-container grow">
+                <span class="assignment-name">{{ assignment.name }}</span>
+                <span class="course-meta">
+                  {{
+                    assignment.points_possible === null
+                      ? 'No points set'
+                      : assignment.points_possible + ' points'
+                  }}
+                  &middot; {{ assignment.published ? 'Published' : 'Unpublished' }} &middot;
+                  {{
+                    assignment.due_at
+                      ? 'Due ' + (assignment.due_at | date: 'mediumDate')
+                      : 'No due date'
+                  }}
+                </span>
+              </span>
+              @if (assignment.linked_exam_id && assignment.linked_exam_id !== exam.id) {
+                <span class="linked-label"
+                  ><span class="material-icons-outlined">link</span> Used by another exam</span
+                >
+              } @else if (!assignment.available) {
+                <span class="linked-label">Unavailable</span>
+              }
+            </label>
+          } @empty {
+            <span class="release-empty">No assignments were found in this Canvas course.</span>
+          }
+        </div>
+      } @else if (status()?.assignment_id) {
+        <div class="linked-destination row-flex-container align-items-center gap">
+          <span class="material-icons-outlined assignment-icon">assignment</span>
+          <div class="col-flex-container grow">
+            <span class="release-label">{{ status()?.assignment_name }}</span>
+            <span class="course-meta">Canvas grade and marked exam result destination</span>
+          </div>
+          @if (targetLocked()) {
+            <span class="linked-label"
+              ><span class="material-icons-outlined">lock</span> Locked after first release</span
+            >
+          } @else {
+            <button
+              type="button"
+              class="action-btn action-btn--sm action-btn--outline"
+              (click)="editAssignment()"
+            >
+              Change
+            </button>
+          }
+        </div>
+
+        @if (!exam.released) {
+          <div class="release-message">
+            Release this exam's results in OMR before sending grades and marked results to Canvas.
+          </div>
+        } @else if (!canReceiveGrades(selectedAssignment())) {
+          <div class="release-message release-message--error">
+            This assignment is unavailable or has no positive point value in Canvas.
+          </div>
+        } @else if (!confirming() && status(); as status) {
+          @if (status.last_attempted_at) {
+            <div class="last-release row-flex-container align-items-center gap">
+              <span class="material-icons-outlined">history</span>
+              @if (status.last_attempt_status === 'running') {
+                <span
+                  >Grade release started {{ status.last_attempted_at | date: 'medium' }} and is
+                  still in progress.</span
+                >
+              } @else {
+                <span
+                  >Last attempt {{ status.last_attempted_at | date: 'medium' }}:
+                  {{ status.last_sent_count }} sent<span [hidden]="!status.last_failed_count"
+                    >, {{ status.last_failed_count }} failed</span
+                  >.</span
+                >
+              }
+            </div>
+          }
+          <div class="release-summary">
+            <div>
+              <strong>{{ status.eligible_count }}</strong
+              ><span>students ready</span>
+            </div>
+            <div>
+              <strong>{{ status.skipped_count }}</strong
+              ><span>students skipped</span>
+            </div>
+          </div>
+          @if (status.skipped_count) {
+            <div class="skip-list col-flex-container">
+              @for (item of status.skipped_reasons | keyvalue; track item.key) {
+                <span>{{ skippedLabel(item.key) }}: {{ item.value }}</span>
+              }
+            </div>
+          }
+        } @else if (confirming() && status(); as status) {
+          <div class="confirmation col-flex-container">
+            <span class="material-icons-outlined confirmation-icon">cloud_upload</span>
+            <span class="confirmation-title"
+              >Send {{ status.eligible_count }} grades and marked exam result links to
+              {{ status.assignment_name }}?</span
+            >
+            <span
+              >Existing Canvas grades for these students will be overwritten. OMR sends each score
+              as a percentage, scaled to the assignment's point total.</span
+            >
+            <span
+              >Each student's submission will also receive a private, student-specific link to
+              their marked result. The link expires automatically.</span
+            >
+            <span class="course-meta"
+              >Canvas posting policies control when students can see the grades.</span
+            >
+          </div>
+        }
+      }
+    }
+
+    <div class="release-footer row-flex-container gap">
+      @if (editingAssignment()) {
+        <button
+          type="button"
+          class="action-btn action-btn--outline grow"
+          [disabled]="saving()"
+          (click)="cancelAssignmentEdit()"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="action-btn grow"
+          [disabled]="
+            saving() ||
+            selectedAssignmentId() === status()?.assignment_id ||
+            (selectedAssignmentId() !== null && (!selectedAssignment() || !canLink(selectedAssignment()!)))
+          "
+          (click)="saveAssignment()"
+        >
+          {{ saving() ? 'Saving...' : 'Save link' }}
+        </button>
+      } @else if (confirming()) {
+        <button
+          type="button"
+          class="action-btn action-btn--outline grow"
+          [disabled]="sending()"
+          (click)="confirming.set(false)"
+        >
+          Back
+        </button>
+        <button type="button" class="action-btn grow" [disabled]="sending()" (click)="send()">
+          <span class="material-icons-outlined">cloud_upload</span>
+          {{ sending() ? 'Sending...' : 'Send to Canvas' }}
+        </button>
+      } @else {
+        <button type="button" class="action-btn action-btn--outline grow" (click)="close()">
+          Close
+        </button>
+        @if (exam.released && status()?.assignment_id) {
+          <button
+            type="button"
+            class="action-btn grow"
+            [disabled]="!status()?.eligible_count || !canReceiveGrades(selectedAssignment())"
+            (click)="review()"
+          >
+            Review release
+          </button>
+        }
+      }
+    </div>
+  </div>
+</div>

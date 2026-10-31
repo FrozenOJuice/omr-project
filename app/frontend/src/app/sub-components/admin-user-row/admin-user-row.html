@@ -1,0 +1,164 @@
+<div class="user-row row-flex-container">
+    <div class="user-info col-flex-container grow">
+        <div class="user-title-row row-flex-container align-items-center">
+            <span
+                class="status-badge"
+                [class.tag-green]="user.status === 'active'"
+                [class.tag-red]="user.status === 'disabled'"
+            >
+                {{ statusLabel }}
+            </span>
+            <span
+                class="status-badge"
+                [class.tag-teal]="user.activeSession"
+                [class.tag-outline]="!user.activeSession"
+            >
+                {{ sessionLabel }}
+            </span>
+        </div>
+        <input
+            class="user-field user-name-input"
+            type="text"
+            [(ngModel)]="selectedFirstName"
+            [disabled]="busy"
+            aria-label="First name"
+        />
+        <input
+            class="user-field user-name-input"
+            type="text"
+            [(ngModel)]="selectedLastName"
+            [disabled]="busy"
+            aria-label="Last name"
+        />
+        <input
+            class="user-field"
+            type="email"
+            [(ngModel)]="selectedEmail"
+            [disabled]="busy"
+            aria-label="Email"
+        />
+        @if (isStudent) {
+            <input
+                class="user-field"
+                type="text"
+                inputmode="numeric"
+                [(ngModel)]="selectedStudentNumber"
+                [disabled]="busy"
+                aria-label="Student number"
+                placeholder="Student number"
+            />
+        }
+        <span class="user-meta">Created {{ createdDate }}</span>
+    </div>
+    <div class="user-actions row-flex-container align-items-center gap">
+        <div class="inline-control row-flex-container align-items-center">
+            <select class="filter-dropdown" [(ngModel)]="selectedRole" name="role" [disabled]="busy">
+                @for (role of roles; track role) {
+                    <option [value]="role">{{ role }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="inline-control row-flex-container align-items-center">
+            <select class="filter-dropdown" [(ngModel)]="selectedStatus" name="status" [disabled]="busy">
+                @for (status of statuses; track status) {
+                    <option [value]="status">{{ status === 'active' ? 'Active' : 'Disabled' }}</option>
+                }
+            </select>
+        </div>
+
+        <button
+            class="icon-btn icon-btn--outline"
+            [title]="busy ? 'Saving changes...' : 'Save changes'"
+            [attr.aria-label]="busy ? 'Saving changes' : 'Save changes'"
+            [disabled]="!hasChanges || busy"
+            (click)="saveChanges()"
+        >
+            <span class="material-icons-outlined" [class.busy-icon]="busy">
+                {{ busy ? 'progress_activity' : 'save' }}
+            </span>
+        </button>
+        <button
+            class="icon-btn icon-btn--outline"
+            title="Force logout"
+            aria-label="Force logout"
+            [disabled]="!user.activeSession || busy"
+            (click)="forceLogout.emit(user.id)"
+        >
+            <span class="material-icons-outlined">logout</span>
+        </button>
+        <button
+            class="icon-btn icon-btn--outline"
+            title="Resend setup email"
+            aria-label="Resend setup email"
+            [disabled]="user.status !== 'active' || busy"
+            (click)="resendSetupEmail.emit(user)"
+        >
+            <span class="material-icons-outlined">forward_to_inbox</span>
+        </button>
+        <button
+            class="icon-btn icon-btn--danger"
+            title="Delete user"
+            aria-label="Delete user"
+            [disabled]="busy"
+            (click)="requestDelete()"
+        >
+            <span class="material-icons-outlined">delete</span>
+        </button>
+    </div>
+</div>
+
+@if (pendingAction) {
+    <div class="admin-confirm-overlay" (click)="cancelPendingAction()">
+        <div class="card admin-confirm-card col-flex-container" role="alertdialog" aria-modal="true"
+            aria-labelledby="admin-confirm-title" (click)="$event.stopPropagation()">
+            <div class="row-flex-container align-items-center gap">
+                <span class="material-icons-outlined admin-confirm-icon">warning</span>
+                <div class="col-flex-container">
+                    <span id="admin-confirm-title" class="admin-confirm-title">
+                        {{ pendingAction === 'delete' ? 'Delete user?' : 'Confirm high-impact changes' }}
+                    </span>
+                    <span>{{ user.fullName }} ({{ user.email }})</span>
+                </div>
+            </div>
+
+            @if (pendingAction === 'delete') {
+                <div class="admin-confirm-warning">
+                    This permanently deletes the account when it has no academic records. This
+                    action cannot be undone.
+                </div>
+            } @else {
+                <div class="admin-confirm-details col-flex-container">
+                    @if (roleChanged) {
+                        <span>
+                            Changing the role from <strong>{{ user.role }}</strong> to
+                            <strong>{{ selectedRole }}</strong> changes which data and controls this
+                            account can access.
+                        </span>
+                        @if (user.role === 'Student' && selectedRole === 'Professor') {
+                            <span>
+                                The account's student number will be removed. Existing academic
+                                records and course enrolments will be preserved.
+                            </span>
+                        }
+                    }
+                    @if (disablingAccount) {
+                        <span>
+                            Disabling the account immediately blocks sign-in and revokes all active
+                            sessions.
+                        </span>
+                    }
+                </div>
+            }
+
+            <div class="row-flex-container admin-confirm-actions gap">
+                <button class="action-btn action-btn--outline grow" (click)="cancelPendingAction()">
+                    Cancel
+                </button>
+                <button class="action-btn action-btn--danger grow" (click)="confirmPendingAction()">
+                    {{ pendingAction === 'delete' ? 'Delete user' : 'Save high-impact changes' }}
+                </button>
+            </div>
+        </div>
+    </div>
+}

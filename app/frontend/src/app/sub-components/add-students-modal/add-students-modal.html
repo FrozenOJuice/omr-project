@@ -1,0 +1,286 @@
+<div class="modal-card card col-flex-container">
+
+    <div class="modal-header row-flex-container align-items-center">
+        <div class="col-flex-container">
+            <span class="modal-title">Add Students</span>
+            <span class="modal-subtitle">{{ course.code }}, {{ course.name }}</span>
+        </div>
+        <button class="icon-btn icon-btn--danger" (click)="close.emit()">
+            <span class="material-icons-outlined">close</span>
+        </button>
+    </div>
+
+    <div class="tab-bar row-flex-container">
+        <button class="tab-btn" [class.active]="activeTab === 'manual'" (click)="selectTab('manual')">
+            <span class="material-icons-outlined tab-icon">person_add</span>
+            Add Student
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'link'" (click)="selectTab('link')">
+            <span class="material-icons-outlined tab-icon">link</span>
+            Invite Link
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'csv'" (click)="selectTab('csv')">
+            <span class="material-icons-outlined tab-icon">upload_file</span>
+            Upload CSV
+        </button>
+    </div>
+
+    @if (activeTab === 'manual') {
+        <form class="tab-content col-flex-container" (ngSubmit)="addStudent()">
+            <div class="manual-grid">
+                <label class="field col-flex-container">
+                    <span class="field-label">First Name</span>
+                    <input
+                        class="field-input"
+                        type="text"
+                        name="firstName"
+                        [(ngModel)]="firstName"
+                        (input)="clearManualResult()"
+                        autocomplete="given-name"
+                    />
+                </label>
+                <label class="field col-flex-container">
+                    <span class="field-label">Last Name</span>
+                    <input
+                        class="field-input"
+                        type="text"
+                        name="lastName"
+                        [(ngModel)]="lastName"
+                        (input)="clearManualResult()"
+                        autocomplete="family-name"
+                    />
+                </label>
+                <label class="field col-flex-container manual-grid-full">
+                    <span class="field-label">Email</span>
+                    <input
+                        class="field-input"
+                        type="email"
+                        name="email"
+                        [(ngModel)]="email"
+                        (input)="clearManualResult()"
+                        autocomplete="email"
+                    />
+                </label>
+                <label class="field col-flex-container manual-grid-full">
+                    <span class="field-label">Student Number</span>
+                    <input
+                        class="field-input"
+                        type="text"
+                        name="studentNumber"
+                        [(ngModel)]="studentNumber"
+                        (input)="clearManualResult()"
+                        inputmode="numeric"
+                        maxlength="8"
+                    />
+                </label>
+            </div>
+
+            @if (addError) {
+                <span class="error-text">{{ addError }}</span>
+            }
+
+            @if (addedStudent) {
+                <div class="result-row result-row--inline row-flex-container align-items-center gap">
+                    <span class="material-icons-outlined result-icon result-icon--success">check_circle</span>
+                    <span class="result-label">{{ addedStudentName() }} added to the roster</span>
+                    <span class="result-pill" [class.result-pill--pending]="addedStudent.accountStatus === 'pending'">
+                        {{ addedStudentStatus() }}
+                    </span>
+                </div>
+            }
+
+            <div class="row-flex-container">
+                <button class="action-btn action-btn--sm" type="submit" [disabled]="isAdding">
+                    <span class="material-icons-outlined">person_add</span>
+                    {{ isAdding ? 'Adding...' : 'Add Student' }}
+                </button>
+            </div>
+        </form>
+    }
+
+    @if (activeTab === 'link') {
+        <div class="tab-content col-flex-container">
+            <p class="hint-text">
+                Share this time-limited link with students. They can sign in or create an account, then join this course.
+            </p>
+
+            <div
+                class="link-display row-flex-container align-items-center gap"
+                [class.link-display--expired]="inviteExpired"
+            >
+                <span class="link-code grow" data-testid="invite-link-url">{{ joinUrl || '—' }}</span>
+                <button
+                    class="action-btn action-btn--sm action-btn--outline"
+                    [disabled]="!canCopyInviteLink"
+                    (click)="copyLink()"
+                >
+                    <span class="material-icons-outlined">{{ copied ? 'check' : 'content_copy' }}</span>
+                    {{ copied ? 'Copied!' : 'Copy' }}
+                </button>
+            </div>
+
+            <div
+                class="invite-expiry row-flex-container align-items-center"
+                [class.invite-expiry--expired]="inviteExpired"
+                aria-live="polite"
+                data-testid="invite-expiry"
+            >
+                <span class="material-icons-outlined invite-expiry-icon">
+                    {{ inviteExpired ? 'event_busy' : 'schedule' }}
+                </span>
+                <div class="col-flex-container invite-expiry-copy">
+                    <span class="invite-expiry-status" data-testid="invite-expiry-status">
+                        {{ inviteExpiryStatus }}
+                    </span>
+                    <span class="invite-expiry-detail" data-testid="invite-expiry-detail">
+                        {{ inviteExpiryDetail }}
+                    </span>
+                </div>
+            </div>
+
+            @if (regenerateError) {
+                <span class="error-text">{{ regenerateError }}</span>
+            }
+
+            <div class="row-flex-container">
+                <button
+                    class="action-btn action-btn--sm action-btn--outline"
+                    [disabled]="isRegenerating"
+                    (click)="regenerateLink()"
+                    data-testid="regenerate-invite-link"
+                >
+                    <span class="material-icons-outlined">refresh</span>
+                    {{ isRegenerating ? 'Regenerating...' : 'Regenerate Link' }}
+                </button>
+            </div>
+
+            <p class="warn-text">
+                NOTICE: Regenerating invalidates the current link and starts a new expiration window.
+                Students with the old link will not be able to join.
+            </p>
+        </div>
+    }
+
+    @if (activeTab === 'csv') {
+        <div class="tab-content col-flex-container">
+            <p class="hint-text">
+                Upload a CSV file with columns <strong>email</strong>, <strong>first_name</strong>, <strong>last_name</strong>, and <strong>student_number</strong>.
+                Existing student accounts will be linked and enrolled. Students without accounts stay pending until they register with the same email.
+            </p>
+
+            @if (!uploadResult) {
+                <label class="file-drop col-flex-container align-items-center" [class.has-file]="csvFile">
+                    <span class="material-icons-outlined file-icon">{{ csvFile ? 'description' : 'upload_file' }}</span>
+                    <span class="file-label">{{ csvFile ? csvFile.name : 'Choose a CSV file' }}</span>
+                    @if (csvFile) {
+                        <span class="file-size">{{ (csvFile.size / 1024).toFixed(1) }} KB</span>
+                    }
+                    <input type="file" accept=".csv" (change)="onFileChange($event)" class="file-input" />
+                </label>
+
+                @if (uploadError) {
+                    <span class="error-text">{{ uploadError }}</span>
+                }
+
+                <div class="row-flex-container gap">
+                    @if (csvFile) {
+                        <button class="action-btn action-btn--sm action-btn--outline" (click)="clearFile()">
+                            Clear
+                        </button>
+                    }
+                    <button
+                        class="action-btn action-btn--sm"
+                        [disabled]="!csvFile || isUploading"
+                        (click)="uploadCsv()"
+                    >
+                        <span class="material-icons-outlined">upload</span>
+                        {{ isUploading ? 'Uploading...' : 'Upload' }}
+                    </button>
+                </div>
+            } @else {
+                <div class="result-card col-flex-container">
+                    <div class="result-row row-flex-container align-items-center gap">
+                        <span class="material-icons-outlined result-icon result-icon--success">check_circle</span>
+                        <span class="result-label">{{ uploadResult.enrolled }} student{{ uploadResult.enrolled !== 1 ? 's' : '' }} added to roster</span>
+                    </div>
+                    <div class="result-row row-flex-container align-items-center gap">
+                        <span class="material-icons-outlined result-icon result-icon--success">link</span>
+                        <span class="result-label">{{ uploadResult.linked }} linked account{{ uploadResult.linked !== 1 ? 's' : '' }}</span>
+                    </div>
+                    <div class="result-row row-flex-container align-items-center gap">
+                        <span class="material-icons-outlined result-icon result-icon--warn">schedule</span>
+                        <span class="result-label">{{ uploadResult.pending }} pending account{{ uploadResult.pending !== 1 ? 's' : '' }}</span>
+                    </div>
+                    @if (uploadResult.skipped > 0) {
+                        <div class="result-row row-flex-container align-items-center gap">
+                            <span class="material-icons-outlined result-icon result-icon--warn">skip_next</span>
+                            <span class="result-label">{{ uploadResult.skipped }} already in the class (skipped)</span>
+                        </div>
+                    }
+                    @if (uploadResult.invited > 0) {
+                        <div class="result-row row-flex-container align-items-center gap">
+                            <span class="material-icons-outlined result-icon result-icon--success">mail</span>
+                            <span class="result-label">{{ uploadResult.invited }} invitation email{{ uploadResult.invited !== 1 ? 's' : '' }} sent</span>
+                        </div>
+                    }
+                    @if (uploadResult.invite_failed > 0) {
+                        <div class="result-row row-flex-container align-items-center gap">
+                            <span class="material-icons-outlined result-icon result-icon--warn">mail_outline</span>
+                            <span class="result-label">
+                                {{ uploadResult.invite_failed }} invitation email{{ uploadResult.invite_failed !== 1 ? 's' : '' }} could not be sent.
+                                These students are on the roster but were not notified.
+                            </span>
+                        </div>
+                    }
+                    @if (uploadResult.warnings.length > 0) {
+                        <div class="col-flex-container errors-section">
+                            <span class="errors-title">Already in the class ({{ uploadResult.warnings.length }})</span>
+                            @for (warning of uploadResult.warnings; track $index) {
+                                <span class="error-item">{{ warning }}</span>
+                            }
+                        </div>
+                    }
+                    @if (uploadResult.errors.length > 0) {
+                        <div class="col-flex-container errors-section">
+                            <span class="errors-title">Errors ({{ uploadResult.errors.length }})</span>
+                            @for (err of uploadResult.errors; track $index) {
+                                <span class="error-item">{{ err }}</span>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="row-flex-container">
+                    <button class="action-btn action-btn--sm action-btn--outline" (click)="clearFile()">
+                        Upload Another File
+                    </button>
+                </div>
+            }
+
+            <div class="col-flex-container resend-section">
+                <p class="hint-text">
+                    If some invitation emails didn't go out, resend to every student still awaiting an invite (re-uploading the file skips them as already added).
+                </p>
+                @if (resendError) {
+                    <span class="error-text">{{ resendError }}</span>
+                }
+                @if (resendResult) {
+                    <span class="result-label">
+                        {{ resendResult.invited }} invitation{{ resendResult.invited !== 1 ? 's' : '' }} sent{{ resendResult.invite_failed > 0 ? ', ' + resendResult.invite_failed + ' still could not be sent' : '' }}.
+                    </span>
+                }
+                <div class="row-flex-container">
+                    <button
+                        class="action-btn action-btn--sm action-btn--outline"
+                        [disabled]="isResending"
+                        (click)="resendInvites()"
+                    >
+                        <span class="material-icons-outlined">forward_to_inbox</span>
+                        {{ isResending ? 'Resending...' : 'Resend pending invitations' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

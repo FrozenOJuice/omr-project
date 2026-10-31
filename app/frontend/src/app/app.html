@@ -1,0 +1,9 @@
+<div class="app-layout">
+  @if (showMenu()) {
+    <app-left-menu />
+    <app-notification-toast />
+  }
+  <main class="page-content" #pageContent>
+    <router-outlet />
+  </main>
+</div>

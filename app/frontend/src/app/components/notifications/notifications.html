@@ -1,0 +1,123 @@
+<div class="notifications-page">
+
+  @if (isLoading) {
+    <app-loading-spinner />
+  }
+
+  @if (loadError) {
+    <div class="error-toast row-flex-container align-items-center">
+      <span class="material-icons-outlined error-toast-icon">error_outline</span>
+      <span class="error-toast-message">{{ loadError }}</span>
+      <button class="icon-btn error-toast-close" (click)="loadError = ''">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+  }
+
+  <!-- Header: title on the left, sort dropdown on the right -->
+  <div class="notifications-header">
+    <h1>Notifications</h1>
+    <select class="sort-select" [(ngModel)]="sortOrder" (change)="onSortChange()">
+      <option value="newest">Sort By: Newest</option>
+      <option value="oldest">Sort By: Oldest</option>
+    </select>
+  </div>
+
+  <!-- Page size control -->
+  <div class="page-size-control">
+    <label for="page-size">Notifications per page:</label>
+    <input
+      id="page-size"
+      class="page-size-input"
+      type="number"
+      [(ngModel)]="pageSize"
+      (change)="onPageSizeChange()"
+      min="1"
+      max="100"
+    />
+  </div>
+
+  <!-- Filter chips: each button highlights when it matches activeFilter -->
+  <div class="filter-chips">
+
+    <button
+      [class.active]="activeFilter === 'All'"
+      (click)="setFilter('All')">
+      All ({{ notifications.length }})
+    </button>
+
+    <button
+      [class.active]="activeFilter === 'Unread'"
+      (click)="setFilter('Unread')">
+      Unread ({{ unreadCount }})
+    </button>
+
+    <button
+      [class.active]="activeFilter === 'Processing'"
+      (click)="setFilter('Processing')">
+      Processing ({{ processingCount }})
+    </button>
+
+    <button
+      [class.active]="activeFilter === 'Re-grade'"
+      (click)="setFilter('Re-grade')">
+      Re-grades ({{ regradeCount }})
+    </button>
+
+    <button
+      class="action-btn action-btn--outline dismiss-all-btn"
+      type="button"
+      [disabled]="unreadCount === 0"
+      (click)="dismissAll()">
+      Dismiss All
+    </button>
+
+  </div>
+
+  <!-- Notification list: loops through pagedNotifications (current page slice only) -->
+  <div class="notification-list">
+
+    @for (notification of pagedNotifications; track notification.id) {
+      <div class="notification-row" [class.notification-row--unread]="!notification.isRead" (click)="open(notification)">
+
+        <!-- Left: icon indicating notification type -->
+        <div class="notification-icon" [class.notification-icon--regrade]="notification.type === 'Re-grade'" [class.notification-icon--batchjob]="notification.type === 'Processing'" aria-hidden="true">
+          <span class="material-icons-outlined">{{ notification.type === 'Re-grade' ? 'replay' : 'schedule' }}</span>
+        </div>
+
+        <!-- Middle: title, course, and subtitle -->
+        <div class="notification-body">
+          <div class="notification-title-row">
+            <span class="notification-title">{{ notification.title }}</span>
+            <span class="notification-course">{{ notification.course }}</span>
+          </div>
+          <p class="notification-subtitle">{{ notification.subtitle }}</p>
+        </div>
+
+        <!-- Right: timestamp and action buttons -->
+        <div class="notification-actions">
+          <span class="notification-time">{{ notification.time }}</span>
+          <div class="notification-buttons">
+            <button class="action-btn action-btn--sm" (click)="open(notification); $event.stopPropagation()">View</button>
+            <button class="action-btn action-btn--sm action-btn--outline" [disabled]="notification.isRead" (click)="dismiss(notification, $event)">Dismiss</button>
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- Shows if no notifications match the active filter -->
+    @if (!isLoading && filteredNotifications.length === 0) {
+      <p class="no-notifications">No notifications to show.</p>
+    }
+
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="previousPage()" aria-label="Previous page">&#8249;</button>
+    <span>{{ currentPage }} / {{ totalPages }}</span>
+    <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()" aria-label="Next page">&#8250;</button>
+  </div>
+
+</div>

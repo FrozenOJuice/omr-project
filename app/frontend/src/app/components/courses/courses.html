@@ -1,0 +1,281 @@
+<div class="course-container">
+
+    @if (isLoadingCourses) {
+        <app-loading-spinner />
+    }
+
+    @if (coursesLoadError) {
+        <div class="error-toast row-flex-container align-items-center">
+            <span class="material-icons-outlined error-toast-icon">error_outline</span>
+            <span class="error-toast-message">{{ coursesLoadError }}</span>
+            <button class="icon-btn error-toast-close" (click)="coursesLoadError = ''">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        </div>
+    }
+
+    <div class="page-header row-flex-container align-items-center mb-3">
+        <h1 class="page-title">Courses</h1>
+        <div class="page-actions row-flex-container gap align-items-center">
+            @if (userService.isProfessorOrAbove()) {
+                <select class="filter-dropdown" [(ngModel)]="archiveFilter">
+                    <option value="active">Active Courses</option>
+                    <option value="archived">Archived Courses</option>
+                    <option value="all">All Courses</option>
+                </select>
+            }
+            <select class="filter-dropdown" (change)="selectedTerm = $any($event.target).value">
+                <option value="">All Terms</option>
+                @for (term of terms; track term) {
+                    <option [value]="term">Term: {{ term }}</option>
+                }
+            </select>
+            <div class="search-wrapper">
+                <span class="material-icons-outlined search-icon">search</span>
+                <input
+                    class="search-input"
+                    type="text"
+                    placeholder="Search courses..."
+                    (input)="searchQuery = $any($event.target).value"
+                />
+            </div>
+            @if (userService.isProfessorOrAbove()) {
+                <button class="action-btn action-btn--outline" (click)="goToTemplates()">
+                    <span class="material-icons-outlined">grid_on</span>
+                    Templates
+                </button>
+                @if (canvasConnected) {
+                    <div class="add-course-wrapper" (click)="$event.stopPropagation()">
+                        <button
+                            class="action-btn add-course-trigger"
+                            aria-haspopup="menu"
+                            [attr.aria-expanded]="showAddCourseMenu"
+                            (click)="toggleAddCourseMenu($event)"
+                        >
+                            <span class="material-icons-outlined dropdown-chevron">expand_more</span>
+                            Add course
+                        </button>
+                        @if (showAddCourseMenu) {
+                            <div class="add-course-menu card col-flex-container" role="menu">
+                                <button type="button" class="add-course-option row-flex-container gap" role="menuitem" (click)="openCreateCourse()">
+                                    <span class="material-icons-outlined">edit</span>
+                                    <span class="col-flex-container">
+                                        <strong>Create OMR course</strong>
+                                        <span>Create a standalone course</span>
+                                    </span>
+                                </button>
+                                <button type="button" class="add-course-option row-flex-container gap" role="menuitem" (click)="openImportCourse()">
+                                    <span class="material-icons-outlined">cloud_download</span>
+                                    <span class="col-flex-container">
+                                        <strong>Import from Canvas</strong>
+                                        <span>Use a connected Canvas course</span>
+                                    </span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                } @else {
+                    <button class="action-btn" (click)="openCreateCourse()">
+                        <span class="material-icons-outlined">add</span>
+                        Add Course
+                    </button>
+                }
+            }
+        </div>
+    </div>
+
+    @if (userService.isAdmin()) {
+        <div class="archive-maintenance card row-flex-container align-items-center gap mb-3">
+            <span class="material-icons-outlined archive-maintenance-icon">auto_delete</span>
+            <div class="col-flex-container grow">
+                <span class="archive-maintenance-title">Archived course maintenance</span>
+                <span class="archive-maintenance-body">
+                    Permanently condense archived courses whose retention deadlines have passed.
+                </span>
+            </div>
+            <button class="action-btn action-btn--outline" (click)="showArchiveCleanupConfirmation = true">
+                <span class="material-icons-outlined">cleaning_services</span>
+                Clean up archives
+            </button>
+        </div>
+    }
+
+    @if (archiveCleanupNotice) {
+        <div class="archive-cleanup-notice mb-3" role="status">{{ archiveCleanupNotice }}</div>
+    }
+
+    <div class="col-flex-container courses-gap">
+        @if (!isLoadingCourses && filteredCourses.length === 0) {
+            <div class="empty-state col-flex-container align-items-center">
+                <span class="material-icons-outlined empty-icon">school</span>
+                <span class="empty-title">
+                    {{ archiveFilter === 'archived' && !searchQuery && !selectedTerm ? 'No archived courses' : (searchQuery || selectedTerm ? 'No courses match your filters' : 'No courses yet') }}
+                </span>
+                <span class="empty-body">
+                    {{ archiveFilter === 'archived' && !searchQuery && !selectedTerm ? 'Archived courses will appear here.' : (searchQuery || selectedTerm ? 'Try adjusting your search or term filter.' : 'Create your first course to get started.') }}
+                </span>
+            </div>
+        }
+        @for (course of filteredCourses; track course.id) {
+            <div class="card course-card col-flex-container" [class.course-card--archived]="course.archivedAt">
+
+                <div class="course-header row-flex-container align-items-center gap" (click)="openCourse(course)">
+                    <div class="course-badge">{{ courseBadgeFromCode(course.code) }}</div>
+                    <div class="col-flex-container grow">
+                        <span class="course-code">
+                            {{ course.code }}&comma; {{ course.name }}
+                            @if (course.archivedAt) {
+                                <span class="status-badge tag-outline">Archived</span>
+                            }
+                            @if (course.retentionProcessedAt) {
+                                <span class="status-badge tag-amber app-tooltip app-tooltip--end" tabindex="0">
+                                    Retention processed
+                                    <span class="app-tooltip__content" role="tooltip">
+                                        <strong>Archive cleanup completed</strong>
+                                        <span>
+                                            This course has been permanently condensed under its
+                                            retention policy. Eligible records were removed, so the
+                                            course can no longer be restored.
+                                        </span>
+                                    </span>
+                                </span>
+                            }
+                            @if (course.source === 'canvas') {
+                                <span class="status-badge tag-blue">Canvas</span>
+                            }
+                        </span>
+                        <span class="course-meta">
+                            {{ course.students }} students &nbsp;&middot;&nbsp;
+                            {{ course.exams.length }} exam{{ course.exams.length !== 1 ? 's' : '' }} &nbsp;&middot;&nbsp;
+                            {{ formatAcademicPeriod(course.academicTerm, course.academicYearStart) }}
+                        </span>
+                    </div>
+                    @if (userService.isProfessorOrAbove() && course.archivedAt && !course.retentionProcessedAt) {
+                        <div class="course-actions row-flex-container align-items-center" (click)="$event.stopPropagation()">
+                            <button
+                                class="action-btn action-btn--sm action-btn--outline"
+                                title="Restore course"
+                                [disabled]="restoringCourseId === course.id"
+                                (click)="promptRestore(course)"
+                            >
+                                <span class="material-icons-outlined">unarchive</span>
+                                {{ restoringCourseId === course.id ? 'Restoring...' : 'Restore' }}
+                            </button>
+                        </div>
+                    }
+                    <span class="material-icons-outlined expand-icon">chevron_right</span>
+                </div>
+
+            </div>
+        }
+    </div>
+
+</div>
+
+@if (viewingTemplates) {
+    <div class="modal-overlay" (click)="viewingTemplates = false">
+        <div (click)="$event.stopPropagation()">
+            <app-template-builder
+                (close)="viewingTemplates = false"
+                (templateDeleted)="loadCourses()"
+            />
+        </div>
+    </div>
+}
+
+@if (showArchiveCleanupConfirmation) {
+    <div class="modal-overlay" (click)="!isCleaningArchives && (showArchiveCleanupConfirmation = false)">
+        <div class="card archive-cleanup-modal col-flex-container" role="alertdialog" aria-modal="true"
+            aria-labelledby="archive-cleanup-title" (click)="$event.stopPropagation()">
+            <div class="row-flex-container align-items-center gap">
+                <span class="material-icons-outlined archive-cleanup-warning">warning</span>
+                <span id="archive-cleanup-title" class="modal-title">Clean up eligible archives?</span>
+            </div>
+            <div class="archive-cleanup-warning-body col-flex-container">
+                <span>
+                    This runs retention processing on every archived course whose configured
+                    deadlines have passed. Courses that are not yet eligible will not change.
+                </span>
+                <strong>This operation is permanent and cannot be undone.</strong>
+                <span>
+                    Depending on each course's policy, stored scan images, grades, roster entries,
+                    review history, notifications, and other student-level records may be deleted.
+                    Processed courses cannot be unarchived. Anonymized analytics are retained only
+                    when the archived course's policy allows it.
+                </span>
+            </div>
+            <div class="modal-footer row-flex-container gap">
+                <button class="action-btn action-btn--outline grow" [disabled]="isCleaningArchives"
+                    (click)="showArchiveCleanupConfirmation = false">
+                    Cancel
+                </button>
+                <button class="action-btn action-btn--danger grow" [disabled]="isCleaningArchives"
+                    (click)="cleanupArchives()">
+                    {{ isCleaningArchives ? 'Cleaning up...' : 'Permanently clean up' }}
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showCreateModal) {
+    <div class="modal-overlay" (click)="closeModal()">
+        <div (click)="$event.stopPropagation()">
+            <app-create-course
+                [institution]="userService.currentUser()?.institution ?? 'ubc'"
+                (close)="closeModal()"
+                (created)="onCourseCreated($event)"
+            />
+        </div>
+    </div>
+}
+
+@if (showImportModal) {
+    <div class="modal-overlay" (click)="showImportModal = false">
+        <div (click)="$event.stopPropagation()">
+            <app-canvas-course-import
+                (close)="showImportModal = false"
+                (imported)="onCoursesImported($event)"
+            />
+        </div>
+    </div>
+}
+
+@if (confirmingRestoreCourse) {
+    <div class="modal-overlay" (click)="cancelRestore()">
+        <div class="card restore-unavailable-modal col-flex-container" (click)="$event.stopPropagation()">
+            <div class="row-flex-container align-items-center gap">
+                <span class="material-icons-outlined">unarchive</span>
+                <span class="modal-title">Restore Course?</span>
+            </div>
+            <span class="restore-unavailable-body">
+                {{ confirmingRestoreCourse.code }}, {{ confirmingRestoreCourse.name }} will become active again and reappear in the default course list.
+            </span>
+            <div class="modal-footer row-flex-container gap">
+                <button class="action-btn action-btn--outline grow" [disabled]="restoringCourseId === confirmingRestoreCourse.id" (click)="cancelRestore()">
+                    Cancel
+                </button>
+                <button class="action-btn grow" [disabled]="restoringCourseId === confirmingRestoreCourse.id" (click)="restoreCourse(confirmingRestoreCourse)">
+                    {{ restoringCourseId === confirmingRestoreCourse.id ? 'Restoring...' : 'Restore Course' }}
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (restoreUnavailableCourse) {
+    <div class="modal-overlay" (click)="restoreUnavailableCourse = null">
+        <div class="card restore-unavailable-modal col-flex-container" (click)="$event.stopPropagation()">
+            <div class="row-flex-container align-items-center gap">
+                <span class="material-icons-outlined restore-unavailable-icon">history_toggle_off</span>
+                <span class="modal-title">Course can no longer be restored</span>
+            </div>
+            <span class="restore-unavailable-body">
+                Retention processing has permanently removed records from {{ restoreUnavailableCourse.code }}. This archived course cannot be restored.
+            </span>
+            <div class="modal-footer row-flex-container justify-end">
+                <button class="action-btn" (click)="restoreUnavailableCourse = null">OK</button>
+            </div>
+        </div>
+    </div>
+}

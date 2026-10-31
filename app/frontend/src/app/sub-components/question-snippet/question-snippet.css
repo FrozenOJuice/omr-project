@@ -1,0 +1,18 @@
+:host {
+    display: block;
+}
+
+.question-snippet {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--input-border-radius);
+    background: var(--primary-darkened);
+    border: var(--border-size) solid var(--color-border);
+}
+
+.snippet-source {
+    position: absolute;
+    max-width: none;
+    -webkit-user-drag: none;
+    user-select: none;
+}

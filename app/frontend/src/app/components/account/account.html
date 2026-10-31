@@ -1,0 +1,252 @@
+@if (isLoading) {
+    <app-loading-spinner />
+}
+
+@if (loadError) {
+    <div class="error-toast row-flex-container align-items-center">
+        <span class="material-icons-outlined error-toast-icon">error_outline</span>
+        <span class="error-toast-message">Failed to load account information. Please refresh the page or try again later.</span>
+        <button class="icon-btn error-toast-close" (click)="dismissError()">
+            <span class="material-icons-outlined">close</span>
+        </button>
+    </div>
+}
+
+<div class="account-container col-flex-container">
+
+    <div class="account-layout row-flex-container">
+
+        <!-- Left column: Profile -->
+        <div class="left-col col-flex-container">
+            <div class="card profile-card col-flex-container">
+
+                <div class="profile-header row-flex-container align-items-center">
+                    <div class="avatar">
+                        <span class="avatar-initials">{{ getInitials() }}</span>
+                    </div>
+                    <div class="profile-info col-flex-container">
+                        <span class="profile-name">{{ fullName }}</span>
+                        <span class="profile-subtitle">{{ role }}</span>
+                    </div>
+                </div>
+
+                <hr class="divider" />
+
+                <div class="row-flex-container align-items-center justify-content-between">
+                    <span class="section-title">Profile details</span>
+                    @if (!isEditingProfile) {
+                        <button class="action-btn action-btn--sm action-btn--outline" (click)="startEditProfile()">Edit</button>
+                    }
+                </div>
+
+                @if (isEditingProfile) {
+                    <div class="form-fields col-flex-container">
+                        <div class="field col-flex-container">
+                            <label class="field-label">First name</label>
+                            <input type="text" class="field-input" [(ngModel)]="draftFirstName" placeholder="First name" />
+                        </div>
+
+                        <div class="field col-flex-container">
+                            <label class="field-label">Last name</label>
+                            <input type="text" class="field-input" [(ngModel)]="draftLastName" placeholder="Last name" />
+                        </div>
+
+                        <div class="field col-flex-container">
+                            <label class="field-label">Email</label>
+                            <input type="email" class="field-input" [(ngModel)]="draftEmail" placeholder="Email" />
+                        </div>
+
+                        @if (isStudent) {
+                            <div class="field col-flex-container">
+                                <label class="field-label">Student number</label>
+                                <input type="text" inputmode="numeric" class="field-input" [(ngModel)]="draftStudentNumber" placeholder="8-digit student number" />
+                            </div>
+                        }
+
+                        <div class="field col-flex-container">
+                            <label class="field-label" for="institution">Institution</label>
+                            <select
+                                id="institution"
+                                class="field-input profile-institution-select"
+                                [(ngModel)]="draftInstitution"
+                            >
+                                @for (option of institutionOptions; track option.code) {
+                                    <option [value]="option.code">{{ option.name }}</option>
+                                }
+                            </select>
+                        </div>
+
+                    </div>
+
+                    @if (profileError) {
+                        <span class="field-error">{{ profileError }}</span>
+                    }
+
+                    <div class="form-actions row-flex-container">
+                        <button class="action-btn action-btn--outline" (click)="cancelEditProfile()" [disabled]="isSavingProfile">Cancel</button>
+                        <button class="action-btn" (click)="saveProfile()" [disabled]="isSavingProfile">
+                            {{ isSavingProfile ? 'Saving...' : 'Save changes' }}
+                        </button>
+                    </div>
+                } @else {
+                    <div class="form-fields col-flex-container">
+                        <div class="field col-flex-container">
+                            <label class="field-label">First name</label>
+                            <div class="field-input field-readonly">{{ firstName }}</div>
+                        </div>
+                        <div class="field col-flex-container">
+                            <label class="field-label">Last name</label>
+                            <div class="field-input field-readonly">{{ lastName }}</div>
+                        </div>
+                        <div class="field col-flex-container">
+                            <label class="field-label">Email</label>
+                            <div class="field-input field-readonly">{{ email }}</div>
+                        </div>
+                        @if (isStudent) {
+                            <div class="field col-flex-container">
+                                <label class="field-label">Student number</label>
+                                <div class="field-input field-readonly">{{ studentNumber ?? 'Not set' }}</div>
+                            </div>
+                        }
+                        <div class="field col-flex-container">
+                            <label class="field-label">Institution</label>
+                            <div class="field-input field-readonly">{{ institutionName }}</div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+            @if (canManageTerms) {
+                <div class="account-terms-section">
+                    <app-academic-term-manager mode="custom" [institution]="institution" />
+                </div>
+            }
+        </div>
+
+        <!-- Right column: Preferences + Security -->
+        <div class="right-col col-flex-container">
+
+            @if (canConnectCanvas) {
+                <app-canvas-account [settingsUrl]="canvasSettingsUrl" />
+            }
+
+            <!-- Preferences -->
+            <div class="card section-card col-flex-container">
+                <span class="section-title">Preferences</span>
+                <hr class="divider" />
+
+                <div class="pref-row row-flex-container align-items-center">
+                    <span class="pref-label">Email notifications</span>
+                    <label class="toggle">
+                        <input type="checkbox" [(ngModel)]="emailNotifications" (ngModelChange)="saveNotificationPreferences()" [disabled]="isSavingPreferences" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="pref-row row-flex-container align-items-center">
+                    <span class="pref-label">New re-grade alerts</span>
+                    <label class="toggle">
+                        <input type="checkbox" [(ngModel)]="regradeAlerts" (ngModelChange)="saveNotificationPreferences()" [disabled]="isSavingPreferences" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="pref-row row-flex-container align-items-center">
+                    <span class="pref-label">Batch job complete</span>
+                    <label class="toggle">
+                        <input type="checkbox" [(ngModel)]="batchJobComplete" (ngModelChange)="saveNotificationPreferences()" [disabled]="isSavingPreferences" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                @if (preferencesError) {
+                    <span class="field-error">{{ preferencesError }}</span>
+                }
+
+                <div class="pref-row row-flex-container align-items-center">
+                    <span class="pref-label">Colour scheme</span>
+                    <select
+                        class="field-input field-select"
+                        [ngModel]="themeService.activeSchemeId()"
+                        (ngModelChange)="onSchemeChange($event)"
+                    >
+                        @for (scheme of schemes; track scheme.id) {
+                            <option [value]="scheme.id" [disabled]="scheme.disabled">{{ scheme.label }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Security -->
+            <div class="card section-card col-flex-container">
+                <span class="section-title">Security</span>
+                <hr class="divider" />
+
+                <div class="security-row row-flex-container align-items-center">
+                    <div class="col-flex-container">
+                        <span class="security-label">Password</span>
+                        <span class="security-sublabel">{{ passwordLastChangedLabel }}</span>
+                    </div>
+                    <button class="action-btn action-btn--sm action-btn--outline" (click)="showPasswordModal = true">Change</button>
+                </div>
+
+                <hr class="divider" />
+
+                <div class="security-row row-flex-container align-items-center">
+                    <div class="col-flex-container" style="min-width: 0">
+                        <span class="security-label">Active Sessions</span>
+                        <p class="security-sublabel" style="margin: 0">Sign out of all devices and sessions, including this one. You will need to sign in again.</p>
+                    </div>
+                    <button type="button" class="action-btn action-btn--sm action-btn--danger" (click)="logoutAll()" [disabled]="isLoggingOut">
+                        {{ isLoggingOut ? 'Signing out...' : 'Sign Out All Devices' }}
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Change Password Modal -->
+@if (showPasswordModal) {
+    <div class="modal-overlay" (click)="showPasswordModal = false">
+        <div class="modal-card card col-flex-container" (click)="$event.stopPropagation()">
+
+            <div class="modal-header row-flex-container align-items-center">
+                <span class="modal-title">Change password</span>
+                <button class="icon-btn icon-btn--danger" (click)="showPasswordModal = false">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="col-flex-container modal-body">
+                <div class="field col-flex-container">
+                    <label class="field-label">Current password</label>
+                    <input type="password" class="field-input" [(ngModel)]="currentPassword" placeholder="Current password" />
+                </div>
+                <div class="field col-flex-container">
+                    <label class="field-label">New password</label>
+                    <input type="password" class="field-input" [(ngModel)]="newPassword" placeholder="New password" />
+                </div>
+                <div class="field col-flex-container">
+                    <label class="field-label">Confirm new password</label>
+                    <input type="password" class="field-input" [(ngModel)]="confirmPassword" placeholder="Confirm new password" />
+                </div>
+                @if (passwordError) {
+                    <span class="field-error">{{ passwordError }}</span>
+                }
+            </div>
+
+            <div class="modal-footer row-flex-container">
+                <button class="action-btn action-btn--outline" (click)="showPasswordModal = false">Cancel</button>
+                <button class="action-btn" (click)="changePassword()" [disabled]="isChangingPassword">
+                    {{ isChangingPassword ? 'Updating...' : 'Update password' }}
+                </button>
+            </div>
+
+        </div>
+    </div>
+}

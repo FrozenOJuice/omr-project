@@ -1,0 +1,10 @@
+@if (siteBranding().is_custom_logo) {
+  <img
+    class="site-logo"
+    [src]="siteBranding().logo_url"
+    [style.height]="size()"
+    alt="OMR System logo"
+  />
+} @else {
+  <app-aperture-logo [size]="size()" />
+}

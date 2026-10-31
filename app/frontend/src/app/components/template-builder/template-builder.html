@@ -1,0 +1,503 @@
+<div class="template-page card col-flex-container" (window:keydown)="handleDeleteShortcut($event)">
+
+  <div class="page-header row-flex-container align-items-center">
+    <div class="row-flex-container align-items-center gap grow">
+      <h1 class="page-title">Bubble Sheet Templates</h1>
+    </div>
+    <div class="row-flex-container align-items-center gap">
+      @if (editingId() && !isBlueprint()) {
+        <button type="button" class="action-btn action-btn--sm action-btn--outline preview-toggle"
+          [class.active]="showPreview()" (click)="togglePreview()">
+          <span class="material-icons-outlined">{{ showPreview() ? 'visibility_off' : 'visibility' }}</span>
+          {{ showPreview() ? 'Hide preview' : 'Show preview' }}
+        </button>
+      }
+      <button class="icon-btn icon-btn--danger" (click)="close.emit()">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="layout row-flex-container gap">
+
+    <!-- ===== My templates (reusable across exams) ===== -->
+    <div class="card list-panel col-flex-container">
+      <div class="row-flex-container align-items-center">
+        <span class="section-title grow">My templates</span>
+        @if (isLoading() || editingId() !== null || showArchived()) {
+          <button class="action-btn action-btn--sm" (click)="startNew()">
+            <span class="material-icons-outlined">add</span>
+            New
+          </button>
+        }
+      </div>
+      <div class="archive-tabs row-flex-container" role="group" aria-label="Template status">
+        <button
+          type="button"
+          class="archive-tab grow"
+          [class.active]="!showArchived()"
+          (click)="setArchiveView(false)"
+        >
+          Active
+        </button>
+        <button
+          type="button"
+          class="archive-tab grow"
+          [class.active]="showArchived()"
+          (click)="setArchiveView(true)"
+        >
+          Archived
+        </button>
+      </div>
+      @if (isLoading()) {
+        <span class="muted">Loading…</span>
+      } @else if (visibleTemplates().length === 0) {
+        <span class="muted">
+          {{ showArchived()
+            ? 'No archived templates.'
+            : 'No templates yet. Build one on the right, or start from the UBC 100Q standard.' }}
+        </span>
+      }
+      @for (t of visibleTemplates(); track t.id) {
+        <div
+          class="template-row row-flex-container align-items-center gap"
+          [class.active]="editingId() === t.id"
+          [class.archived]="t.archived_at !== null"
+        >
+          <button
+            type="button"
+            class="template-select grow"
+            [disabled]="t.archived_at !== null"
+            (click)="edit(t)"
+          >
+            <span class="template-name" [title]="t.name">{{ t.name }}</span>
+            <span class="muted">{{ t.total_questions }} questions &middot; {{ t.n_versions }} version{{ t.n_versions !== 1 ? 's' : '' }}</span>
+            @if (t.archived_at) {
+              <span class="status-badge tag-outline list-ready-badge">Archived</span>
+            }
+            @if (t.omr_template_id) {
+              <span class="status-badge tag-green list-ready-badge" title="This template is registered with OMR for scanning">Registered</span>
+            }
+          </button>
+          @if (t.archived_at) {
+            <button
+              class="icon-btn icon-btn--ghost"
+              title="Restore template"
+              [disabled]="archiveActionId() !== null"
+              (click)="restore(t)"
+            >
+              <span class="material-icons-outlined">unarchive</span>
+            </button>
+          } @else {
+            <button
+              class="icon-btn icon-btn--ghost"
+              title="Archive template"
+              [disabled]="archiveActionId() !== null"
+              (click)="archive(t)"
+            >
+              <span class="material-icons-outlined">archive</span>
+            </button>
+          }
+          <button class="icon-btn icon-btn--ghost delete-btn" title="Delete template" (click)="requestDelete(t)">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- ===== Builder ===== -->
+    <div class="card builder-panel col-flex-container">
+      @if (isBlueprint() || questions().length === 0) {
+        <span class="section-title">{{ editingId() ? 'Edit template' : 'Create a template' }}</span>
+      }
+
+      @if (error()) {
+        <div class="banner banner--error">{{ error() }}</div>
+      }
+
+      <div class="controls row-flex-container gap align-items-end">
+        <label class="field grow">
+          <span class="field-label">Template name</span>
+          <input type="text" class="field-input" [class.field-input--error]="questions().length > 0 && !templateName().trim()" placeholder="e.g. Midterm bubble sheet"
+            [ngModel]="templateName()" (ngModelChange)="templateName.set($event); saved.set(false)" />
+          @if (questions().length > 0 && !templateName().trim()) {
+            <span class="field-error">Enter a template name.</span>
+          }
+        </label>
+        @if (templateStatus(); as status) {
+          <span class="status-badge template-status-badge" [class]="status.tagClass">{{ status.label }}</span>
+        }
+        @if (showVersionsField()) {
+          <label
+            class="field"
+            [title]="versionCountLocked() ? 'Versions cannot be changed after assigning this template to an exam' : ''"
+          >
+            <span class="field-label">Exam versions</span>
+            <input type="number" [min]="isBlueprint() ? 2 : 1" [max]="isBlueprint() ? 5 : 26" class="field-input slim"
+              [class.field-input--locked]="versionCountReadOnly()"
+              [readOnly]="versionCountReadOnly()"
+              [attr.aria-disabled]="versionCountReadOnly()"
+              [ngModel]="nVersions()" (ngModelChange)="nVersions.set(+$event); saved.set(false)" />
+            @if (isCheckingVersionUsage()) {
+              <span class="field-help">Checking usage...</span>
+            } @else if (versionCountLocked()) {
+              <span class="field-help">Locked after assignment</span>
+            }
+          </label>
+        }
+        @if (isBlueprint() && !versionFromQ1()) {
+          <span class="muted">One version</span>
+        }
+      </div>
+
+      @if (editingId() === null && questions().length === 0) {
+        <div class="setup-options">
+          <div class="setup-card col-flex-container gap">
+            <div class="row-flex-container align-items-center gap">
+              <span class="material-icons-outlined preset-icon">edit_note</span>
+              <div>
+                <strong>Create custom bubble sheet</strong>
+                <div class="muted">Set the starting size, then edit it in the grid.</div>
+              </div>
+            </div>
+            <div class="row-flex-container align-items-end gap">
+              <label class="field grow">
+                <span class="field-label">Number of questions</span>
+                <input type="number" min="1" [max]="maxQuestionCount" class="field-input"
+                  [ngModel]="desiredCount()" (ngModelChange)="desiredCount.set(+$event)" />
+              </label>
+              <button type="button" class="action-btn" (click)="startCustom()">Create custom</button>
+            </div>
+          </div>
+          <div class="setup-card setup-card--preset col-flex-container gap">
+            <div class="row-flex-container align-items-center gap">
+              <span class="material-icons-outlined preset-icon">grid_on</span>
+              <div>
+                <strong>Use UBCO template</strong>
+                <div class="muted">Ready-made 100-question A–E layout.</div>
+              </div>
+            </div>
+            <label class="q1-toggle row-flex-container align-items-center gap" title="Use Q1 to select the exam version, leaving 99 graded questions.">
+              <input type="checkbox" [ngModel]="versionFromQ1()" (ngModelChange)="versionFromQ1.set($event)" />
+              <span class="muted">Use Q1 to select the exam version</span>
+            </label>
+            @if (versionFromQ1()) {
+              <label class="field">
+                <span class="field-label">Number of versions</span>
+                <input type="number" min="2" max="5" class="field-input slim"
+                  [class.field-input--error]="ubcoVersionError()"
+                  [ngModel]="nVersions()" (ngModelChange)="nVersions.set(+$event)" />
+                @if (ubcoVersionError()) {
+                  <span class="field-error">{{ ubcoVersionError() }}</span>
+                } @else {
+                  <span class="field-help">Q1 selects versions A–{{ lastVersionLabel() }}.</span>
+                }
+              </label>
+            } @else {
+              <span class="field-help">Enable this to use Q1 as the version selector.</span>
+            }
+            <button class="action-btn action-btn--outline" [disabled]="isSaving() || ubcoVersionError()" (click)="useUbco100Preset()">Use UBC standard</button>
+          </div>
+        </div>
+      }
+
+      @if (!isBlueprint() && questions().length > 0) {
+        <div class="sheet-toolbar row-flex-container align-items-center gap">
+          <div class="col-flex-container grow">
+            <strong>Layout grid</strong>
+            @if (isCheckingVersionUsage()) {
+              <span class="muted">Checking whether this template is in use...</span>
+            } @else if (questionConfigLocked()) {
+              <span class="muted">Locked, since it's already used by an exam. Rename it or create a new template to change the layout.</span>
+            } @else {
+              <span class="muted">
+                {{ questions().length }} questions · {{ sections().length }} section{{ sections().length === 1 ? '' : 's' }}
+                · options A–{{ optionColumns()[optionColumns().length - 1] }}
+              </span>
+            }
+            <span class="muted option-count-help">
+              The number at the end of each question row shows how many answer options it has.
+            </span>
+          </div>
+          @if (!editingId()) {
+            <button class="action-btn action-btn--sm action-btn--outline" (click)="cancelNew()">Cancel</button>
+          }
+          <label class="question-count-control"
+            title="Highest option count a question can be set to. Raising this widens the grid; the generated PDF wraps wide questions onto extra lines rather than off the page.">
+            <span>Max options</span>
+            <input type="number" min="2" [max]="optionCountCeiling" class="field-input" [disabled]="gridEditingLocked()"
+              [ngModel]="desiredMaxOptionCount()" (ngModelChange)="desiredMaxOptionCount.set(+$event)"
+              (keydown.enter)="applyMaxOptionCount(); $event.preventDefault()" />
+            <button type="button" class="action-btn action-btn--sm" [class.action-btn--success]="maxOptionCountDirty()"
+              [disabled]="gridEditingLocked() || !maxOptionCountDirty()"
+              title="Apply max options (Enter)" (click)="applyMaxOptionCount()">Set</button>
+          </label>
+          <button type="button" class="action-btn action-btn--sm action-btn--outline" (click)="addSection('multiple_choice')"
+            [disabled]="atQuestionLimit() || gridEditingLocked()">
+            <span class="material-icons-outlined">add</span>
+            Multiple choice
+          </button>
+          <button type="button" class="action-btn action-btn--sm action-btn--outline" (click)="addSection('true_false')"
+            [disabled]="atQuestionLimit() || gridEditingLocked()">
+            <span class="material-icons-outlined">add</span>
+            True / False
+          </button>
+          @if (selectedQuestions().length) {
+            @if (sections().length > 1) {
+              <label class="move-section-control">
+                <span>Move to</span>
+                <select class="field-input" [(ngModel)]="moveTargetSectionId" [disabled]="gridEditingLocked()">
+                  <option value="">Choose section</option>
+                  @for (section of sections(); track section.id) {
+                    <option [value]="section.id">{{ section.name }} · {{ sectionTypeLabel(section.type) }}</option>
+                  }
+                </select>
+                <button type="button" class="action-btn action-btn--sm action-btn--outline"
+                  [disabled]="!moveTargetSectionId || gridEditingLocked()" (click)="moveSelectedQuestions()">Move</button>
+              </label>
+            }
+            <button type="button" class="action-btn action-btn--sm action-btn--danger selection-action-btn" [disabled]="gridEditingLocked()"
+              title="Delete selected questions (Delete)" (click)="deleteSelectedQuestions()">
+              Delete {{ selectedQuestions().length }} question{{ selectedQuestions().length === 1 ? '' : 's' }}
+            </button>
+            <button type="button" class="action-btn action-btn--sm selection-action-btn selection-cancel-btn" (click)="selectedQuestions.set([])">
+              Cancel selection
+            </button>
+          }
+        </div>
+      }
+
+      @if (isBlueprint()) {
+        <div class="q-list" [style.--preview-rows]="blueprintGridRows()">
+        @if (versionFromQ1()) {
+          <div class="q-row q-row--reserved">
+            <div class="row-flex-container align-items-center gap">
+              <span class="q-num">Q1</span>
+              <span class="muted">Exam version</span>
+            </div>
+          </div>
+        }
+        @for (choices of questions(); track $index; let qi = $index) {
+          <div class="q-row">
+            <div class="row-flex-container align-items-center gap">
+              <span class="q-num">Q{{ questionKeys()[qi] }}</span>
+              <span class="q-choices">{{ choices.join(' ') }}</span>
+            </div>
+          </div>
+        }
+        </div>
+      } @else if (questions().length > 0) {
+        <div #sheetWrap class="sheet-wrap"
+          (pointermove)="moveQuestionGesture($event)"
+          (pointerup)="endQuestionGesture($event)"
+          (pointercancel)="endQuestionGesture($event)"
+          (lostpointercapture)="endQuestionGesture($event)"
+          (window:mouseup)="endCellDrag()"
+          (mousemove)="autoScrollSheet($event, sheetWrap)" (mouseleave)="optionPreview.set(null)">
+          @for (row of sectionRows(); track row.section.id; let sectionIndex = $index) {
+            <section class="sheet-section">
+              <div class="sheet-section-header">
+                <div class="section-header-content row-flex-container align-items-center gap">
+                  <span class="section-order">{{ sectionIndex + 1 }}</span>
+                  <input type="text" maxlength="100" class="section-name-input grow" aria-label="Section name"
+                    [disabled]="gridEditingLocked()"
+                    [ngModel]="row.section.name" (ngModelChange)="renameSection(row.section.id, $event)" />
+                  <select class="section-type-select" aria-label="Section type"
+                    [disabled]="gridEditingLocked()"
+                    [ngModel]="row.section.type"
+                    (ngModelChange)="requestSectionTypeChange(row.section, $event)">
+                    <option value="multiple_choice">Multiple choice</option>
+                    <option value="true_false">True / False</option>
+                  </select>
+                  <label class="section-question-count-control">
+                    <span>Questions</span>
+                    <input type="number" min="1" [max]="maxSectionQuestionCount(row.section.id)"
+                      [disabled]="gridEditingLocked()"
+                      [ngModel]="sectionQuestionCount(row.section.id)"
+                      (ngModelChange)="setSectionQuestionCount(row.section.id, +$event)"
+                      (keydown.enter)="applySectionQuestionCount(row.section.id); $event.preventDefault()" />
+                    <button type="button" title="Set questions in this section (Enter)"
+                      [disabled]="gridEditingLocked()"
+                      (click)="applySectionQuestionCount(row.section.id)">Set</button>
+                  </label>
+                  <button type="button" class="icon-btn icon-btn--ghost" title="Move section up"
+                    [disabled]="sectionIndex === 0 || gridEditingLocked()" (click)="moveSection(row.section.id, -1)">
+                    <span class="material-icons-outlined">arrow_upward</span>
+                  </button>
+                  <button type="button" class="icon-btn icon-btn--ghost" title="Move section down"
+                    [disabled]="sectionIndex === sections().length - 1 || gridEditingLocked()" (click)="moveSection(row.section.id, 1)">
+                    <span class="material-icons-outlined">arrow_downward</span>
+                  </button>
+                  <button type="button" class="icon-btn icon-btn--ghost section-delete-btn"
+                    [disabled]="sections().length === 1 || gridEditingLocked()"
+                    [title]="sections().length === 1 ? 'A template needs at least one section' : 'Delete section and its questions'"
+                    (click)="requestDeleteSection(row.section)">
+                    <span class="material-icons-outlined">delete</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sheet-grid" [style.--option-columns]="optionColumnsFor(row.section).length">
+                <div class="sheet-corner">Question</div>
+                @for (label of optionColumnsFor(row.section); track label) {
+                  <div class="sheet-header">{{ label }}</div>
+                }
+                @for (qi of row.questionIndexes; track qi) {
+                  <div class="sheet-row-label sheet-question-row" [attr.data-question-index]="qi"
+                    [class.selected]="selectedQuestions().includes(qi)"
+                    (pointerdown)="beginQuestionGesture(qi, $event, sheetWrap)">
+                    Q{{ questionKeys()[qi] }}
+                  </div>
+                  @for (label of optionColumnsFor(row.section); track label; let oi = $index) {
+                    <button type="button" class="sheet-cell"
+                      [disabled]="gridEditingLocked()"
+                      [class.active]="oi < questions()[qi].length"
+                      [class.preview]="row.section.type === 'multiple_choice' && optionPreview()?.question === qi && oi < (optionPreview()?.count ?? 0)"
+                      [class.selected-row]="selectedQuestions().includes(qi)"
+                      [class.endpoint]="row.section.type === 'multiple_choice' && oi === questions()[qi].length - 1"
+                      [class.sheet-cell--fixed]="row.section.type === 'true_false'"
+                      (mousedown)="beginCellDrag(qi, oi); $event.preventDefault()"
+                      (mouseenter)="previewOptions(qi, oi + 1); dragCell(qi, oi)"
+                      [attr.aria-label]="row.section.type === 'true_false'
+                        ? 'Question ' + questionKeys()[qi] + ', option ' + label
+                        : 'Question ' + questionKeys()[qi] + ': set option count to ' + (oi + 1)"
+                      [title]="row.section.type === 'true_false' ? label : 'Set Q' + questionKeys()[qi] + ' options through ' + label">
+                      @if (row.section.type === 'multiple_choice' && oi === questions()[qi].length - 1) {
+                        <span>{{ questions()[qi].length }}</span>
+                      }
+                    </button>
+                  }
+                }
+                <button #addRow type="button" class="sheet-row-label sheet-add-row"
+                  (click)="addQuestion(sheetWrap, addRow, row.section.id)"
+                  [disabled]="atQuestionLimit() || gridEditingLocked()"
+                  [title]="atQuestionLimit() ? 'Maximum of 200 questions reached' : 'Add a question to ' + row.section.name"
+                  [attr.aria-label]="'Add a question to ' + row.section.name">{{ atQuestionLimit() ? '200 max' : '+' }}</button>
+                <div class="sheet-cell sheet-add-cell"></div>
+              </div>
+            </section>
+          }
+        </div>
+      }
+
+      <div class="footer row-flex-container align-items-center gap">
+        <span class="grow"></span>
+        <button class="action-btn" [disabled]="!canSave() || isGeneratingPdf() || nothingToDo()" (click)="save()">
+          {{ isSaving() ? 'Saving…' : (isGeneratingPdf() ? 'Generating…' : (!editingId() ? 'Create template' : (nothingToDo() ? 'Up to date' : 'Save changes'))) }}
+        </button>
+      </div>
+    </div>
+
+    @if (showPreview()) {
+      <!-- ===== PDF preview ===== -->
+      <div class="card preview-panel col-flex-container">
+        <span class="section-title">Preview</span>
+        @if (previewUrl(); as url) {
+          <iframe [src]="url" title="Bubble sheet preview"></iframe>
+        } @else if (isLoadingPreview()) {
+          <div class="preview-placeholder muted">Loading preview…</div>
+        } @else {
+          <div class="preview-placeholder muted">Preview unavailable.</div>
+        }
+      </div>
+    }
+
+  </div>
+</div>
+
+@if (deleteCandidate(); as t) {
+  <div class="delete-confirm-overlay" (click)="cancelDelete()">
+    <div class="card delete-confirm-card col-flex-container" (click)="$event.stopPropagation()">
+      <div class="row-flex-container align-items-center gap">
+        <span class="material-icons-outlined confirm-icon">warning</span>
+        <div class="col-flex-container grow">
+          <span class="confirm-title">Delete Template?</span>
+          <span class="confirm-body">{{ t.name }}</span>
+        </div>
+      </div>
+
+      @if (isCheckingDelete()) {
+        <div class="usage-loading row-flex-container align-items-center gap">
+          <span class="material-icons-outlined">hourglass_empty</span>
+          <span>Checking template usage...</span>
+        </div>
+      } @else if (deleteUsage(); as usage) {
+        @if (deleteHasUsage()) {
+          <div class="banner banner--warning">
+            This template is used by {{ usage.exam_count }} exam{{ usage.exam_count === 1 ? '' : 's' }}.
+            Deleting it will remove the template from those exams.
+          </div>
+          <div class="usage-list col-flex-container">
+            <span class="usage-title">Affected exams</span>
+            @for (exam of usage.exams; track exam.id) {
+              <div class="usage-row row-flex-container align-items-center gap">
+                <span class="usage-name grow">{{ exam.name }}</span>
+                <span class="usage-meta">{{ exam.answer_key_count }} key{{ exam.answer_key_count === 1 ? '' : 's' }}</span>
+                <span class="usage-meta">{{ exam.scan_count }} scan{{ exam.scan_count === 1 ? '' : 's' }}</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <span class="confirm-body">This template is not used by any exams.</span>
+        }
+      }
+
+      <div class="row-flex-container confirm-actions gap">
+        <button class="action-btn action-btn--sm action-btn--outline grow" [disabled]="isDeleting()" (click)="cancelDelete()">
+          Cancel
+        </button>
+        <button
+          class="action-btn action-btn--danger grow"
+          [disabled]="isCheckingDelete() || isDeleting()"
+          (click)="confirmDelete()"
+        >
+          {{ isDeleting() ? 'Deleting...' : (deleteHasUsage() ? 'Delete anyway' : 'Delete') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (sectionDeleteCandidate(); as section) {
+  <div class="delete-confirm-overlay" (click)="cancelDeleteSection()">
+    <div class="card delete-confirm-card col-flex-container" (click)="$event.stopPropagation()">
+      <div class="row-flex-container align-items-center gap">
+        <span class="material-icons-outlined confirm-icon">warning</span>
+        <div class="col-flex-container grow">
+          <span class="confirm-title">Delete {{ section.name }}?</span>
+          <span class="confirm-body">
+            This will also delete its {{ sectionDeleteQuestionCount() }}
+            question{{ sectionDeleteQuestionCount() === 1 ? '' : 's' }}.
+          </span>
+        </div>
+      </div>
+      <div class="row-flex-container confirm-actions gap">
+        <button class="action-btn action-btn--sm action-btn--outline grow" (click)="cancelDeleteSection()">Cancel</button>
+        <button class="action-btn action-btn--danger grow" (click)="confirmDeleteSection()">
+          Delete section and questions
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (sectionTypeChangeCandidate(); as change) {
+  <div class="delete-confirm-overlay" (click)="cancelSectionTypeChange()">
+    <div class="card delete-confirm-card col-flex-container" (click)="$event.stopPropagation()">
+      <div class="row-flex-container align-items-center gap">
+        <span class="material-icons-outlined confirm-icon">swap_horiz</span>
+        <div class="col-flex-container grow">
+          <span class="confirm-title">Change {{ change.section.name }}?</span>
+          <span class="confirm-body">
+            Its questions will reset to {{ change.type === 'true_false' ? 'T / F' : 'A–E' }} options.
+          </span>
+        </div>
+      </div>
+      <div class="row-flex-container confirm-actions gap">
+        <button class="action-btn action-btn--sm action-btn--outline grow" (click)="cancelSectionTypeChange()">Cancel</button>
+        <button class="action-btn grow" (click)="confirmSectionTypeChange()">
+          Change to {{ sectionTypeLabel(change.type) }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

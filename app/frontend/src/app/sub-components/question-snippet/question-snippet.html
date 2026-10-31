@@ -1,0 +1,6 @@
+<div class="question-snippet" [style]="hostStyle()">
+    @if (imageUrl(); as src) {
+    <img #sourceImage [src]="src" class="snippet-source" [style]="imageStyle()" (load)="onImageLoad()" alt=""
+        draggable="false" (dragstart)="$event.preventDefault()" />
+    }
+</div>

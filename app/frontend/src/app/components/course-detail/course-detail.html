@@ -1,0 +1,901 @@
+<div class="course-detail-container col-flex-container">
+
+    @if (isLoadingCourse()) {
+        <app-loading-spinner />
+    }
+
+    @if (courseLoadError()) {
+        <div class="error-toast row-flex-container align-items-center">
+            <span class="material-icons-outlined error-toast-icon">error_outline</span>
+            <span class="error-toast-message">{{ courseLoadError() }}</span>
+            <button class="icon-btn error-toast-close" (click)="courseLoadError.set('')">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        </div>
+    }
+
+    @if (releaseNotice()) {
+        <div class="action-notice row-flex-container align-items-center">
+            <span class="material-icons-outlined">check_circle</span>
+            <span class="grow">{{ releaseNotice() }}</span>
+            <button class="icon-btn icon-btn--ghost" aria-label="Dismiss" (click)="releaseNotice.set('')">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        </div>
+    }
+
+    @if (courseActionError() && !deletingCourse() && !confirmingRestore()) {
+        <div class="error-toast row-flex-container align-items-center">
+            <span class="material-icons-outlined error-toast-icon">error_outline</span>
+            <span class="error-toast-message">{{ courseActionError() }}</span>
+            <button class="icon-btn error-toast-close" (click)="courseActionError.set('')">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        </div>
+    }
+
+    @if (course(); as course) {
+        <app-course-header
+            [course]="course"
+            [canManage]="userService.isProfessorOrAbove()"
+            [showBack]="!userService.isProfessorOrAbove()"
+            [isRestoring]="isRestoringCourse()"
+            (back)="goBack()"
+            (edit)="editingCourse.set(course)"
+            (remove)="confirmDelete()"
+            (restore)="promptRestore()"
+        />
+
+        @if (course.archivedAt) {
+            <div class="archived-read-only-banner">
+                @if (course.retentionProcessedAt) {
+                    <span class="material-icons-outlined">history_toggle_off</span>
+                    Retention processing has permanently condensed this archived course and removed
+                    eligible records. It can no longer be restored or changed.
+                } @else {
+                    <span class="material-icons-outlined">lock</span>
+                    Archived courses are read-only.
+                    @if (userService.isProfessorOrAbove()) { Use Restore Course above to make changes again. }
+                }
+            </div>
+        }
+
+        @if (userService.isProfessorOrAbove()) {
+            <nav class="section-nav row-flex-container align-items-center" aria-label="Course sections">
+                <button type="button" class="icon-btn icon-btn--ghost section-nav-back"
+                    title="Back to courses" aria-label="Back to courses" (click)="goBack()">
+                    <span class="material-icons-outlined">arrow_back</span>
+                </button>
+                <span class="section-nav-divider" aria-hidden="true"></span>
+                <div class="section-nav-links row-flex-container gap">
+                    <button type="button" class="section-nav-chip" (click)="scrollToSection('overview')">Overview</button>
+                    <button type="button" class="section-nav-chip" (click)="scrollToSection('exams')">Exams</button>
+                    <button type="button" class="section-nav-chip" (click)="scrollToSection('students')">Students</button>
+                </div>
+                <span class="section-nav-divider" aria-hidden="true"></span>
+                <button type="button" class="action-btn action-btn--outline section-nav-stats" (click)="showAllCourseStats.set(!showAllCourseStats())">
+                    <span class="material-icons-outlined">{{ showAllCourseStats() ? 'expand_less' : 'analytics' }}</span>
+                    <span class="section-nav-stats-label">{{ showAllCourseStats() ? 'Hide all stats' : 'View all stats' }}</span>
+                </button>
+            </nav>
+        }
+
+        @if (userService.isProfessorOrAbove()) {
+            <div class="row-flex-container gap" id="overview">
+                <div class="card graph-card col-flex-container">
+                    <span class="card-title">{{ jobStatusLabel() ? 'Current Job' : 'Grading Progress' }}</span>
+                    <div class="chart-wrapper grow">
+                        <canvas #jobProgressChart></canvas>
+                        <div class="doughnut-center">
+                            <span class="doughnut-percent">{{ displayProgress().percent }}%</span>
+                            <span class="doughnut-label">{{ jobSubLabel() }}</span>
+                        </div>
+                    </div>
+                    <hr class="card-divider">
+                    <span class="card-footer">
+                        @if (jobStatusLabel(); as statusLabel) {
+                            {{ statusLabel }}
+                        } @else {
+                            {{ displayProgress().total - displayProgress().scanned }} scan{{ displayProgress().total - displayProgress().scanned !== 1 ? 's' : '' }} remaining
+                        }
+                    </span>
+                </div>
+
+                <div class="card graph-card col-flex-container">
+                    <span class="card-title">Grade Distribution</span>
+                    <div class="chart-wrapper grow">
+                        <canvas #gradeDistChart></canvas>
+                        @if (isLoadingGradeDistribution()) {
+                            <div class="chart-loading">
+                                <app-loading-spinner [overlay]="false" />
+                            </div>
+                        }
+                    </div>
+                    <hr class="card-divider">
+                    <span class="card-footer">
+                        {{ isLoadingGradeDistribution() ? 'Loading...' : gradedGradeCount() + ' graded scan' + (gradedGradeCount() !== 1 ? 's' : '') }}
+                    </span>
+                </div>
+
+                <div class="card graph-card col-flex-container">
+                    <span class="card-title">Re-grade Volume</span>
+                    <div class="chart-wrapper grow">
+                        <canvas #regradeVolumeChart></canvas>
+                        @if (isLoadingRegradeVolume()) {
+                            <div class="chart-loading">
+                                <app-loading-spinner [overlay]="false" />
+                            </div>
+                        }
+                    </div>
+                    <hr class="card-divider">
+                    <span class="card-footer">{{ totalRegradeVolume() }} total re-grade request{{ totalRegradeVolume() !== 1 ? 's' : '' }}</span>
+                </div>
+            </div>
+
+            @if (showAllCourseStats()) {
+                <div class="card course-stats-card col-flex-container mt-3">
+                    <div>
+                        <span class="card-title">All Course Stats</span>
+                        <div class="card-footer">Performance across all graded scans in this course.</div>
+                    </div>
+
+                    @if (isLoadingGradeDistribution()) {
+                        <app-loading-spinner [overlay]="false" />
+                    } @else if (courseStatsError()) {
+                        <div class="error-text">{{ courseStatsError() }}</div>
+                    } @else if (courseStats(); as courseStats) {
+                        <div class="stats-grid course-summary-grid">
+                            <div class="stat-tile"><span class="stat-label">Exams</span><span class="stat-value">{{ courseStats.exam_count }}</span></div>
+                            <div class="stat-tile"><span class="stat-label">Graded scans</span><span class="stat-value">{{ courseStats.graded_count }}</span></div>
+                            <div class="stat-tile"><span class="stat-label">Mean</span><span class="stat-value">{{ courseStats.mean_percentage === null ? '—' : courseStats.mean_percentage + '%' }}</span></div>
+                            <div class="stat-tile"><span class="stat-label">Standard deviation</span><span class="stat-value">{{ courseStats.standard_deviation_percentage === null ? '—' : courseStats.standard_deviation_percentage + '%' }}</span></div>
+                            <div class="stat-tile"><span class="stat-label">Median</span><span class="stat-value">{{ courseStats.median_percentage === null ? '—' : courseStats.median_percentage + '%' }}</span></div>
+                            <div class="stat-tile"><span class="stat-label">Mode</span><span class="stat-value">{{ courseStats.mode_percentages.length ? courseStats.mode_percentages.join('%, ') + '%' : '—' }}</span></div>
+                            <div class="stat-tile"><span class="stat-label">Range</span><span class="stat-value">{{ courseStats.lowest_percentage === null ? '—' : courseStats.lowest_percentage + '% – ' + courseStats.highest_percentage + '%' }}</span></div>
+                        </div>
+
+                        <div class="stats-section">
+                            <span class="stats-section-title">Exam comparison</span>
+                            @if (courseStats.exams.length === 0) {
+                                <div class="stats-empty">No exams are available yet.</div>
+                            } @else {
+                                <div class="course-stats-table-wrap">
+                                    <table class="course-stats-table">
+                                        <thead><tr><th>Exam</th><th>Graded</th><th>Mean</th><th>Std. dev.</th><th>Median</th><th>Mode</th><th>Low</th><th>High</th></tr></thead>
+                                        <tbody>
+                                            @for (exam of courseStats.exams; track exam.exam_id) {
+                                                <tr>
+                                                    <td>{{ exam.exam_name }}</td>
+                                                    <td>{{ exam.graded_count }}</td>
+                                                    <td>{{ exam.mean_percentage === null ? '—' : exam.mean_percentage + '%' }}</td>
+                                                    <td>{{ exam.standard_deviation_percentage === null ? '—' : exam.standard_deviation_percentage + '%' }}</td>
+                                                    <td>{{ exam.median_percentage === null ? '—' : exam.median_percentage + '%' }}</td>
+                                                    <td>{{ exam.mode_percentages.length ? exam.mode_percentages.join('%, ') + '%' : '—' }}</td>
+                                                    <td>{{ exam.lowest_percentage === null ? '—' : exam.lowest_percentage + '%' }}</td>
+                                                    <td>{{ exam.highest_percentage === null ? '—' : exam.highest_percentage + '%' }}</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="course-comparison-launch">
+                            <button type="button" class="action-btn" (click)="openCourseComparison()">
+                                <span class="material-icons-outlined">compare_arrows</span>
+                                Compare with another course
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="mt-3">
+                <div class="card regrade-requests-card col-flex-container">
+                    <span class="card-title">Latest Re-grade Requests</span>
+                    @if (regradeRequests().length === 0) {
+                        <span class="card-footer">No re-grade requests yet.</span>
+                    } @else {
+                        <hr class="course-divider">
+                        <div class="regrade-requests-list col-flex-container">
+                            @for (request of regradeRequests(); track request.id) {
+                                <app-dashboard-regrade-requests-card [request]="request" />
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (userService.isStudent()) {
+            <div class="mt-3">
+                <div class="card regrade-requests-card col-flex-container">
+                    <span class="card-title">My Re-grade Requests</span>
+                    @if (regradeRequests().length === 0) {
+                        <span class="card-footer">No re-grade requests yet.</span>
+                    } @else {
+                        <hr class="course-divider">
+                        <div class="regrade-requests-list col-flex-container">
+                            @for (request of regradeRequests(); track request.id) {
+                                <app-dashboard-regrade-requests-card [request]="request" />
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="card exams-card col-flex-container mt-3" id="exams">
+            <div class="row-flex-container align-items-center justify-content-between">
+                <span class="card-title">Exams</span>
+                @if (userService.isProfessorOrAbove()) {
+                    <div class="row-flex-container gap">
+                        <button class="action-btn action-btn--sm action-btn--outline" title="Manage Templates" (click)="goToTemplates()">
+                            <span class="material-icons-outlined">grid_on</span>
+                            Templates
+                        </button>
+                        @if (course.canManageCanvas) {
+                            <div class="add-exam-dropdown">
+                                <button class="action-btn action-btn--sm" (click)="showAddExamMenu.set(!showAddExamMenu())">
+                                    <span class="material-icons-outlined">arrow_drop_down</span>
+                                    Add Exam
+                                </button>
+                                @if (showAddExamMenu()) {
+                                    <div class="menu-backdrop" (click)="showAddExamMenu.set(false)"></div>
+                                    <div class="exam-menu add-exam-menu col-flex-container">
+                                        <button class="exam-menu-item" (click)="startCreatingExam('omr')">
+                                            <span class="material-icons-outlined">add_task</span>
+                                            <span class="col-flex-container">
+                                                <span class="exam-menu-item-label">Create OMR exam</span>
+                                                <span class="exam-menu-item-desc">Create a standalone exam in OMR</span>
+                                            </span>
+                                        </button>
+                                        <button class="exam-menu-item" (click)="startCreatingExam('canvas')">
+                                            <span class="material-icons-outlined">assignment</span>
+                                            <span class="col-flex-container">
+                                                <span class="exam-menu-item-label">Create from Canvas assignment</span>
+                                                <span class="exam-menu-item-desc">Choose a Canvas assignment to link</span>
+                                            </span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        } @else {
+                            <button class="action-btn action-btn--sm" (click)="startCreatingExam('omr')">
+                                <span class="material-icons-outlined">add_task</span>
+                                Add Exam
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+            <hr class="course-divider">
+
+            <div class="exams-list col-flex-container">
+            @if (course.exams.length === 0) {
+                <div class="exam-empty-state align-items-center">
+                    @if (userService.isStudent()) {
+                        <span class="exam-empty-text">Your professor has yet to make an exam, be patient!</span>
+                    } @else {
+                        <span class="exam-empty-text">No exams yet, create one to get started!</span>
+                    }
+                </div>
+            }
+            @for (exam of course.exams; track exam.id; let last = $last) {
+                <div class="exam-row row-flex-container align-items-center gap" [class.last]="last">
+                    <div class="col-flex-container grow">
+                        <div class="row-flex-container align-items-center exam-title-row">
+                            <span class="exam-name">{{ exam.name }}</span>
+                            @if (userService.isProfessorOrAbove()) {
+                                <span class="status-badge" [ngClass]="ExamStatusClass[exam.status]">
+                                    {{ exam.status }}
+                                </span>
+                            }
+                            <span class="status-badge" [ngClass]="ReleaseStatusClass[releaseStatus(exam)]">
+                                {{ ReleaseStatusLabel[releaseStatus(exam)] }}
+                            </span>
+                            @if (userService.isProfessorOrAbove() && exam.regradeCount > 0) {
+                                <span class="status-badge regrade-badge" title="Open re-grade requests for this exam">
+                                    <span class="material-icons-outlined">flag</span>
+                                    {{ exam.regradeCount }} re-grade{{ exam.regradeCount !== 1 ? 's' : '' }}
+                                </span>
+                            }
+                            @if (userService.isProfessorOrAbove() && exam.ambiguousCount > 0) {
+                                <span class="status-badge tag-orange" title="Grades with ambiguous marks need manual review">
+                                    <span class="material-icons-outlined">error_outline</span>
+                                    {{ exam.ambiguousCount }} ambiguous
+                                </span>
+                            }
+                            @if (userService.isProfessorOrAbove() && exam.templateMissing) {
+                                <span
+                                    class="status-badge tag-amber"
+                                    [title]="exam.templateWarning || 'This exam no longer has an assigned template.'"
+                                >
+                                    Missing template
+                                </span>
+                            }
+                            @if (exam.canvasAssignmentName) {
+                                <span class="status-badge tag-blue" [title]="'Linked Canvas assignment: ' + exam.canvasAssignmentName">
+                                    Canvas &middot; {{ exam.canvasAssignmentName }}
+                                </span>
+                            }
+                        </div>
+                        <span class="exam-schedule" [class.exam-schedule--unscheduled]="!exam.start_time">
+                            <span class="material-icons-outlined">schedule</span>
+                            {{ formatExamSchedule(exam) }}
+                        </span>
+                        @if (userService.isProfessorOrAbove()) {
+                            <span class="exam-meta">
+                                {{ examSubLabel(exam) }}{{ exam.completedAt ? ', done ' + exam.completedAt : '' }}
+                            </span>
+                            @if (exam.templateMissing) {
+                                <span class="exam-warning">
+                                    {{ exam.templateWarning || 'This exam no longer has an assigned template.' }}
+                                </span>
+                            }
+                            @if (exportErrorExamId() === exam.id) {
+                                <span class="exam-warning">Unable to download results.</span>
+                            }
+                        }
+                    </div>
+                    @if (userService.isStudent() && canViewResults(exam)) {
+                        <div class="exam-actions row-flex-container align-items-center gap">
+                            <button class="action-btn action-btn--sm action-btn--outline" title="View your grade for this exam" (click)="openStudentResults(exam)">
+                                <span class="material-icons-outlined">edit_note</span>
+                                Results
+                            </button>
+                        </div>
+                    }
+                    @if (userService.isProfessorOrAbove()) {
+                        <div class="exam-actions row-flex-container align-items-center gap">
+                            @if (canDefineAnswerKey(exam) && !exam.hasAnswerKey) {
+                                <button class="action-btn action-btn--sm action-btn--outline" title="Set the correct answers used to grade scans" (click)="defineAnswerKey(exam)">
+                                    <span class="material-icons-outlined">rule</span>
+                                    Define answer key
+                                </button>
+                            }
+                            <span class="scan-upload-action" [title]="scanUploadTitle(exam)">
+                                <button
+                                    class="action-btn action-btn--sm action-btn--outline"
+                                    [disabled]="!canUploadScans(exam)"
+                                    (click)="uploadScan(exam)"
+                                >
+                                    <span class="material-icons-outlined">upload</span>
+                                    Upload
+                                </button>
+                            </span>
+                            @if (canReleaseExam(exam)) {
+                                @if (exam.released) {
+                                    <button class="action-btn action-btn--sm action-btn--outline" title="Unrelease results and hide grades from students" [disabled]="isReleasingExam()" (click)="closeExam(exam)">
+                                        <span class="material-icons-outlined">visibility_off</span>
+                                        Unrelease
+                                    </button>
+                                } @else if (exam.status === ExamStatus.Graded) {
+                                    <button class="action-btn action-btn--sm action-btn--outline" title="Publish grades so students can see them" [disabled]="isReleasingExam()" (click)="confirmExamRelease(exam)">
+                                        <span class="material-icons-outlined">publish</span>
+                                        Release
+                                    </button>
+                                }
+                            }
+                            @if (canViewResults(exam)) {
+                                <button class="action-btn action-btn--sm action-btn--outline" title="View exam results for this exam's students" (click)="openAnnotatedResults(exam)">
+                                    <span class="material-icons-outlined">edit_note</span>
+                                    Results
+                                </button>
+                            }
+
+                            <div class="exam-menu-wrapper">
+                                <button class="icon-btn icon-btn--ghost" title="More actions" (click)="$event.stopPropagation(); toggleExamMenu(exam.id, $any($event.currentTarget))">
+                                    <span class="material-icons-outlined">more_vert</span>
+                                </button>
+                                @if (openMenuExamId() === exam.id) {
+                                    <div
+                                        class="exam-menu col-flex-container"
+                                        [style.top.px]="examMenuPosition()?.top"
+                                        [style.right.px]="examMenuPosition()?.right"
+                                        (click)="$event.stopPropagation()"
+                                    >
+                                        <button class="exam-menu-item" (click)="closeExamMenu(); openEditSchedule(exam)">
+                                            <span class="material-icons-outlined">event</span>
+                                            <span class="col-flex-container">
+                                                <span class="exam-menu-item-label">Edit schedule</span>
+                                                <span class="exam-menu-item-desc">Set or clear the exam date and duration</span>
+                                            </span>
+                                        </button>
+                                        @if (canDefineAnswerKey(exam) && exam.hasAnswerKey) {
+                                            <button class="exam-menu-item" (click)="closeExamMenu(); defineAnswerKey(exam)">
+                                                <span class="material-icons-outlined">rule</span>
+                                                <span class="col-flex-container">
+                                                    <span class="exam-menu-item-label">Define answer key</span>
+                                                    <span class="exam-menu-item-desc">Set the correct answers used to grade scans</span>
+                                                </span>
+                                            </button>
+                                        }
+                                        @if (canChangeTemplate(exam)) {
+                                            <button class="exam-menu-item" (click)="closeExamMenu(); openAssignTemplate(exam)">
+                                                <span class="material-icons-outlined">{{ exam.templateMissing ? 'post_add' : 'swap_horiz' }}</span>
+                                                <span class="col-flex-container">
+                                                    <span class="exam-menu-item-label">{{ exam.templateMissing ? 'Assign template' : 'Change template' }}</span>
+                                                    <span class="exam-menu-item-desc">Choose the bubble sheet layout for this exam</span>
+                                                </span>
+                                            </button>
+                                        }
+                                        @if (canDownloadExamPdf(exam)) {
+                                            <button class="exam-menu-item" [disabled]="isDownloadingExamPdf()" (click)="closeExamMenu(); downloadExamPdf(exam)">
+                                                <span class="material-icons-outlined">download</span>
+                                                <span class="col-flex-container">
+                                                    <span class="exam-menu-item-label">Download exam PDF</span>
+                                                    <span class="exam-menu-item-desc">Save the generated exam sheet</span>
+                                                </span>
+                                            </button>
+                                        }
+                                        @if (canViewResults(exam)) {
+                                            <button class="exam-menu-item" (click)="closeExamMenu(); openExamStats(exam)">
+                                                <span class="material-icons-outlined">bar_chart</span>
+                                                <span class="col-flex-container">
+                                                    <span class="exam-menu-item-label">View exam stats</span>
+                                                    <span class="exam-menu-item-desc">Advanced score, question, and version analysis</span>
+                                                </span>
+                                            </button>
+                                        }
+                                        @if (canReleaseExam(exam) && canViewResults(exam)) {
+                                            <button class="exam-menu-item" [disabled]="exportingExamId() === exam.id" (click)="closeExamMenu(); downloadResults(exam)">
+                                                <span class="material-icons-outlined">file_download</span>
+                                                <span class="col-flex-container">
+                                                    <span class="exam-menu-item-label">Download results CSV</span>
+                                                    <span class="exam-menu-item-desc">Export every student's responses and scores</span>
+                                                </span>
+                                            </button>
+                                        }
+                                        @if (course.canManageCanvas && canReleaseExam(exam)) {
+                                            <button class="exam-menu-item" (click)="closeExamMenu(); canvasGradeExam.set(exam)">
+                                                <span class="material-icons-outlined">{{ exam.canvasAssignmentId && exam.released ? 'cloud_upload' : 'link' }}</span>
+                                                <span class="col-flex-container">
+                                                    <span class="exam-menu-item-label">
+                                                        {{ exam.canvasAssignmentId && exam.released ? 'Send results to Canvas' : (exam.canvasAssignmentId ? 'Canvas assignment' : 'Link Canvas assignment') }}
+                                                    </span>
+                                                    <span class="exam-menu-item-desc">Manage Canvas grades and marked exam result links</span>
+                                                </span>
+                                            </button>
+                                        }
+                                        <button class="exam-menu-item exam-menu-item--danger" (click)="closeExamMenu(); confirmExamDelete(exam)">
+                                            <span class="material-icons-outlined">delete</span>
+                                            <span class="col-flex-container">
+                                                <span class="exam-menu-item-label">Delete exam</span>
+                                                <span class="exam-menu-item-desc">Permanently remove this exam and its data</span>
+                                            </span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            </div>
+        </div>
+
+        @if (userService.isProfessorOrAbove()) {
+            <div class="card students-card col-flex-container mt-3" id="students">
+                <app-student-list
+                    [course]="course"
+                    [embedded]="true"
+                    [isOwner]="isCourseOwner"
+                    (openAddStudents)="addingStudents.set(true)"
+                    (studentRemoved)="onStudentRemoved($event)"
+                    (studentPromoted)="onStudentPromoted($event)"
+                    (rosterChanged)="onCanvasRosterChanged($event)"
+                />
+            </div>
+        }
+    }
+
+</div>
+
+@if (deletingCourse(); as deletingCourse) {
+    @if (shouldArchiveCourse(deletingCourse)) {
+        <app-retention-policy-modal
+            [course]="deletingCourse"
+            (cancel)="cancelDelete()"
+            (archived)="onCourseArchived()"
+        />
+    } @else {
+        <div class="modal-overlay" (click)="cancelDelete()">
+            <div class="card confirm-card col-flex-container" (click)="$event.stopPropagation()">
+                <div class="row-flex-container align-items-center gap">
+                    <span class="material-icons-outlined confirm-icon">warning</span>
+                    <div class="col-flex-container">
+                        <span class="confirm-title">Delete Course Permanently?</span>
+                        <span class="confirm-body">
+                            {{ deletingCourse.code }}, {{ deletingCourse.name }} is empty and will be permanently removed.
+                        </span>
+                    </div>
+                </div>
+                @if (courseActionError()) {
+                    <div class="correction-error">{{ courseActionError() }}</div>
+                }
+                <div class="row-flex-container confirm-actions gap">
+                    <button class="action-btn action-btn--sm action-btn--outline grow" (click)="cancelDelete()">Cancel</button>
+                    <button class="action-btn action-btn--danger grow" [disabled]="isDeleting()" (click)="executeDelete()">
+                        {{ isDeleting() ? 'Deleting...' : 'Delete Permanently' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@if (confirmingRestore() && course(); as course) {
+    <div class="modal-overlay" (click)="cancelRestore()">
+        <div class="card confirm-card col-flex-container" (click)="$event.stopPropagation()">
+            <div class="row-flex-container align-items-center gap">
+                <span class="material-icons-outlined confirm-icon">unarchive</span>
+                <div class="col-flex-container">
+                    <span class="confirm-title">Restore Course?</span>
+                    <span class="confirm-body">
+                        {{ course.code }}, {{ course.name }} will become active again and reappear in the default course list.
+                    </span>
+                </div>
+            </div>
+            @if (courseActionError()) {
+                <div class="correction-error">{{ courseActionError() }}</div>
+            }
+            <div class="row-flex-container confirm-actions gap">
+                <button class="action-btn action-btn--sm action-btn--outline grow" (click)="cancelRestore()">Cancel</button>
+                <button class="action-btn grow" [disabled]="isRestoringCourse()" (click)="restoreCourse()">
+                    {{ isRestoringCourse() ? 'Restoring...' : 'Restore Course' }}
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (canvasGradeExam() && course(); as course) {
+    <app-canvas-grade-release
+        [courseId]="course.id"
+        [exam]="canvasGradeExam()!"
+        (dismissed)="canvasGradeExam.set(null)"
+        (assignmentChanged)="onCanvasAssignmentChanged($event)"
+    />
+}
+
+@if (deletingExam(); as deletingExam) {
+    <div class="modal-overlay" (click)="cancelExamDelete()">
+        <div class="card confirm-card col-flex-container" (click)="$event.stopPropagation()">
+            <div class="row-flex-container align-items-center gap">
+                <span class="material-icons-outlined confirm-icon">warning</span>
+                <div class="col-flex-container">
+                    <span class="confirm-title">Delete Exam?</span>
+                    <span class="confirm-body">{{ deletingExam.name }} and its scans, answer keys, and grades will be permanently removed.</span>
+                </div>
+            </div>
+            <div class="row-flex-container confirm-actions gap">
+                <button class="action-btn action-btn--sm action-btn--outline grow" [disabled]="isDeletingExam()" (click)="cancelExamDelete()">Cancel</button>
+                <button class="action-btn action-btn--danger grow" [disabled]="isDeletingExam()" (click)="executeExamDelete()">
+                    {{ isDeletingExam() ? 'Deleting...' : 'Delete' }}
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (editingScheduleExam(); as editingScheduleExam) {
+    <div class="modal-overlay" (click)="closeEditSchedule()">
+        <div class="card schedule-card col-flex-container" role="dialog" aria-modal="true"
+            aria-labelledby="edit-schedule-title" (click)="$event.stopPropagation()">
+            <div class="modal-header row-flex-container align-items-center">
+                <div class="col-flex-container">
+                    <span id="edit-schedule-title" class="modal-title">Edit schedule</span>
+                    <span class="confirm-body">{{ editingScheduleExam.name }}</span>
+                </div>
+                <button class="icon-btn icon-btn--danger" [disabled]="isSavingSchedule()" (click)="closeEditSchedule()">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="schedule-form col-flex-container">
+                <label class="field col-flex-container">
+                    <span class="field-label">Date</span>
+                    <input
+                        type="date"
+                        class="field-input schedule-control"
+                        [ngModel]="scheduleDate"
+                        [disabled]="isSavingSchedule()"
+                        (ngModelChange)="setScheduleDate($event)"
+                    />
+                </label>
+
+                @if (scheduleDate) {
+                    <div class="schedule-fields row-flex-container">
+                        <label class="field col-flex-container grow">
+                            <span class="field-label">Start time</span>
+                            <input type="time" class="field-input schedule-control" [(ngModel)]="scheduleStartClock" [disabled]="isSavingSchedule()" />
+                        </label>
+                        <label class="field col-flex-container grow">
+                            <span class="field-label">Duration (minutes)</span>
+                            <input type="number" min="1" step="5" class="field-input schedule-control schedule-control--number"
+                                [(ngModel)]="scheduleDurationMinutes" [disabled]="isSavingSchedule()" />
+                        </label>
+                    </div>
+                    <div class="schedule-presets row-flex-container">
+                        @for (preset of scheduleDurationPresets; track preset) {
+                            <button type="button" class="schedule-preset"
+                                [class.active]="scheduleDurationMinutes === preset"
+                                [disabled]="isSavingSchedule()"
+                                (click)="scheduleDurationMinutes = preset">{{ preset }}m</button>
+                        }
+                    </div>
+                    @if (!scheduleStartClock) {
+                        <span class="schedule-note">Choose a start time to finish scheduling this exam.</span>
+                    } @else if (!scheduleDurationMinutes || scheduleDurationMinutes <= 0) {
+                        <span class="schedule-note">Enter a duration greater than zero.</span>
+                    }
+                    @if (scheduleEndsAt) {
+                        <span class="schedule-note">Ends {{ scheduleEndsAt }}</span>
+                    }
+                } @else {
+                    <span class="schedule-note">No date selected — this exam will be unscheduled.</span>
+                }
+
+                @if (editingScheduleExam.generatedPdfPath) {
+                    <span class="schedule-note">The generated exam PDF will be refreshed when you save.</span>
+                }
+                @if (scheduleError()) {
+                    <span class="error-text" role="alert">{{ scheduleError() }}</span>
+                }
+            </div>
+
+            <div class="row-flex-container confirm-actions gap">
+                <button class="action-btn action-btn--sm action-btn--outline grow"
+                    [disabled]="isSavingSchedule()" (click)="closeEditSchedule()">Cancel</button>
+                <button class="action-btn grow" data-testid="save-exam-schedule"
+                    [disabled]="!scheduleIsValid || isSavingSchedule()" (click)="saveExamSchedule()">
+                    {{ isSavingSchedule() ? 'Saving...' : 'Save schedule' }}
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (confirmingReleaseExam(); as confirmingReleaseExam) {
+    <div class="modal-overlay" (click)="cancelExamRelease()">
+        <div class="card confirm-card col-flex-container" role="alertdialog" aria-modal="true"
+            aria-labelledby="release-results-title" (click)="$event.stopPropagation()">
+            <div class="row-flex-container align-items-center gap">
+                <span class="material-icons-outlined confirm-icon">warning</span>
+                <div class="col-flex-container">
+                    <span id="release-results-title" class="confirm-title">Release Results?</span>
+                    <span class="confirm-body">{{ confirmingReleaseExam.name }}'s grades will become visible to every student in this course.</span>
+                    <span class="confirm-body">Students may receive a notification immediately. Review flagged scans before continuing.</span>
+                </div>
+            </div>
+            <div class="row-flex-container confirm-actions gap">
+                <button class="action-btn action-btn--sm action-btn--outline grow" [disabled]="isReleasingExam()" (click)="cancelExamRelease()">Cancel</button>
+                <button class="action-btn action-btn--sm grow" [disabled]="isReleasingExam()" (click)="executeExamRelease()">
+                    {{ isReleasingExam() ? 'Releasing...' : 'Release results' }}
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (addingStudents() && course(); as course) {
+    <div class="modal-overlay" (click)="addingStudents.set(false)">
+        <div (click)="$event.stopPropagation()">
+            <app-add-students-modal
+                [course]="course"
+                (close)="addingStudents.set(false)"
+                (studentsAdded)="onStudentsAdded($event)"
+            />
+        </div>
+    </div>
+}
+
+@if (examWizardStep() === 1 && course(); as course) {
+    <div class="modal-overlay" (click)="requestCloseExamWizard()">
+        <div (click)="$event.stopPropagation()">
+            <app-create-exam
+                [courseId]="course.id"
+                [wizardStep]="1"
+                [canvasAssignmentMode]="examWizardMode() === 'canvas'"
+                (close)="requestCloseExamWizard()"
+                (created)="onWizardExamCreated($event)"
+                (manageTemplates)="goToTemplates()"
+            />
+        </div>
+    </div>
+}
+
+@if (examWizardStep() === 2 && examWizardExam(); as examWizardExam) {
+    <div class="modal-overlay" (click)="requestCloseExamWizard()">
+        <div (click)="$event.stopPropagation()">
+            <app-answer-key
+                [examId]="examWizardExam.id"
+                [wizardStep]="2"
+                (close)="requestCloseExamWizard()"
+                (nextRequested)="examWizardStep.set(3)"
+                (refreshRequested)="refreshCourse()"
+            />
+        </div>
+    </div>
+}
+
+@if (examWizardStep() === 3 && examWizardExam(); as examWizardExam) {
+    <div class="modal-overlay" (click)="requestCloseExamWizard()">
+        <div (click)="$event.stopPropagation()">
+            <app-scan-upload-modal
+                [exam]="examWizardExam"
+                [wizardStep]="3"
+                (close)="requestCloseExamWizard()"
+                (backRequested)="examWizardStep.set(2)"
+                (scanUploaded)="onScanUploaded($event)"
+                (refreshRequested)="refreshCourse()"
+            />
+        </div>
+    </div>
+}
+
+@if (confirmingExamWizardExit()) {
+    <div class="modal-overlay" (click)="cancelExamWizardExit()">
+        <div class="card confirm-card col-flex-container" (click)="$event.stopPropagation()">
+            <div class="row-flex-container align-items-center gap">
+                <span class="material-icons-outlined confirm-icon">warning</span>
+                <div class="col-flex-container">
+                    <span class="confirm-title">Finish setting up this exam?</span>
+                    <span class="confirm-body">
+                        @if (!examWizardExamLive()?.hasAnswerKey) {
+                            This exam doesn't have an answer key yet, so it can't be graded. Pick this back up anytime with the "Define answer key" button on the exam's row, then "Upload" once you're ready to scan filled-in sheets.
+                        } @else {
+                            The answer key is set, but no exam PDFs have been uploaded for scanning yet. Pick this back up anytime with the "Upload" button on the exam's row.
+                        }
+                    </span>
+                </div>
+            </div>
+            <div class="row-flex-container confirm-actions gap">
+                <button class="action-btn action-btn--sm action-btn--outline grow" (click)="cancelExamWizardExit()">Keep going</button>
+                <button class="action-btn action-btn--sm grow" (click)="closeExamWizard()">Exit for now</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (viewingTemplates()) {
+    <div class="modal-overlay" (click)="viewingTemplates.set(false)">
+        <div (click)="$event.stopPropagation()">
+            <app-template-builder
+                (close)="viewingTemplates.set(false)"
+                (templateDeleted)="refreshCourse()"
+            />
+        </div>
+    </div>
+}
+
+@if (assigningTemplateExam(); as assigningTemplateExam) {
+    <div class="modal-overlay" (click)="closeAssignTemplate()">
+        <div class="card assign-template-card col-flex-container" (click)="$event.stopPropagation()">
+            <div class="modal-header row-flex-container align-items-center">
+                <div class="col-flex-container grow">
+                    <span class="modal-title">{{ assigningTemplateExam.templateMissing ? 'Assign Template' : 'Change Template' }}</span>
+                    <span class="confirm-body">{{ assigningTemplateExam.name }}</span>
+                </div>
+                <button class="icon-btn icon-btn--danger" [disabled]="isAssigningTemplate()" (click)="closeAssignTemplate()">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            @if (isLoadingTemplateOptions()) {
+                <div class="loading-row row-flex-container align-items-center gap">
+                    <span class="material-icons-outlined">hourglass_empty</span>
+                    <span>Loading templates...</span>
+                </div>
+            } @else if (templateOptions().length === 0) {
+                <span class="confirm-body">You do not have any templates to assign.</span>
+                <button class="action-btn action-btn--outline" (click)="createTemplateForAssignment()">
+                    Create template
+                </button>
+            } @else {
+                <label class="field col-flex-container">
+                    <span class="field-label">Bubble Sheet Template</span>
+                    <select
+                        class="field-input"
+                        [ngModel]="selectedTemplateId()"
+                        (ngModelChange)="selectedTemplateId.set($event)"
+                        [disabled]="isAssigningTemplate() || confirmingTemplateChange()"
+                    >
+                        @for (template of templateOptions(); track template.id) {
+                            <option [value]="template.id">{{ template.name }} ({{ template.total_questions }}Q)</option>
+                        }
+                    </select>
+                </label>
+                <button class="link-btn" (click)="createTemplateForAssignment()">Create or manage templates</button>
+            }
+
+            @if (templateAssignError()) {
+                <span class="error-text">{{ templateAssignError() }}</span>
+            }
+
+            <div class="row-flex-container confirm-actions gap">
+                @if (confirmingTemplateChange()) {
+                    <div class="template-reset-warning grow">
+                        <span class="material-icons-outlined">warning</span>
+                        <span>Changing this template will permanently delete all answer keys for this exam.</span>
+                    </div>
+                    <button class="action-btn action-btn--sm action-btn--outline" [disabled]="isAssigningTemplate()" (click)="confirmingTemplateChange.set(false)">
+                        Go back
+                    </button>
+                    <button class="action-btn action-btn--danger" [disabled]="isAssigningTemplate()" (click)="assignTemplate(true)">
+                        {{ isAssigningTemplate() ? 'Changing...' : 'Delete keys and change' }}
+                    </button>
+                } @else {
+                    <button class="action-btn action-btn--sm action-btn--outline grow" [disabled]="isAssigningTemplate()" (click)="closeAssignTemplate()">
+                        Cancel
+                    </button>
+                    <button
+                        class="action-btn grow"
+                        [disabled]="!selectedTemplateId() || selectedTemplateId() === assigningTemplateExam.exam_template_id || isLoadingTemplateOptions() || isAssigningTemplate()"
+                        (click)="assignTemplate()"
+                    >
+                        {{ isAssigningTemplate() ? 'Saving...' : (assigningTemplateExam.templateMissing ? 'Assign template' : 'Change template') }}
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@if (viewingAnswerKeyExam(); as viewingAnswerKeyExam) {
+    <div class="modal-overlay" (click)="this.viewingAnswerKeyExam.set(null)">
+        <div (click)="$event.stopPropagation()">
+            <app-answer-key [examId]="viewingAnswerKeyExam.id" (close)="this.viewingAnswerKeyExam.set(null)" (refreshRequested)="refreshCourse()" />
+        </div>
+    </div>
+}
+
+@if (showCourseModal()) {
+    <div class="modal-overlay" (click)="closeCourseModal()">
+        <div (click)="$event.stopPropagation()">
+            <app-create-course
+                [institution]="userService.currentUser()?.institution ?? 'ubc'"
+                [editCourse]="editingCourse()"
+                (close)="closeCourseModal()"
+                (updated)="onCourseUpdated($event)"
+            />
+        </div>
+    </div>
+}
+
+@if (uploadingScansForExam(); as uploadingScansForExam) {
+    <div class="modal-overlay" (click)="closeUploadModal()">
+        <div (click)="$event.stopPropagation()">
+            <app-scan-upload-modal
+                [exam]="uploadingScansForExam"
+                (close)="closeUploadModal()"
+                (scanUploaded)="onScanUploaded($event)"
+                (refreshRequested)="refreshCourse()"
+            />
+        </div>
+    </div>
+}
+
+@if (viewingStatsExam(); as viewingStatsExam) {
+    <app-exam-stats-view
+        [examId]="viewingStatsExam.id"
+        [releaseError]="releaseError()"
+        [releaseBlockers]="releaseBlockers()"
+        [modal]="true"
+        (close)="closeResults()"
+    />
+}
+
+@if (showingCourseComparison() && course(); as course) {
+    @if (courseStats(); as courseStats) {
+        <app-course-comparison-modal
+            [courseId]="courseId()"
+            [courseOwnerId]="courseOwnerId()"
+            [course]="course"
+            [courseStats]="courseStats"
+            (closed)="showingCourseComparison.set(false)"
+        />
+    }
+}

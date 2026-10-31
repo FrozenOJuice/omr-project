@@ -1,0 +1,142 @@
+{
+  "width": 1200,
+  "height": 1700,
+  "nativeDpi": 216,
+  "config": {
+    "blurSize": 3,
+    "morphCloseSize": 3,
+    "minAnchorConfidence": 0.5,
+    "adaptiveBlockSize": 25,
+    "adaptiveC": 3,
+    "referenceRatio": 1.4638
+  },
+  "pages": [
+    {
+      "anchors": [
+        {
+          "path": "anchors/front_question.png",
+          "center": {
+            "X": 1124,
+            "Y": 173
+          },
+          "roi": {
+            "Min": {
+              "X": 950,
+              "Y": 50
+            },
+            "Max": {
+              "X": 1200,
+              "Y": 300
+            }
+          }
+        },
+        {
+          "path": "anchors/front_title.png",
+          "center": {
+            "X": 112,
+            "Y": 170
+          },
+          "roi": {
+            "Min": {
+              "X": 0,
+              "Y": 100
+            },
+            "Max": {
+              "X": 380,
+              "Y": 340
+            }
+          }
+        },
+        {
+          "path": "anchors/front_footer.png",
+          "center": {
+            "X": 262,
+            "Y": 1453
+          },
+          "roi": {
+            "Min": {
+              "X": 100,
+              "Y": 1350
+            },
+            "Max": {
+              "X": 550,
+              "Y": 1560
+            }
+          }
+        },
+        {
+          "path": "anchors/front_footer_2.png",
+          "center": {
+            "X": 870,
+            "Y": 1455
+          },
+          "roi": {
+            "Min": {
+              "X": 650,
+              "Y": 1350
+            },
+            "Max": {
+              "X": 1200,
+              "Y": 1560
+            }
+          }
+        }
+      ]
+    },
+    {
+      "anchors": [
+        {
+          "path": "anchors/back_student_id_header.png",
+          "center": {
+            "X": 546,
+            "Y": 97
+          },
+          "roi": {
+            "Min": {
+              "X": 350,
+              "Y": 0
+            },
+            "Max": {
+              "X": 750,
+              "Y": 250
+            }
+          }
+        },
+        {
+          "path": "anchors/back_id.png",
+          "center": {
+            "X": 122,
+            "Y": 142
+          },
+          "roi": {
+            "Min": {
+              "X": 0,
+              "Y": 55
+            },
+            "Max": {
+              "X": 380,
+              "Y": 300
+            }
+          }
+        },
+        {
+          "path": "anchors/back_last.png",
+          "center": {
+            "X": 115,
+            "Y": 1033
+          },
+          "roi": {
+            "Min": {
+              "X": 0,
+              "Y": 950
+            },
+            "Max": {
+              "X": 380,
+              "Y": 1130
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

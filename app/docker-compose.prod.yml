@@ -1,0 +1,41 @@
+services:
+  migrate:
+    build: ./backend
+    command: ["alembic", "upgrade", "head"]
+    env_file: .env.prod
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    env_file: .env.prod
+    environment:
+      DEBUG: "false"
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  frontend:
+    ports:
+      - "${APP_PORT:-80}:80"
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  omr_service:
+    env_file: .env.prod
+    environment:
+      OMR_MODE: PRODUCTION
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    restart: unless-stopped
+
+  garage-store:
+    restart: unless-stopped

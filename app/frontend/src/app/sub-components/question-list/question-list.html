@@ -1,0 +1,72 @@
+<div class="question-list col-flex-container">
+
+    @if (rows().length === 0) {
+    <span class="empty-text">No questions on this page.</span>
+    }
+
+    @for (row of rows(); track row.questionId) {
+    <div class="question-card" [class.expanded]="expandedQuestionId() === row.questionId"
+        [class.ambiguous]="row.ambiguous" [id]="'question-card-' + row.questionId"
+        (mouseenter)="hover.emit(row.questionId)" (mouseleave)="hover.emit(null)">
+        <button type="button" class="question-card-header row-flex-container align-items-center gap"
+            (click)="toggleExpanded(row.questionId)">
+            <span class="question-status-dot" [class]="row.statusClass"></span>
+            <span class="question-number">Q{{ row.questionId }}</span>
+            @if (row.ambiguous) {
+            <span class="status-badge tag-amber">Needs review</span>
+            }
+            <span class="grow"></span>
+            <span class="question-score" [attr.aria-label]="'Score ' + row.score + ' out of ' + row.maxScore">
+                {{ row.score }}/{{ row.maxScore }}
+            </span>
+            <span class="material-icons-outlined expand-icon">
+                {{ expandedQuestionId() === row.questionId ? 'expand_less' : 'expand_more' }}
+            </span>
+        </button>
+
+        @if (expandedQuestionId() === row.questionId) {
+        @let size = snippetSize(row.bounds);
+        <div class="question-card-body col-flex-container">
+            <div class="card-snippet-scroll" [class.unlinked]="hideAnswerKey()" #snippetScroll>
+                <app-question-snippet [imageUrl]="imageUrl()" [bounds]="row.bounds" [boxWidth]="size.width"
+                    [boxHeight]="size.height" />
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Student answer</span>
+                <span class="detail-value">{{ row.studentAnswers.length ? row.studentAnswers.join(', ') : 'Blank'
+                    }}</span>
+            </div>
+            @if (!hideAnswerKey()) {
+            <div class="detail-row">
+                <span class="detail-label">Correct answer</span>
+                <span class="detail-value">{{ row.correctAnswers.join(', ') }}</span>
+            </div>
+            }
+            <div class="detail-row">
+                <span class="detail-label">Confidence</span>
+                <span class="detail-value">{{ row.confidencePercent }}%</span>
+            </div>
+
+            @if (!hideAnswerKey()) {
+            <div class="answer-editor col-flex-container">
+                <span class="detail-label">Confirm or modify detected answer</span>
+                <div class="answer-options row-flex-container" [class.scrollable]="row.options.length > 5"
+                    (scroll)="syncSnippetScroll($any($event.target), snippetScroll)">
+                    @for (option of row.options; track option) {
+                    <button type="button" class="answer-btn" [class.selected]="isSelected(row, option)"
+                        (click)="toggleAnswer(row, option)">
+                        {{ option }}
+                    </button>
+                    }
+                </div>
+                <button type="button" class="action-btn action-btn--sm" (click)="save(row)">
+                    Save correction
+                </button>
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
+
+</div>

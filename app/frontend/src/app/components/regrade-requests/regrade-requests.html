@@ -1,0 +1,509 @@
+<div class="regrade-container">
+
+    @if (isLoading) {
+        <app-loading-spinner />
+    }
+
+    @if (loadError) {
+        <div class="error-toast row-flex-container align-items-center">
+            <span class="material-icons-outlined error-toast-icon">error_outline</span>
+            <span class="error-toast-message">Failed to load re-grade requests. Please refresh the page or try again later.</span>
+            <button class="icon-btn error-toast-close" (click)="dismissError()">
+                <span class="material-icons-outlined">close</span>
+            </button>
+        </div>
+    }
+
+    @if (isStudentView()) {
+        <div class="page-header row-flex-container align-items-center mb-3">
+            <h1 class="page-title">My Re-grade Requests</h1>
+            <div class="page-actions row-flex-container gap align-items-center">
+                <select class="filter-dropdown" (change)="selectedStatus = $any($event.target).value">
+                    <option value="">All Statuses</option>
+                    <option [value]="RegradeStatus.Pending">{{ RegradeStatusLabel[RegradeStatus.Pending] }}</option>
+                    <option [value]="RegradeStatus.Resolved">{{ RegradeStatusLabel[RegradeStatus.Resolved] }}</option>
+                    <option [value]="RegradeStatus.Rejected">{{ RegradeStatusLabel[RegradeStatus.Rejected] }}</option>
+                </select>
+                <div class="search-wrapper">
+                    <span class="material-icons-outlined search-icon">search</span>
+                    <input
+                        class="search-input"
+                        type="text"
+                        placeholder="Search my requests..."
+                        (input)="searchQuery = $any($event.target).value"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div class="regrade-panes row-flex-container gap">
+
+            <div class="card regrade-list-pane col-flex-container">
+                <span class="regrade-list-title">{{ groupedMyRequests.length }} Request{{ groupedMyRequests.length !== 1 ? 's' : '' }}</span>
+                <div class="regrade-list col-flex-container">
+                    @if (groupedMyRequests.length === 0) {
+                        <div class="empty-state col-flex-container align-items-center">
+                            <span class="material-icons-outlined empty-icon">rate_review</span>
+                            @if (hasActiveFilters) {
+                                <span class="empty-title">No re-grade requests match your filters</span>
+                            } @else {
+                                <span class="empty-title">You have not submitted any re-grade requests yet</span>
+                            }
+                        </div>
+                    }
+                    @for (request of groupedMyRequests; track request.id) {
+                        <div
+                            class="regrade-list-item col-flex-container"
+                            [class.selected]="request.id === selectedMyRequestId"
+                            (click)="selectMyRequest(request)"
+                        >
+                            <div class="row-flex-container justify-content-between align-items-center">
+                                <span class="regrade-list-name">{{ request.questionLabel }}</span>
+                                <span class="regrade-list-date">{{ request.created_at | date:'dd/MM/yy' }}</span>
+                            </div>
+                            <div class="row-flex-container justify-content-between align-items-center">
+                                <span class="status-badge" [ngClass]="RegradeStatusClass[request.status]">{{ RegradeStatusLabel[request.status] }}</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card regrade-detail-pane col-flex-container grow">
+                @if (selectedMyRequest) {
+                    <div class="regrade-detail-header row-flex-container justify-content-between align-items-center">
+                        <div class="col-flex-container">
+                            <span class="regrade-detail-title">{{ selectedMyRequest.questionLabel }}</span>
+                            <span class="regrade-detail-subtitle">Submitted: {{ selectedMyRequest.created_at | date:'dd/MM/yy' }}</span>
+                        </div>
+                        <div class="row-flex-container gap align-items-center">
+                            <button class="action-btn action-btn--sm action-btn--outline" title="Decision History" (click)="openHistoryModal()">
+                                <span class="material-icons-outlined">history</span>
+                                History
+                            </button>
+                            <span class="status-badge" [ngClass]="RegradeStatusClass[selectedMyRequest.status]">
+                                {{ RegradeStatusLabel[selectedMyRequest.status] }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="regrade-info-row row-flex-container gap">
+                        <div class="regrade-info-box regrade-info-box--fixed col-flex-container">
+                            <span class="regrade-info-label">Request Status</span>
+                            <span class="regrade-info-value">{{ RegradeStatusLabel[selectedMyRequest.status] }}</span>
+                        </div>
+                        <div class="regrade-info-box regrade-info-box--fixed col-flex-container">
+                            <span class="regrade-info-label">Current Grade</span>
+                            <span class="regrade-info-value">{{ currentGradeTotal() ?? 'N/A' }}/{{ currentGradeMax() ?? 'N/A' }}</span>
+                        </div>
+                        @if (selectedMyRequest.status === RegradeStatus.Pending) {
+                        <div class="regrade-info-box regrade-info-box--fixed col-flex-container">
+                            <span class="regrade-info-label">Proposed Re-grade</span>
+                            <span class="regrade-info-value">{{ proposedGradeTotal(selectedMyRequest) ?? 'N/A' }}/{{ currentGradeMax() ?? 'N/A' }}</span>
+                        </div>
+                        }
+                        <div class="regrade-info-box col-flex-container grow">
+                            <span class="regrade-info-label">My Feedback for {{ selectedMyRequest.questionLabel }}</span>
+                            <span class="regrade-info-value regrade-note">{{ selectedMyRequest.student_comment || 'No explanation provided.' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="regrade-response-box col-flex-container">
+                        <span class="regrade-info-label">Staff Feedback for {{ selectedMyRequest.questionLabel }}</span>
+                        <span class="regrade-note">{{ selectedMyRequest.instructor_response || 'No response yet.' }}</span>
+                    </div>
+
+                    <div class="regrade-preview-row row-flex-container gap grow">
+                        <div class="regrade-preview-panel regrade-preview-panel--scan col-flex-container">
+                            <span class="regrade-preview-title">Scanned Sheet</span>
+                            <app-exam-page-viewer
+                                [page]="previewPage"
+                                [pageCount]="previewPageCount"
+                                [loading]="previewLoading"
+                                [error]="previewError"
+                                [imageUrl]="previewImageUrl"
+                                [boxes]="previewBoxes"
+                                [regions]="previewRegions"
+                                [highlightedQuestionIds]="previewFlaggedQuestions"
+                                [gradeId]="previewGradeId"
+                                [zoomable]="true"
+                                (prevPage)="prevPreviewPage()"
+                                (nextPage)="nextPreviewPage()"
+                            />
+                        </div>
+                        <div class="regrade-preview-panel regrade-preview-panel--key col-flex-container">
+                            <span class="regrade-preview-title">Answer Key</span>
+                            @if (previewAnswerKey.length === 0) {
+                                <span class="regrade-preview-placeholder">No answer key available.</span>
+                            } @else {
+                                <div class="answer-key-list col-flex-container">
+                                    @for (row of previewAnswerKey; track row.questionNumber) {
+                                        <div class="answer-key-row col-flex-container">
+                                            <div class="row-flex-container justify-content-between align-items-center">
+                                                <span class="answer-key-question">Question {{ row.questionNumber }}</span>
+                                                <span class="status-badge" [ngClass]="row.correct ? 'tag-green' : 'tag-red'">
+                                                    {{ row.score }}/{{ row.maxScore }}
+                                                </span>
+                                            </div>
+                                            <div class="row-flex-container justify-content-between">
+                                                <span class="answer-key-label">Correct Answer</span>
+                                                <span class="answer-key-value">{{ row.correctAnswers.length ? row.correctAnswers.join(', ') : 'N/A' }}</span>
+                                            </div>
+                                            <div class="row-flex-container justify-content-between">
+                                                <span class="answer-key-label">Student Answer</span>
+                                                <span class="answer-key-value">{{ row.studentAnswers.length ? row.studentAnswers.join(', ') : 'Blank' }}</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                } @else {
+                    <div class="empty-state col-flex-container align-items-center">
+                        <span class="material-icons-outlined empty-icon">rate_review</span>
+                        <span class="empty-title">Select a request to review</span>
+                    </div>
+                }
+            </div>
+
+        </div>
+    } @else {
+        <div class="page-header row-flex-container align-items-center mb-3">
+            <h1 class="page-title">Re-grade Requests</h1>
+            <div class="page-actions row-flex-container gap align-items-center">
+                <select class="filter-dropdown" (change)="selectedTerm = $any($event.target).value">
+                    <option value="">All Terms</option>
+                    @for (term of terms; track term) {
+                        <option [value]="term">Term: {{ term }}</option>
+                    }
+                </select>
+                <select class="filter-dropdown" (change)="selectedStatus = $any($event.target).value">
+                    <option value="">All Statuses</option>
+                    <option [value]="RegradeStatus.Pending">{{ RegradeStatusLabel[RegradeStatus.Pending] }}</option>
+                    <option [value]="RegradeStatus.Resolved">{{ RegradeStatusLabel[RegradeStatus.Resolved] }}</option>
+                    <option [value]="RegradeStatus.Rejected">{{ RegradeStatusLabel[RegradeStatus.Rejected] }}</option>
+                </select>
+                <div class="search-wrapper">
+                    <span class="material-icons-outlined search-icon">search</span>
+                    <input
+                        class="search-input"
+                        type="text"
+                        placeholder="Search request..."
+                        (input)="searchQuery = $any($event.target).value"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div class="regrade-panes row-flex-container gap">
+
+            <div class="card regrade-list-pane col-flex-container">
+                <span class="regrade-list-title">{{ groupedRequests.length }} Request{{ groupedRequests.length !== 1 ? 's' : '' }}</span>
+                <div class="regrade-list col-flex-container">
+                    @if (groupedRequests.length === 0) {
+                        <div class="empty-state col-flex-container align-items-center">
+                            <span class="material-icons-outlined empty-icon">rate_review</span>
+                            @if (hasActiveFilters) {
+                                <span class="empty-title">No re-grade requests match your filters</span>
+                            } @else {
+                                <span class="empty-title">No pending re-grade requests</span>
+                            }
+                        </div>
+                    }
+                    @for (request of groupedRequests; track request.id) {
+                        <div
+                            class="regrade-list-item col-flex-container"
+                            [class.selected]="request.id === selectedRequestId"
+                            (click)="selectRequest(request)"
+                        >
+                            <div class="row-flex-container justify-content-between align-items-center">
+                                <span class="regrade-list-name">{{ request.student_name }}</span>
+                                <span class="regrade-list-date">{{ request.created_at | date:'dd/MM/yy' }}</span>
+                            </div>
+                            <div class="row-flex-container justify-content-between align-items-center">
+                                <span class="regrade-list-course">{{ request.course_code }} &middot; {{ request.questionLabel }}</span>
+                                <span class="status-badge" [ngClass]="RegradeStatusClass[request.status]">{{ RegradeStatusLabel[request.status] }}</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card regrade-detail-pane col-flex-container grow">
+                @if (selectedRequest) {
+                    <div class="regrade-detail-header row-flex-container justify-content-between align-items-center">
+                        <div class="col-flex-container">
+                            <span class="regrade-detail-title">{{ selectedRequest.student_name }}</span>
+                            <span class="regrade-detail-subtitle">
+                                {{ selectedRequest.course_code }} - {{ selectedRequest.exam_name }} ({{ selectedRequest.questionLabel }})
+                                Submitted: {{ selectedRequest.created_at | date:'dd/MM/yy' }}
+                            </span>
+                        </div>
+                        <div class="row-flex-container gap align-items-center">
+                            <button
+                                class="action-btn action-btn--outline"
+                                title="Decision History"
+                                (click)="openHistoryModal()"
+                            >
+                                <span class="material-icons-outlined">history</span>
+                                History
+                            </button>
+                            @if (selectedRequest.status === RegradeStatus.Pending) {
+                                <button
+                                    class="action-btn action-btn--success regrade-resolve-btn"
+                                    [disabled]="isResolving"
+                                    (click)="confirmResolve()"
+                                >
+                                    <span class="material-icons-outlined">fact_check</span>
+                                    Resolve
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="regrade-info-row row-flex-container gap">
+                        <div class="regrade-info-box regrade-info-box--fixed col-flex-container">
+                            <span class="regrade-info-label">Request Status</span>
+                            <span class="regrade-info-value">{{ RegradeStatusLabel[selectedRequest.status] }}</span>
+                        </div>
+                        <div class="regrade-info-box regrade-info-box--fixed col-flex-container">
+                            <span class="regrade-info-label">Current Grade</span>
+                            <span class="regrade-info-value">{{ currentGradeTotal() ?? 'N/A' }}/{{ currentGradeMax() ?? 'N/A' }}</span>
+                        </div>
+                        @if (selectedRequest.status === RegradeStatus.Pending) {
+                        <div class="regrade-info-box regrade-info-box--fixed col-flex-container">
+                            <span class="regrade-info-label">Proposed Re-grade</span>
+                            <span class="regrade-info-value">{{ proposedGradeTotal(selectedRequest) ?? 'N/A' }}/{{ currentGradeMax() ?? 'N/A' }}</span>
+                        </div>
+                        }
+                        <div class="regrade-info-box col-flex-container grow">
+                            <span class="regrade-info-label">Student Feedback for {{ selectedRequest.questionLabel }}</span>
+                            <span class="regrade-info-value regrade-note">{{ selectedRequest.student_comment || 'No note provided.' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="regrade-response-box col-flex-container">
+                        <span class="regrade-info-label">Staff Feedback for {{ selectedRequest.questionLabel }}</span>
+                        <span class="regrade-note">{{ selectedRequest.instructor_response || 'No response yet.' }}</span>
+                    </div>
+
+                    <div class="regrade-preview-row row-flex-container gap grow">
+                        <div class="regrade-preview-panel regrade-preview-panel--scan col-flex-container">
+                            <span class="regrade-preview-title">Scanned Sheet</span>
+                            <app-exam-page-viewer
+                                [page]="previewPage"
+                                [pageCount]="previewPageCount"
+                                [loading]="previewLoading"
+                                [error]="previewError"
+                                [imageUrl]="previewImageUrl"
+                                [boxes]="previewBoxes"
+                                [regions]="previewRegions"
+                                [highlightedQuestionIds]="previewFlaggedQuestions"
+                                [gradeId]="previewGradeId"
+                                [zoomable]="true"
+                                (prevPage)="prevPreviewPage()"
+                                (nextPage)="nextPreviewPage()"
+                            />
+                        </div>
+                        <div class="regrade-preview-panel regrade-preview-panel--key col-flex-container">
+                            <span class="regrade-preview-title">Answer Key</span>
+                            @if (previewAnswerKey.length === 0) {
+                                <span class="regrade-preview-placeholder">No answer key available.</span>
+                            } @else {
+                                <div class="answer-key-list col-flex-container">
+                                    @for (row of previewAnswerKey; track row.questionNumber) {
+                                        <div class="answer-key-row col-flex-container">
+                                            <div class="row-flex-container justify-content-between align-items-center">
+                                                <span class="answer-key-question">Question {{ row.questionNumber }}</span>
+                                                <span class="status-badge" [ngClass]="row.correct ? 'tag-green' : 'tag-red'">
+                                                    {{ row.score }}/{{ row.maxScore }}
+                                                </span>
+                                            </div>
+                                            <div class="row-flex-container justify-content-between">
+                                                <span class="answer-key-label">Correct Answer</span>
+                                                <span class="answer-key-value">{{ row.correctAnswers.length ? row.correctAnswers.join(', ') : 'N/A' }}</span>
+                                            </div>
+                                            <div class="row-flex-container justify-content-between">
+                                                <span class="answer-key-label">Student Answer</span>
+                                                <span class="answer-key-value">{{ row.studentAnswers.length ? row.studentAnswers.join(', ') : 'Blank' }}</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                } @else {
+                    <div class="empty-state col-flex-container align-items-center">
+                        <span class="material-icons-outlined empty-icon">rate_review</span>
+                        <span class="empty-title">Select a request to review</span>
+                    </div>
+                }
+            </div>
+
+        </div>
+    }
+
+</div>
+
+@if (showHistoryModal) {
+    <div class="modal-overlay" (click)="closeHistoryModal()">
+        <div class="card confirm-card col-flex-container" (click)="$event.stopPropagation()">
+            <div class="row-flex-container justify-content-between align-items-center">
+                <span class="confirm-title">Decision History</span>
+                <button class="icon-btn" title="Close" (click)="closeHistoryModal()">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+            @if (isLoadingRequestHistory) {
+                <span class="confirm-body">Loading decision history...</span>
+            } @else if (requestHistoryError) {
+                <span class="confirm-body">{{ requestHistoryError }}</span>
+            } @else if (requestHistory.length === 0) {
+                <span class="confirm-body">No review decisions recorded yet.</span>
+            } @else {
+                <div class="regrade-history-list col-flex-container">
+                    @for (entry of requestHistory; track entry.id) {
+                        <div class="regrade-history-item col-flex-container">
+                            <div class="row-flex-container justify-content-between align-items-center gap">
+                                <span class="regrade-history-title">{{ historyEventLabel(entry) }}</span>
+                                <span class="regrade-history-date">{{ entry.created_at | date:'dd/MM/yy HH:mm' }}</span>
+                            </div>
+                            @for (change of historyChanges(entry); track change.label) {
+                                <div class="regrade-history-change col-flex-container">
+                                    <span class="regrade-history-key">{{ change.label }}</span>
+                                    <span class="regrade-history-values">
+                                        <span class="regrade-history-value">{{ change.before }}</span>
+                                        <span class="material-icons-outlined regrade-history-arrow">arrow_forward</span>
+                                        <span class="regrade-history-value">{{ change.after }}</span>
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (confirmingRequest && !isStudentView()) {
+    <div class="modal-overlay" (click)="cancelResolve()">
+        <div class="card confirm-card-wide row-flex-container gap align-items-stretch" (click)="$event.stopPropagation()">
+        <div class="confirm-card col-flex-container">
+            <div class="row-flex-container align-items-center gap">
+                <span class="material-icons-outlined confirm-icon confirm-icon--success">fact_check</span>
+                <div class="col-flex-container">
+                    <span class="confirm-title">Resolve Re-grade?</span>
+                    <span class="confirm-body">
+                        {{ confirmingRequest.student_name }} - {{ confirmingRequest.course_code }} ({{ confirmingRequest.exam_name }}, {{ confirmingRequest.questionLabel }})
+                    </span>
+                </div>
+            </div>
+            <div class="regrade-info-row row-flex-container gap">
+                <div class="regrade-info-box col-flex-container grow">
+                    <span class="regrade-info-label">Current Grade</span>
+                    <span class="regrade-info-value">{{ currentGradeTotal() ?? 'N/A' }}/{{ currentGradeMax() ?? 'N/A' }}</span>
+                </div>
+                <div class="regrade-info-box col-flex-container grow">
+                    <span class="regrade-info-label">Proposed Grade</span>
+                    <span class="regrade-info-value">{{ draftProposedGradeTotal() ?? 'N/A' }}/{{ currentGradeMax() ?? 'N/A' }}</span>
+                </div>
+            </div>
+            <div class="regrade-question-decisions col-flex-container">
+                @for (row of confirmingRequest.requests; track row.question_number) {
+                    <div class="regrade-question-decision col-flex-container">
+                        <div class="row-flex-container justify-content-between align-items-center">
+                            <span class="regrade-info-label">Question {{ row.question_number }}</span>
+                            <span class="regrade-question-correct-answer">Correct Answer: {{ questionCorrectAnswer(row.question_number) }}</span>
+                        </div>
+                        <div class="row-flex-container gap align-items-center">
+                            <button
+                                type="button"
+                                class="action-btn action-btn--sm"
+                                [class.action-btn--success]="draftProposedCorrect[row.question_number] === true"
+                                [class.action-btn--outline]="draftProposedCorrect[row.question_number] !== true"
+                                [disabled]="isResolving"
+                                (click)="setDraftProposedCorrect(row.question_number, true)"
+                            >
+                                Correct
+                            </button>
+                            <button
+                                type="button"
+                                class="action-btn action-btn--sm"
+                                [class.action-btn--danger]="draftProposedCorrect[row.question_number] === false"
+                                [class.action-btn--outline]="draftProposedCorrect[row.question_number] !== false"
+                                [disabled]="isResolving"
+                                (click)="setDraftProposedCorrect(row.question_number, false)"
+                            >
+                                Incorrect
+                            </button>
+                            <div class="regrade-question-score-wrapper row-flex-container align-items-center gap">
+                                <input
+                                    class="regrade-info-input regrade-question-score-input"
+                                    type="number"
+                                    min="0"
+                                    step="0.25"
+                                    [max]="questionMaxScore(row.question_number)"
+                                    placeholder="Score (optional)"
+                                    [value]="draftProposedCorrect[row.question_number] === false ? 0 : draftProposedScore[row.question_number]"
+                                    [disabled]="isResolving || draftProposedCorrect[row.question_number] === false"
+                                    (input)="updateDraftProposedScore(row.question_number, $any($event.target).value)"
+                                />
+                                <span class="regrade-question-score-max">/ {{ questionMaxScore(row.question_number) ?? '—' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            @if (resolveError) {
+                <div class="row-flex-container align-items-center gap">
+                    <span class="material-icons-outlined error-toast-icon">error_outline</span>
+                    <span class="error-toast-message">{{ resolveError }}</span>
+                </div>
+            }
+            <div class="regrade-response-box col-flex-container">
+                <label class="regrade-info-label" [for]="'instructor-response-' + confirmingRequest.id">
+                    Feedback for {{ confirmingRequest.questionLabel }} (required)
+                </label>
+                <textarea
+                    class="regrade-response-input"
+                    [id]="'instructor-response-' + confirmingRequest.id"
+                    rows="3"
+                    maxlength="2000"
+                    placeholder="Explain the decision to the student."
+                    [disabled]="isResolving"
+                    [value]="draftInstructorResponse"
+                    (input)="updateDraftInstructorResponse($any($event.target).value)"
+                ></textarea>
+            </div>
+            <div class="row-flex-container confirm-actions gap">
+                <button class="action-btn action-btn--sm action-btn--outline grow" (click)="cancelResolve()">Cancel</button>
+                <button class="action-btn action-btn--success grow" [disabled]="isResolving" (click)="executeResolve()">
+                    {{ isResolving ? 'Resolving...' : (resolveArmed ? 'Are you sure?' : 'Resolve') }}
+                </button>
+            </div>
+        </div>
+        <div class="confirm-preview-panel col-flex-container">
+            <span class="regrade-preview-title">Scanned Sheet</span>
+            <app-exam-page-viewer
+                [page]="previewPage"
+                [pageCount]="previewPageCount"
+                [loading]="previewLoading"
+                [error]="previewError"
+                [imageUrl]="previewImageUrl"
+                [boxes]="previewBoxes"
+                [regions]="previewRegions"
+                [highlightedQuestionIds]="previewFlaggedQuestions"
+                [gradeId]="previewGradeId"
+                [zoomable]="true"
+                (prevPage)="prevPreviewPage()"
+                (nextPage)="nextPreviewPage()"
+            />
+        </div>
+        </div>
+    </div>
+}

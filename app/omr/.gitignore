@@ -1,0 +1,14 @@
+*.exe
+setenv.ps1
+
+# File uploads in OMR_MODE=TEST will be stored here.
+data/images/
+data/matrices/
+*.sqlite3
+*.prof
+
+# Log files
+debug.log
+
+# Test output data.
+testoutput/*

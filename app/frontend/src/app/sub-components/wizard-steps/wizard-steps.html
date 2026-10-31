@@ -1,0 +1,13 @@
+<div class="wizard-steps row-flex-container align-items-center">
+    @for (label of labels; track label; let i = $index; let last = $last) {
+        <div class="wizard-step row-flex-container align-items-center">
+            <span class="wizard-step-circle" [class.done]="i + 1 < current" [class.active]="i + 1 === current">
+                {{ i + 1 }}
+            </span>
+            <span class="wizard-step-label" [class.active]="i + 1 === current">{{ label }}</span>
+        </div>
+        @if (!last) {
+            <span class="wizard-step-connector" [class.done]="i + 1 < current"></span>
+        }
+    }
+</div>

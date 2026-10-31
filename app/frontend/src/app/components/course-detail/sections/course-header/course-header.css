@@ -1,0 +1,16 @@
+.page-header, .course-identity, .page-actions { display: flex; align-items: center; }
+.page-header { justify-content: space-between; gap: 1em; margin-bottom: 1em; }
+.course-identity, .page-actions { gap: .75em; }
+.course-identity { min-width: 0; flex: 1; }
+.course-copy { display: flex; flex-direction: column; min-width: 0; }
+.page-title { font-size: 1.3em; }
+.course-badge { width: 3em; height: 3em; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--highlight3); color: var(--on-highlight3); border: var(--border-size) solid var(--color-border); border-radius: var(--card-border-radius); font-weight: 700; font-size: .95em; }
+.course-meta { margin-top: .2em; font-size: .82em; opacity: .6; }
+.delete-btn:hover { color: var(--tag-red); border-color: var(--tag-red); }
+.page-actions .icon-btn { font-size: 1em; }
+/* .action-btn's icon otherwise uses the Material Icons font's own 24px
+   default (only .icon-btn scales it down app-wide), which makes this
+   button a few px taller than the 40px .icon-btn next to it. Match it
+   here only, so other .action-btn icons elsewhere are unaffected. */
+.page-actions .action-btn .material-icons-outlined { font-size: 1.4em; }
+@media (max-width:800px) { .page-header { align-items: flex-start; flex-direction: column; } .page-actions { flex-wrap: wrap; } }
