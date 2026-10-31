@@ -17,9 +17,10 @@ removed from the portfolio copy.
 The original team repository is
 [`UBCO-COSC499-S2026/capstone-team-15`](https://github.com/UBCO-COSC499-S2026/capstone-team-15).
 The final report records the team, original repository, feature contributors,
-and individual reflections. This repository began with an initial import on
-31 October 2026; that import is not evidence of sole authorship and does not
-reproduce the original team's commits, reviews, or issue history.
+and individual reflections. This portfolio repository began with the cleaned
+import `22be7a9` on 31 October 2026. It starts a new history and excludes the older
+private import's commits. That cleaned import is not evidence of sole authorship
+and does not reproduce the original team's commits, reviews, or issue history.
 
 See [Joel's contribution summary](docs/portfolio/contributions.md) and the
 [final report](docs/final/OMR%20System%20Final%20Project%20Report.md).

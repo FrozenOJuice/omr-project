@@ -26,6 +26,23 @@ do not equate a selected-package pass with an unqualified full-suite pass.
 The same two failures were reproduced against the untouched import in the same
 container environment. No tests or assertions were removed from the source.
 
+## Verified GitHub Actions result
+
+The new repository has a completed, successful
+[Repository checks run 41242912328](https://github.com/FrozenOJuice/omr-project/actions/runs/41242912328),
+triggered by a push on **31 October 2026** for commit
+`22be7a91a8c247fd9310351288a25a89d32a791f`. Both jobs succeeded:
+
+| Job | Verified steps | Result |
+| --- | --- | --- |
+| `repository` | Source syntax/local-link checks and Canvas shell portability checks | Passed |
+| `frontend` | `npm ci` and `npm test -- --watch=false` | Passed |
+
+The run status and individual job/step conclusions were read from GitHub. This
+updates the earlier pre-import statement that CI had not run. The successful run
+is evidence for the commit above; these later documentation edits have only local
+validation until committed and checked by a subsequent run.
+
 ## CI scope
 
 The former pytest workflow was entirely commented out. The replacement
@@ -35,8 +52,9 @@ It requires no project secrets or live Canvas/Resend credentials.
 
 Backend and OMR are not claimed as CI jobs. Backend CI needs a correctly
 provisioned disposable PostgreSQL/Garage environment; OMR needs the native-library
-image and an appropriate hardware-metadata environment. No GitHub Actions run
-has been triggered by this local preparation.
+image and an appropriate hardware-metadata environment. The successful run above
+covers the configured repository/frontend jobs, not backend tests, OMR tests,
+security scanning, dependency-audit clearance, or asset permissions.
 
 ## Backend test isolation
 
@@ -85,3 +103,25 @@ After installing them into a tooling environment, run
 `python tools/portfolio/verify_assets.py`. In the original private repository,
 `--legacy-ref 83ab149` additionally checks the former charter IDs without printing
 their values. That private historical ref is intentionally absent from an export.
+
+## Final review and advisory checks
+
+The [final security and asset-rights review](final-review.md) rechecked the cleaned
+repository's history, known privacy targets, tracked configurations, PDF/raster
+metadata, and asset provenance. Its targeted findings are not a security
+certification.
+
+A separate read-only dependency review found advisory matches despite passing
+functional CI. `npm audit` reported 49 package entries across all dependencies
+(3 critical, 21 high, 23 moderate, 2 low); the production-only audit reported 6
+entries (4 high, 2 moderate). GitHub's reviewed advisory API returned 53 advisory
+records matching 33 explicitly pinned backend requirements, including critical
+ratings. Counts represent package/version matches, not proven exploit paths or
+independent application vulnerabilities. See
+[the dependency evidence](dependency-review.json) for package versions, scopes,
+advisory links, and audit commands.
+
+These checks used temporary lockfile copies without installing packages, running
+application services, or modifying dependencies. Go modules, container images,
+external CDN resources, transitive Python dependencies, and exploitability of
+individual findings were not exhaustively audited. No package fixes were applied.

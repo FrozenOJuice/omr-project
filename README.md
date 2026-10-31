@@ -18,7 +18,8 @@ see [individual contributions](docs/portfolio/contributions.md) and
 [Screenshot gallery](docs/portfolio/screenshots/README.md) ·
 [Architecture](docs/portfolio/architecture.md) ·
 [Testing evidence](docs/portfolio/testing.md) ·
-[Publication review](docs/portfolio/publication.md)
+[Publication review](docs/portfolio/publication.md) ·
+[Final security and asset review](docs/portfolio/final-review.md)
 
 ![Exam review with the scanned sheet, detected answers, and grade controls](docs/portfolio/screenshots/exam-review.png)
 
@@ -37,8 +38,9 @@ see [individual contributions](docs/portfolio/contributions.md) and
 This is a portfolio presentation of an existing team project. The original
 [final reports](docs/TOC.md) are retained as capstone evidence. University/team
 publication permissions are still being confirmed; the existing
-[AGPL-3.0 license](LICENSE) is unchanged. This copy was imported from the original
-team repository; it does not contain the team's complete commit history.
+[AGPL-3.0 license](LICENSE) is unchanged. This repository starts with a cleaned source import of the team project; the
+original private import history is excluded. The team's complete development
+history remains in the original project repository.
 
 ## Running locally
 

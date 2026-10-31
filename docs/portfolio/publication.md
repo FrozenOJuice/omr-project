@@ -1,9 +1,19 @@
 # Publication review
 
-Status as of **31 October 2026**: portfolio materials are prepared for private
-review. Public source release is pending confirmation of university/team terms
-and the remaining asset permissions. No repository visibility, Git history,
-license, application features, or production deployment was changed.
+Status as of **31 October 2026**: this is the new, private
+[`FrozenOJuice/omr-project`](https://github.com/FrozenOJuice/omr-project) repository.
+It began with the cleaned import commit `22be7a91a8c247fd9310351288a25a89d32a791f`;
+only that one commit was reachable at review time. Targeted checks did not find
+the earlier student numbers or personal invitation email in the reviewed files.
+Both jobs in [CI run 41242912328](https://github.com/FrozenOJuice/omr-project/actions/runs/41242912328)
+passed for that commit.
+
+The [final security and asset-rights review](final-review.md) records the evidence,
+remaining dependency/application risks, and unresolved asset permissions. This is
+not a complete security certification or a blanket rights clearance. Public
+release remains pending the university/team terms and asset questions below.
+This documentation update changes no application features, dependencies, license,
+repository visibility, or deployment.
 
 ## Completed preparation
 
@@ -57,28 +67,65 @@ This is a suggested draft only; no message has been sent on the team's behalf.
 | UBC logos, forms, and template artwork | Included in the original project | Provenance/permission remains to be confirmed; no new license grant asserted |
 | Remark sample form and cropped anchors | Included scanner fixture, bearing a third-party copyright/use notice | Notice retained; check redistribution terms before public source release |
 | Application/OMR logos, icons, and background image | Included in the original project without a complete source inventory | Confirm source and reuse terms before public release |
+| Aperture CSS adaptation | `app/omr/pages/css/aperture.css` cites Rplus's public CodePen | CodePen documents public Pens as MIT-licensed; preserve the author credit and obtain/include the applicable copyright and permission notice |
 | Libraries and container images | Dependency manifests/locks and OMR service report | Existing licenses remain applicable; the service report contains a useful direct-dependency license table |
 
-## Git history and a review copy
+## Current Git history and provenance
 
-The existing initial import commit still contains the former IDs, personal email,
-and literary fixtures. Updating the working tree does not remove those earlier
-versions. Do not make this existing history public as a consequence of the cleanup.
-The original repository and its history have been left intact.
+This repository was initialized from a cleaned source export. Its initial commit
+is `22be7a9` (31 October 2026), titled "Import cleaned OMR System copy". The
+review found one reachable commit, no unreachable objects reported by Git's
+integrity check, and GitHub noreply author/committer email metadata. The original
+unsafe import commit `83ab149` is **not part of this repository's history**.
+There is no evidence from these targeted checks that this new repository exposes
+the earlier identifiers or invitation address through its commit history.
 
-For a source-only snapshot to review privately, run:
+The earlier warning applied to the separate original `omr-system` repository,
+whose history was not rewritten. It does not describe `omr-project`. Keep that
+original archive private unless separately reviewed. Team attribution and the
+original university/team repository remain recorded in `CONTRIBUTORS.md`.
 
-```sh
-python tools/portfolio/check_repository.py
-python tools/portfolio/export_source.py /tmp/omr-system-portfolio-review
-```
+Normal future documentation commits can be added to this cleaned history; no
+additional history-free import or history rewrite is needed for the old email
+based on the evidence reviewed here.
 
-Choose a new destination outside this repository. The exporter copies current
-tracked and non-ignored new source, omits deleted files and `.git`, refuses to
-overwrite an existing destination, and does not initialize Git, commit, push, or
-publish. It retains attribution and the license. It is a review artifact, not
-permission to publish. Retain the original privately if a separate public
-repository is approved later.
+For an optional source-only snapshot, use
+`python tools/portfolio/export_source.py /tmp/omr-project-review-copy` with a new
+destination. That helper excludes Git internals and ignored files and does not
+commit, push, publish, or establish publication permission. A fresh export is
+not a substitute for asset-rights review.
+
+## Specific asset decisions before unrestricted release
+
+- **UBC branding:** `app/frontend/public/UBC-logo.jpg`, `2Crest_ex_768.png`, and
+  the left-menu logo copy contain UBC marks. The
+  [UBC visual identity rules](https://assets.brand.ubc.ca/downloads/ubc_brand_identity_rules.pdf)
+  (Introduction, PDF page 4) require prior approval for students to use the brand
+  to promote themselves or their work. Confirm coverage for this portfolio and
+  redistribution of the asset files; do not infer it from the code's AGPL license.
+- **UBC forms/templates:** the canonical sheets and cropped anchors under
+  `app/omr/data/templates/ubc/` also need source/permission documentation. The logo
+  policy alone does not establish the copyright status of those forms.
+- **Remark form:** `app/omr/internal/scanner/testdata/input.jpg` and its cropped
+  anchors retain Gravic's notice allowing modification for use. The publisher's
+  [copyright terms](https://remarksoftware.com/copyright/) separately restrict
+  redistribution absent permission or an applicable included license. Reconcile
+  the specific form's terms before publishing copies; "free sample" is not proof
+  of unrestricted redistribution.
+- **Adapted CSS:** the source identifies
+  [Rplus's camera-aperture Pen](https://codepen.io/Rplus/pen/pVNKmL).
+  [CodePen's public-Pen policy](https://blog.codepen.io/documentation/licensing/)
+  provides an MIT license basis. The repository has a source credit but no full
+  specific third-party notice. Preserve/add the applicable notice before claiming
+  that attribution requirements are complete; do not invent a copyright year.
+- **Other artwork and reports:** obtain provenance for the background, SVG/GIF
+  logos, favicon/icon family, and `Unclearexample.png`, and confirm the team/report
+  grant for screenshot reuse. No finding of infringement is made merely because
+  a source record is missing.
+
+The [final review](final-review.md#asset-rights-evidence) maps these questions to
+specific files and primary sources. No asset was removed or relicensed in this
+review.
 
 ## Hosting is a separate decision
 
@@ -87,3 +134,5 @@ audit found scan endpoints lacking course-level authorization, roster claiming
 without email-ownership proof, and deployment configuration gaps. These behaviors
 were left unchanged as requested. Resolve them before hosting real student data
 or inviting untrusted users; do not describe this capstone as production-certified.
+Dependency advisory matches recorded in the final review also require triage
+before deployment or processing untrusted input.
